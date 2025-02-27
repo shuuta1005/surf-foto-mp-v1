@@ -3,34 +3,36 @@ import { NextRequest, NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
-// GET - Fetch all photos for a specific gallery
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { galleryId: string } }
-) {
+export async function POST(req: NextRequest) {
   try {
-    const { galleryId } = params;
+    const { name, location, photographerId } = await req.json();
 
-    if (!galleryId) {
-      return NextResponse.json(
-        { error: "Gallery ID is required" },
-        { status: 400 }
-      );
-    }
-
-    const photos = await prisma.photo.findMany({
-      where: { galleryId },
-      orderBy: { uploadedAt: "desc" },
+    const newGallery = await prisma.gallery.create({
+      data: { name, location, photographerId },
     });
 
-    return NextResponse.json(photos);
+    return NextResponse.json(newGallery);
   } catch (error) {
-    console.error("Error fetching photos:", error);
+    console.error("Error creating gallery:", error);
+
     return NextResponse.json(
       {
         error:
           error instanceof Error ? error.message : "An unknown error occurred",
       },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET() {
+  try {
+    const galleries = await prisma.gallery.findMany();
+    return NextResponse.json(galleries);
+  } catch (error) {
+    console.log(error)
+    return NextResponse.json(
+      { error: "Failed to fetch galleries" },
       { status: 500 }
     );
   }
