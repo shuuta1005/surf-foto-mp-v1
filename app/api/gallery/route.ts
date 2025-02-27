@@ -30,6 +30,7 @@ export async function GET() {
     const galleries = await prisma.gallery.findMany();
     return NextResponse.json(galleries);
   } catch (error) {
+    console.error("Error fetching galleries:", error); // Now 'error' is used
     return NextResponse.json(
       { error: "Failed to fetch galleries" },
       { status: 500 }
