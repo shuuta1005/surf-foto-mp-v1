@@ -3,13 +3,14 @@ import { NextRequest, NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
+interface Context {
+  params?: { galleryId?: string }; // Optional params to prevent type errors
+}
+
 // GET - Fetch all photos for a specific gallery
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { galleryId: string } }
-) {
+export async function GET(req: NextRequest, context: Context) {
   try {
-    const { galleryId } = params;
+    const galleryId = context.params?.galleryId; // Safely access params
 
     if (!galleryId) {
       return NextResponse.json(
