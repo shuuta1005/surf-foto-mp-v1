@@ -3,35 +3,41 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("Seeding database...");
+  console.log("Seeding multiple galleries using local images...");
 
-  // Create 50 galleries
-  const galleries = await prisma.gallery.createMany({
-    data: Array.from({ length: 50 }).map((_, i) => ({
-      id: `gallery-${i + 1}`,
-      name: `Gallery ${i + 1}`,
-      location: `Location ${i % 5}`,
-      photographerId: `photographer-${(i % 10) + 1}`,
-    })),
-  });
+  const galleries = [
+    { name: "Ichinomiya", folder: "fake-gallery-1", location: "千葉北" },
+    { name: "Torami", folder: "fake-gallery-2", location: "千葉北" },
+    { name: "Kugenuma", folder: "fake-gallery-3", location: "湘南" },
+    { name: "Kamogawa", folder: "fake-gallery-4", location: "千葉南" },
+    { name: "Maroubra ", folder: "fake-gallery-5", location: "Sydney" },
+  ];
 
-  console.log(`✅ Created ${galleries.count} galleries`);
+  for (const gallery of galleries) {
+    // Generate photo URLs assuming filenames are photo-1.jpg to photo-15.jpg
+    const photos = Array.from({ length: 15 }).map((_, index) => ({
+      title: `Photo ${index + 1}`,
+      photoUrl: `/${gallery.folder}/photo-${index + 1}.jpg`, // Use the folder name dynamically
+    }));
 
-  // Create 500 photos, spread across galleries
-  const photos = await prisma.photo.createMany({
-    data: Array.from({ length: 500 }).map((_, i) => ({
-      galleryId: `gallery-${(i % 50) + 1}`,
-      photoUrl: `https://example.com/photo-${i + 1}.jpg`,
-      title: `Photo ${i + 1}`,
-    })),
-  });
+    await prisma.gallery.create({
+      data: {
+        name: gallery.name,
+        location: gallery.location,
+        photos: {
+          create: photos,
+        },
+      },
+    });
 
-  console.log(`✅ Created ${photos.count} photos`);
+    console.log(`Seeded: ${gallery.name}`);
+  }
+
+  console.log("Seeding complete! Check your frontend!");
 }
 
 main()
-  .catch((error) => {
-    console.error("❌ Error seeding database:", error);
-    process.exit(1);
-  })
-  .finally(() => prisma.$disconnect());
+  .catch((e) => console.error("Error seeding database:", e))
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

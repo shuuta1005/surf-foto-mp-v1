@@ -1,36 +1,33 @@
 import { PrismaClient } from "@prisma/client";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
-export async function POST(req: NextRequest) {
-  try {
-    const { name, location, photographerId } = await req.json();
-
-    const newGallery = await prisma.gallery.create({
-      data: { name, location, photographerId },
-    });
-
-    return NextResponse.json(newGallery);
-  } catch (error) {
-    console.error("Error creating gallery:", error);
-
-    return NextResponse.json(
-      {
-        error:
-          error instanceof Error ? error.message : "An unknown error occurred",
-      },
-      { status: 500 }
-    );
-  }
-}
-
 export async function GET() {
   try {
-    const galleries = await prisma.gallery.findMany();
-    return NextResponse.json(galleries);
+    // Fetch all galleries including their photos
+    const galleries = await prisma.gallery.findMany({
+      include: { photos: true },
+    });
+
+    // Ensure first photo in the gallery is selected as the cover image
+    const formattedGalleries = galleries.map((gallery) => {
+      const coverPhoto =
+        gallery.photos.length > 0
+          ? gallery.photos[0].photoUrl
+          : "/images/default.jpg";
+
+      return {
+        id: gallery.id,
+        name: gallery.name,
+        location: gallery.location,
+        coverImage: coverPhoto,
+      };
+    });
+
+    return NextResponse.json(formattedGalleries);
   } catch (error) {
-    console.error("Error fetching galleries:", error); // Now 'error' is used
+    console.error("Error fetching galleries:", error);
     return NextResponse.json(
       { error: "Failed to fetch galleries" },
       { status: 500 }
