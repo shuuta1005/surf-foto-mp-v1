@@ -1,5 +1,6 @@
 import Image from "next/image";
-import loader from "@/assets/loader.gif";
+//import loader from "@/assets/loader.gif";
+import waveLoader from "@/assets/wave-loader.gif";
 
 const LoadingPage = () => {
   return (
@@ -12,7 +13,7 @@ const LoadingPage = () => {
         width: "100vw",
       }}
     >
-      <Image src={loader} height={150} width={150} alt="loang..." />
+      <Image src={waveLoader} height={300} width={300} alt="loang..." />
     </div>
   );
 };

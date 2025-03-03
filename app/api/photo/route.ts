@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
-
-const prisma = new PrismaClient();
+import { createPhoto } from "@/db/photo";
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,17 +12,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const gallery = await prisma.gallery.findUnique({
-      where: { id: galleryId },
-    });
-
-    if (!gallery) {
-      return NextResponse.json({ error: "Gallery not found" }, { status: 404 });
-    }
-
-    const newPhoto = await prisma.photo.create({
-      data: { galleryId, photoUrl, title },
-    });
+    const newPhoto = await createPhoto(galleryId, photoUrl, title);
 
     return NextResponse.json(newPhoto);
   } catch (error) {

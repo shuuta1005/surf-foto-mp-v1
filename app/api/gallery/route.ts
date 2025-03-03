@@ -1,29 +1,16 @@
-import { PrismaClient } from "@prisma/client";
+//NextResponse → Used to send JSON responses in Next.js API routes.
 import { NextResponse } from "next/server";
+import { formatGalleries } from "@/lib/galleryHelpers";
+import { Gallery } from "@/app/types/gallery";
+import { getAllGalleries } from "@/db/gallery";
 
-const prisma = new PrismaClient();
-
+//This function runs when /api/gallery is requested with a GET request.
+//The frontend calls this function when it needs all galleries.
 export async function GET() {
   try {
-    // Fetch all galleries including their photos
-    const galleries = await prisma.gallery.findMany({
-      include: { photos: true },
-    });
+    const galleries: Gallery[] = await getAllGalleries();
 
-    // Ensure first photo in the gallery is selected as the cover image
-    const formattedGalleries = galleries.map((gallery) => {
-      const coverPhoto =
-        gallery.photos.length > 0
-          ? gallery.photos[0].photoUrl
-          : "/images/default.jpg";
-
-      return {
-        id: gallery.id,
-        name: gallery.name,
-        location: gallery.location,
-        coverImage: coverPhoto,
-      };
-    });
+    const formattedGalleries = formatGalleries(galleries);
 
     return NextResponse.json(formattedGalleries);
   } catch (error) {
