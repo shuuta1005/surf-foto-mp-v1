@@ -1,14 +1,14 @@
 //NextResponse → Used to send JSON responses in Next.js API routes.
 import { NextResponse } from "next/server";
 import { formatGalleries } from "@/lib/galleryHelpers";
-import { Gallery } from "@/app/types/gallery";
+//import { Gallery } from "@/app/types/gallery";
 import { getAllGalleries } from "@/db/gallery";
 
 //This function runs when /api/gallery is requested with a GET request.
 //The frontend calls this function when it needs all galleries.
 export async function GET() {
   try {
-    const galleries: Gallery[] = await getAllGalleries();
+    const galleries = await getAllGalleries();
 
     const formattedGalleries = formatGalleries(galleries);
 

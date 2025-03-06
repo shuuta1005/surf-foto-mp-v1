@@ -1,16 +1,37 @@
 import prisma from "./db"; // ✅ Use Prisma instance
+import { Gallery } from "@/app/types/gallery";
 
 // ✅ Fetch all galleries (with first photo as cover image)
-export async function getAllGalleries() {
+
+export async function getAllGalleries(): Promise<Gallery[]> {
   return await prisma.gallery.findMany({
-    include: { photos: { take: 1 } }, // Fetch first photo for cover image
+    include: {
+      photos: {
+        select: {
+          id: true,
+          photoUrl: true,
+          title: true,
+          uploadedAt: true,
+          galleryId: true,
+        },
+      },
+    },
   });
 }
 
 // ✅ Fetch a single gallery by ID (with all photos)
-export async function getGalleryById(galleryId: string) {
-  return await prisma.gallery.findUnique({
+export async function getGalleryById(
+  galleryId: string
+): Promise<Gallery | null> {
+  const gallery = await prisma.gallery.findUnique({
     where: { id: galleryId },
     include: { photos: true },
   });
+
+  if (!gallery) return null;
+
+  return {
+    ...gallery,
+    coverImage: gallery.coverImage ?? "", // Ensure coverImage is never null
+  };
 }

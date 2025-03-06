@@ -15,8 +15,6 @@ const GalleryCard: React.FC<GalleryCardProps> = ({
   title,
   location,
 }) => {
-  console.log("Gallery ID in Card:", id);
-
   return (
     <Link href={`/gallery/${id}`} className="block">
       <Card className="overflow-hidden group cursor-pointer">
@@ -24,9 +22,10 @@ const GalleryCard: React.FC<GalleryCardProps> = ({
           <Image
             src={image}
             alt={title}
-            layout="fill"
-            objectFit="cover"
-            className="brightness-75 group-hover:scale-105 transition-transform duration-300"
+            fill // Use 'fill' instead of deprecated 'layout="fill"'
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority // Optional: for faster initial load
+            className="brightness-75 group-hover:scale-105 transition-transform duration-300 object-cover"
           />
           <div className="absolute inset-0 flex flex-col justify-center items-center text-white text-center p-4">
             <h3 className="text-3xl font-bold mb-2">{title}</h3>

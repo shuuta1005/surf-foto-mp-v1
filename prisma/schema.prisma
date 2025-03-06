@@ -15,12 +15,12 @@ datasource db {
 }
 
 model Gallery {
-  id             String   @id @default(uuid())
-  name           String
-  location       String?
-  photographerId String?
-  createdAt      DateTime @default(now())
-  photos         Photo[]
+  id         String   @id @default(uuid())
+  name       String
+  location   String?
+  coverImage String? // ✅ New field for manually setting the cover image
+  photos     Photo[]
+  createdAt  DateTime @default(now())
 }
 
 model Photo {

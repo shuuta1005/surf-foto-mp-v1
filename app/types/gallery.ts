@@ -6,6 +6,8 @@ export interface Photo {
 export interface Gallery {
   id: string;
   name: string;
-  location?: string | null; // Optional, can be null
+  location?: string | null;
+  coverImage?: string | null; // ✅ Accept both string and null
+  createdAt: Date;
   photos: Photo[];
 }
