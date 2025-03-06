@@ -3,10 +3,10 @@
 import HighlightedGalleries from "@/components/shared/highlightedGallery/HighlightedGalleries";
 import HighlightedPhotos from "@/components/highlightedPhotos/HighlightedPhotos";
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+//const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const Homepage = async () => {
-  await delay(1000);
+const Homepage = () => {
+  //await delay(1000);
 
   return (
     <>
