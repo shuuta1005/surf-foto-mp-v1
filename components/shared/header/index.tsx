@@ -7,7 +7,7 @@ import FilterDropdown from "./FilterDropdown";
 
 const Header = () => {
   return (
-    <header className="w-full border-b bg-stone-100 shadow-md">
+    <header className="w-full border-b bg-stone-100 shadow-md sticky top-0 z-10">
       <div className="wrapper flex items-center p-4 gap-4 max-w-7xl mx-auto">
         {/* Side Menu */}
         <SideMenu />

@@ -29,7 +29,7 @@ const HighlightedGalleries: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header and Pagination */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Score in February🔥</h2>
+          <h2 className="text-2xl font-bold">Recent Scores🔥最近の1173</h2>
           <GalleryPagination
             currentPage={currentPage}
             totalPages={totalPages}

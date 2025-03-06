@@ -30,7 +30,7 @@ const FilterDropdown: React.FC = () => {
       <Button
         variant="outline"
         onClick={() => setShowFilters(!showFilters)}
-        className="flex items-center"
+        className="flex items-center  font-semibold"
       >
         <Filter size={18} className="mr-2" />
         <span className="hidden sm:inline">Filter</span>
@@ -43,7 +43,7 @@ const FilterDropdown: React.FC = () => {
             <Button
               key={index}
               variant="ghost"
-              className="block w-full text-left"
+              className="block w-full text-left  font-semibold"
             >
               {location}
             </Button>

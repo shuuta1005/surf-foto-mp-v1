@@ -11,6 +11,7 @@ export default {
     extend: {
       fontFamily: {
         gothic: ["Grenze Gotisch", "serif"],
+        serifjp: ["var(--font-noto-serif-jp)", "serif"], // ✅ Added Noto Serif JP
       },
       colors: {
         background: "hsl(var(--background))",
