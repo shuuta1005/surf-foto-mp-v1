@@ -14,7 +14,7 @@ const menuItems = [
   { title: "Sign In", icon: <UserIcon />, href: "/sign-in" },
   { title: "Profile", icon: <UserIcon />, href: "/profile" },
   { title: "Photographers", icon: <Camera />, href: "/photographers" },
-  { title: "About", icon: <Info />, href: "/about" },
+  { title: "About Us", icon: <Info />, href: "/about" },
   { title: "Terms and Conditions", icon: <FileText />, href: "/terms" },
   { title: "Privacy Policy", icon: <Shield />, href: "/privacy" },
 ];
