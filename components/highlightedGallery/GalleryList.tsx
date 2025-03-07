@@ -1,9 +1,9 @@
-import GalleryCard from "../GalleryCard";
+import GalleryCard from "./GalleryCard";
 
 interface GalleryListProps {
   galleries: {
     id: string;
-    coverImage: string; // ✅ coverImage is now always present
+    coverImage?: string | null; // ✅ Allow undefined or null
     name: string;
     location?: string;
   }[];
@@ -16,7 +16,7 @@ const GalleryList: React.FC<GalleryListProps> = ({ galleries }) => {
         <GalleryCard
           key={gallery.id}
           id={gallery.id}
-          image={gallery.coverImage}
+          image={gallery.coverImage || "/placeholder.jpg"} // ✅ Provide a default value
           title={gallery.name}
           location={gallery.location || "Unknown"}
         />

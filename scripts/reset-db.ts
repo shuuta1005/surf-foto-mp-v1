@@ -1,15 +1,18 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "@/db/db";
 
 async function resetDatabase() {
-  console.log("🔄 Resetting database...");
+  console.log("⚠️ Resetting database...");
 
-  // Delete all photos first (to avoid foreign key constraint issues)
-  await prisma.photo.deleteMany();
-  await prisma.gallery.deleteMany();
+  await prisma.$transaction([
+    prisma.photo.deleteMany(),
+    prisma.gallery.deleteMany(),
+    prisma.account.deleteMany(),
+    prisma.session.deleteMany(),
+    prisma.verificationToken.deleteMany(),
+    prisma.user.deleteMany(),
+  ]);
 
-  console.log("✅ Database reset complete.");
+  console.log("✅ Database reset complete!");
 }
 
 resetDatabase()
