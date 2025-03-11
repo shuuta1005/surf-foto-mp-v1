@@ -1,5 +1,6 @@
 //page.tsx defines the homepage content and gets inserted into layout.tsx.
 
+import DestinationsGrid from "@/components/destinationGrid/DestinationsGrid";
 import HighlightedGalleries from "@/components/highlightedGallery/HighlightedGalleries";
 import HighlightedPhotos from "@/components/highlightedPhotos/HighlightedPhotos";
 
@@ -12,6 +13,7 @@ const Homepage = () => {
     <>
       <HighlightedPhotos />
       <HighlightedGalleries />
+      <DestinationsGrid />
     </>
   );
 };

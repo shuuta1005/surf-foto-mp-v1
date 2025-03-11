@@ -11,9 +11,9 @@ export default function AboutPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
+    <div className="min-h-screen bg-gradient-to-b from-gray-300 to-gray-400">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-gray-800 to-gray-900 text-white relative overflow-hidden">
+      <div className="bg-gradient-to-r from-gray-300 to-gray-400 text-black relative overflow-hidden">
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle,_transparent_10%,_#000_70%)]"></div>
         </div>
@@ -47,16 +47,13 @@ export default function AboutPage() {
           }`}
         >
           <div className="flex-1">
-            <h2 className="text-3xl font-bold text-gray-100 mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-8">
               Our Mission
             </h2>
-            <p className="text-lg text-gray-300 leading-relaxed mb-6">
-              At BraFotos, we believe every wave deserves to be remembered. Our
-              platform seamlessly connects talented surf photographers with wave
-              riders, creating a marketplace where unforgettable moments can be
-              discovered, shared, and cherished.
+            <p className="text-lg text-gray-700 leading-relaxed mb-6 font-semibold">
+              At BraFotos, we believe every wave deserves to be remembered.
             </p>
-            <p className="text-lg text-gray-300 leading-relaxed mb-6">
+            <p className="text-lg text-gray-700 leading-relaxed mb-6 font-semibold">
               Our platform connects photographers with surfers, creating a place
               where the beauty and thrill of surf culture can be discovered,
               shared, and remembered forever.
@@ -78,7 +75,7 @@ export default function AboutPage() {
       </div>
 
       {/* Join Us CTA */}
-      <div className="bg-gradient-to-b from-gray-800 to-gray-900 text-white">
+      <div className="bg-gradient-to-b from-gray-400 to-gray-500 text-black">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div
             className={`text-center transform transition-all duration-1000 delay-500 ${
@@ -90,11 +87,11 @@ export default function AboutPage() {
             <h2 className="text-3xl font-bold mb-6">
               Keen to Join Our Community?
             </h2>
-            <p className="text-xl max-w-2xl mx-auto mb-8 text-gray-300 font-semibold">
-              For photographers who are keen to join our community.
+            <p className="text-xl max-w-2xl mx-auto mb-8 text-gray-900 font-semibold">
+              For photographers who are keen to join our community⚡️⚡️
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-yellow-600 hover:bg-yellow-700 text-white px-8 py-4 rounded-lg font-medium transition-colors shadow-lg flex items-center justify-center">
+              <button className="bg-yellow-600 hover:bg-yellow-700 text-black px-8 py-4 rounded-lg font-bold transition-colors shadow-lg flex items-center justify-center">
                 For Photographers <ArrowRight size={18} className="ml-2" />
               </button>
             </div>
