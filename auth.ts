@@ -7,14 +7,26 @@
 // Callbacks → Controls session behavior.
 // Sign In/Out Handlers → Manages user login/logout.
 
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "./db/db";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compareSync } from "bcrypt-ts-edge";
-import NextAuthConfig from "next-auth";
 
-export const config = {
+// ✅ Define the structure of session.user
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+      role?: string;
+    };
+  }
+}
+
+export const config: NextAuthOptions = {
   pages: { signIn: "/sign-in", error: "/sign-in" },
   session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 },
   adapter: PrismaAdapter(prisma),
@@ -22,20 +34,20 @@ export const config = {
     CredentialsProvider({
       credentials: { email: { type: "email" }, password: { type: "password" } },
       async authorize(credentials) {
-        if (credentials == null) return null;
+        if (!credentials) return null;
 
-        //Find user in database
+        // ✅ Find user in database
         const user = await prisma.user.findFirst({
           where: { email: credentials.email as string },
         });
 
-        //Check if user exists and password matches
+        // ✅ Check if user exists and password matches
         if (user && user.password) {
           const isMatch = compareSync(
             credentials.password as string,
             user.password
           );
-          //If password is correct, return user
+
           if (isMatch) {
             return {
               id: user.id,
@@ -45,25 +57,26 @@ export const config = {
             };
           }
         }
-        //If user does not exist or password is not matched, the return null
-        return null;
+
+        return null; // Invalid credentials
       },
     }),
   ],
   callbacks: {
-    async session({ session, user, trigger, token }: any) {
-      //Set the user id from the token
-
-      session.user.id = token.sub;
-
-      //If there's an update, set the user name
-      if (trigger === "update") {
-        session.user.name = user.name;
-      }
+    async session({ session, token }) {
+      // ✅ Ensure session.user exists
+      session.user = {
+        id: token.sub as string,
+        name: session.user?.name ?? null,
+        email: session.user?.email ?? null,
+        image: session.user?.image ?? null,
+        role: token.role as string | undefined,
+      };
 
       return session;
     },
   },
-} satisfies NextAuthConfig;
+};
 
+// ✅ Correct way to export NextAuth handlers in v4
 export const { handlers, auth, signIn, signOut } = NextAuth(config);
