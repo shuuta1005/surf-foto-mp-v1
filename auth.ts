@@ -12,7 +12,7 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "./db/db";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compareSync } from "bcrypt-ts-edge";
-import type { NextAuthConfig } from "next-auth";
+import NextAuthConfig from "next-auth";
 
 export const config = {
   pages: { signIn: "/sign-in", error: "/sign-in" },
