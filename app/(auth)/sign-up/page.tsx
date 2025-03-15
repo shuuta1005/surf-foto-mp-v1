@@ -2,74 +2,94 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { signUpSchema } from "@/lib/validation"; // ✅ Import Zod validation
+//import { z } from "zod";
 
 export default function SignUpPage() {
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
 
-    const response = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
-    });
-
-    setLoading(false);
-
-    if (!response.ok) {
-      const { error } = await response.json();
-      setError(error || "Failed to create an account.");
+    // ✅ Validate form data using Zod
+    const result = signUpSchema.safeParse(formData);
+    if (!result.success) {
+      // ✅ Extract error messages
+      const formattedErrors: { [key: string]: string } = {};
+      result.error.errors.forEach((err) => {
+        formattedErrors[err.path[0]] = err.message;
+      });
+      setErrors(formattedErrors);
       return;
     }
 
-    // Redirect to sign-in page after successful signup
-    router.push("/sign-in");
+    // ✅ If validation passes, send data to backend
+    console.log("Validated data:", result.data);
+
+    // Redirect to another page after successful signup
+    router.push("/dashboard");
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
+    <div className="max-w-md mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Sign Up</h1>
-      <form
-        onSubmit={handleSubmit}
-        className="w-80 p-4 bg-white shadow-md rounded-md"
-      >
-        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+      <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="text"
-          placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full p-2 border rounded mb-2"
-          required
+          name="name"
+          placeholder="Full Name"
+          value={formData.name}
+          onChange={handleChange}
+          className="border p-2 w-full"
         />
+        {errors.name && <p className="text-red-500">{errors.name}</p>}
+
         <input
           type="email"
+          name="email"
           placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-2 border rounded mb-2"
-          required
+          value={formData.email}
+          onChange={handleChange}
+          className="border p-2 w-full"
         />
+        {errors.email && <p className="text-red-500">{errors.email}</p>}
+
         <input
           type="password"
+          name="password"
           placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-2 border rounded mb-2"
-          required
+          value={formData.password}
+          onChange={handleChange}
+          className="border p-2 w-full"
         />
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? "Signing up..." : "Sign Up"}
-        </Button>
+        {errors.password && <p className="text-red-500">{errors.password}</p>}
+
+        <input
+          type="password"
+          name="confirmPassword"
+          placeholder="Confirm Password"
+          value={formData.confirmPassword}
+          onChange={handleChange}
+          className="border p-2 w-full"
+        />
+        {errors.confirmPassword && (
+          <p className="text-red-500">{errors.confirmPassword}</p>
+        )}
+
+        <button type="submit" className="bg-blue-500 text-white px-4 py-2">
+          Sign Up
+        </button>
       </form>
     </div>
   );
