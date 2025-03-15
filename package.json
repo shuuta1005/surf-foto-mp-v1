@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
-    "@next-auth/prisma-adapter": "^1.0.7",
+    "@next-auth/prisma-adapter": "^0.5.2-next.19",
     "@prisma/adapter-neon": "^6.4.1",
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-slot": "^1.1.2",
