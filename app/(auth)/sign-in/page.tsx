@@ -8,7 +8,7 @@ import CredentialsSignInForm from "./credentials-sign-form";
 export default function SignInPage() {
   return (
     <div className="flex min-h-screen">
-      {/* Left Side: Login Form */}
+      {/* Left Side: Sign In Form */}
       <div className="w-full md:w-1/2 flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           <Card className="shadow-lg">
@@ -23,7 +23,7 @@ export default function SignInPage() {
                 />
               </Link>
               <CardTitle className="text-2xl font-bold">Sign In</CardTitle>
-              <p className="text-gray-500">Sign in to your account</p>
+              <p className="text-gray-500">Access your BraFotos account</p>
             </CardHeader>
             <CardContent>
               <CredentialsSignInForm />
@@ -33,7 +33,7 @@ export default function SignInPage() {
       </div>
 
       {/* Right Side: Image (Hidden on Mobile) */}
-      <div className="hidden md:flex w-1/2 justify-center items-center m-10 ">
+      <div className="hidden md:flex w-1/2 justify-center items-center m-10">
         <Image
           src="/destinations/north-chiba.jpg"
           alt="Surfing"
