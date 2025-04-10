@@ -2,18 +2,18 @@
 //✅ The {children} part is where the page's content is inserted.
 
 import Footer from "@/components/shared/footer";
-import Header from "@/components/shared/header";
+
+import HeaderContainer from "@/components/shared/header/header-container";
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  //This thing prevents unexpected side effects (a layout component accidentally changing page content).
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <div className="flex h-screen flex-col">
-      <Header />
-      <main className="flex-1 wrapper">{children}</main>
+    <div className="flex flex-col min-h-screen">
+      <HeaderContainer />
+      <main className="flex-1">{children}</main>
       <Footer />
     </div>
   );
