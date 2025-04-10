@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import CredentialsSignInForm from "./credentials-sign-form";
+import CredentialsSignInForm from "./credentials-sign-in-form";
 
 export default function SignInPage() {
   return (

@@ -7,76 +7,78 @@
 // Callbacks → Controls session behavior.
 // Sign In/Out Handlers → Manages user login/logout.
 
-import NextAuth, { NextAuthOptions } from "next-auth";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import prisma from "./db/db";
+import NextAuth, { type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { compareSync } from "bcrypt-ts-edge";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
-// ✅ Define the structure of session.user
-declare module "next-auth" {
-  interface Session {
-    user: {
-      id: string;
-      name?: string | null;
-      email?: string | null;
-      image?: string | null;
-      role?: string;
-    };
-  }
-}
+// Prisma client
+const prisma = new PrismaClient();
 
+// Export reusable auth config
 export const config: NextAuthOptions = {
-  pages: { signIn: "/sign-in", error: "/sign-in" },
-  session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 },
+  pages: {
+    signIn: "/sign-in",
+    error: "/sign-in", // Optional: redirect to sign-in on error
+  },
   adapter: PrismaAdapter(prisma),
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
   providers: [
     CredentialsProvider({
-      credentials: { email: { type: "email" }, password: { type: "password" } },
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
       async authorize(credentials) {
-        if (!credentials) return null;
+        if (!credentials?.email || !credentials?.password) return null;
 
-        // ✅ Find user in database
-        const user = await prisma.user.findFirst({
-          where: { email: credentials.email as string },
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email },
         });
 
-        // ✅ Check if user exists and password matches
-        if (user && user.password) {
-          const isMatch = compareSync(
-            credentials.password as string,
-            user.password
-          );
+        if (!user || !user.password) return null;
 
-          if (isMatch) {
-            return {
-              id: user.id,
-              name: user.name,
-              email: user.email,
-              role: user.role,
-            };
-          }
-        }
+        const isValid = await bcrypt.compare(
+          credentials.password,
+          user.password
+        );
+        if (!isValid) return null;
 
-        return null; // Invalid credentials
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        };
       },
     }),
   ],
   callbacks: {
     async session({ session, token }) {
-      // ✅ Ensure session.user exists
-      session.user = {
-        id: token.sub as string,
-        name: session.user?.name ?? null,
-        email: session.user?.email ?? null,
-        image: session.user?.image ?? null,
-        role: token.role as string | undefined,
-      };
-
+      if (token && session.user) {
+        session.user = {
+          id: token.sub as string,
+          name: session.user.name ?? null,
+          email: session.user.email ?? null,
+          image: session.user.image ?? null,
+          role: token.role as string | undefined,
+        };
+      }
       return session;
     },
   },
+  secret: process.env.NEXTAUTH_SECRET,
 };
 
-// ✅ Correct way to export NextAuth handlers in v4
-export const { handlers, auth, signIn, signOut } = NextAuth(config);
+// Export helpers
+export const {
+  auth, // to use getServerSession anywhere
+  signIn,
+  signOut,
+  handlers,
+} = NextAuth(config);
