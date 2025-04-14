@@ -1,92 +1,3 @@
-// "use client";
-
-// import { useState } from "react";
-// import { Label } from "@radix-ui/react-label";
-// import { Input } from "@/components/ui/input";
-// import { signIn } from "next-auth/react";
-// import { Button } from "@/components/ui/button";
-// import Link from "next/link";
-// import { useRouter } from "next/navigation";
-
-// const CredentialsSignInForm = () => {
-//   const router = useRouter();
-//   const [email, setEmail] = useState("");
-//   const [password, setPassword] = useState("");
-//   const [error, setError] = useState("");
-
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     setError("");
-
-//     const result = await signIn("credentials", {
-//       email,
-//       password,
-//       redirect: false,
-//     });
-
-//     if (result?.error) {
-//       setError("Invalid email or password.");
-//     } else {
-//       router.push("/"); // Redirect to homepage after login
-//     }
-//   };
-
-//   return (
-//     <form onSubmit={handleSubmit} className="space-y-6">
-//       {error && <p className="text-red-500 text-sm">{error}</p>}
-
-//       {/* Email Input */}
-//       <div>
-//         <Label htmlFor="email" className="font-semibold">
-//           Email
-//         </Label>
-//         <Input
-//           id="email"
-//           name="email"
-//           type="email"
-//           required
-//           autoComplete="email"
-//           value={email}
-//           onChange={(e) => setEmail(e.target.value)}
-//         />
-//       </div>
-
-//       {/* Password Input */}
-//       <div>
-//         <Label htmlFor="password" className="font-semibold">
-//           Password
-//         </Label>
-//         <Input
-//           id="password"
-//           name="password"
-//           type="password"
-//           required
-//           autoComplete="current-password"
-//           value={password}
-//           onChange={(e) => setPassword(e.target.value)}
-//         />
-//       </div>
-
-//       {/* Submit Button */}
-//       <div>
-//         <Button className="w-full font-semibold" variant="default">
-//           Sign In
-//         </Button>
-//       </div>
-
-//       {/* Sign Up Link */}
-//       <div className="text-sm text-center text-gray-500">
-//         Don’t have an account?{" "}
-//         <Link href="/sign-up" className="text-blue-500 hover:underline">
-//           Sign Up
-//         </Link>
-//       </div>
-//     </form>
-//   );
-// };
-
-// export default CredentialsSignInForm;
-
 "use client";
 
 import { useState } from "react";
@@ -94,26 +5,32 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { z } from "zod";
 import { signInSchema } from "@/lib/validation";
-import { Input } from "@/components/ui/input";
+import { signInDefaultValues } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
-import { Label } from "@radix-ui/react-label";
 import Link from "next/link";
 import { toast } from "@/components/ui/use-toast";
-import { signInDefaultValues } from "@/lib/constants";
+import FormField from "@/components/form/formField";
 
-type SignInData = z.infer<typeof signInSchema>;
+type SignInData = z.infer<typeof signInSchema>; // typeof = the type of the Zod object
 
 const CredentialsSignInForm = () => {
   const router = useRouter();
-
   const [formData, setFormData] = useState<SignInData>(signInDefaultValues);
 
+  // Partial is a type that represents a type that allows all properties to be optional.
+  // Required is a type that represents a type that requires all properties to be present.
+  // Record is a type that represents a type that is a mapping from string to any.
+
+  //The Record type is defined as Record<K, T> ,
+  // where K represents the type of the keys
+  // and T represents the type of the values.
   const [errors, setErrors] = useState<
     Partial<Record<keyof SignInData, string>>
   >({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -121,11 +38,11 @@ const CredentialsSignInForm = () => {
     setErrors({});
 
     try {
+      //This runs the rules we defined in signInSchema and checks if formData is valid.
       const validated = signInSchema.parse(formData);
 
       const result = await signIn("credentials", {
-        email: validated.email,
-        password: validated.password,
+        ...validated,
         redirect: false,
       });
 
@@ -139,11 +56,13 @@ const CredentialsSignInForm = () => {
         router.push("/");
       }
     } catch (err) {
+      //If Zod finds validation problems, it throws an error
       if (err instanceof z.ZodError) {
         const fieldErrors: typeof errors = {};
-        for (const issue of err.issues) {
-          fieldErrors[issue.path[0] as keyof SignInData] = issue.message;
-        }
+        err.issues.forEach((issue) => {
+          const key = issue.path[0] as keyof SignInData;
+          fieldErrors[key] = issue.message;
+        });
         setErrors(fieldErrors);
       } else {
         toast({
@@ -157,41 +76,32 @@ const CredentialsSignInForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Email */}
-      <div>
-        <Label htmlFor="email">Email</Label>
-        <Input
-          name="email"
-          type="email"
-          value={formData.email}
-          onChange={handleChange}
-        />
-        {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
-      </div>
+      <FormField
+        label="Email"
+        name="email"
+        type="email"
+        value={formData.email}
+        onChange={handleChange}
+        error={errors.email}
+      />
 
-      {/* Password */}
-      <div>
-        <Label htmlFor="password">Password</Label>
-        <Input
-          name="password"
-          type="password"
-          value={formData.password}
-          onChange={handleChange}
-        />
-        {errors.password && (
-          <p className="text-sm text-red-500">{errors.password}</p>
-        )}
-      </div>
+      <FormField
+        label="Password"
+        name="password"
+        type="password"
+        value={formData.password}
+        onChange={handleChange}
+        error={errors.password}
+      />
 
-      {/* Submit */}
       <Button className="w-full">Sign In</Button>
 
-      <div className="text-sm text-center text-gray-500">
+      <p className="text-sm text-center text-gray-500">
         Don’t have an account?{" "}
         <Link href="/sign-up" className="text-blue-500 hover:underline">
           Sign Up
         </Link>
-      </div>
+      </p>
     </form>
   );
 };

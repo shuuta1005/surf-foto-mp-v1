@@ -22,6 +22,7 @@ model User {
 
   accounts Account[]
   sessions Session[]
+  carts    Cart[]
 }
 
 model Account {
@@ -80,4 +81,30 @@ model Photo {
   photoUrl   String
   title      String?
   uploadedAt DateTime @default(now())
+}
+
+model Cart {
+  id            String     @id @default(uuid())
+  sessionCartId String     @unique
+  userId        String?
+  user          User?      @relation(fields: [userId], references: [id])
+  items         CartItem[]
+  totalPrice    Int
+  taxPrice      Int?
+  afterTaxPrice Int?
+  createdAt     DateTime   @default(now())
+}
+
+model CartItem {
+  id               String    @id @default(uuid())
+  cartId           String
+  cart             Cart      @relation(fields: [cartId], references: [id])
+  photoId          String
+  photoUrl         String
+  price            Int
+  location         String?
+  takenAt          DateTime?
+  photographerId   String?
+  photographerName String?
+  slug             String?
 }

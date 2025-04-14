@@ -1,4 +1,4 @@
-import prisma from "./db";
+import { prisma } from "@/lib/db";
 
 // ✅ Fetch all photos for a gallery
 export async function getPhotosByGalleryId(galleryId: string) {

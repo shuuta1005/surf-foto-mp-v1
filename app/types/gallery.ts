@@ -11,3 +11,14 @@ export interface Gallery {
   createdAt: Date;
   photos: Photo[];
 }
+
+export type GalleryCardProps = {
+  id: string;
+  image: string;
+  title: string;
+  location: string;
+};
+
+export type GalleryViewProps = {
+  gallery: Gallery;
+};

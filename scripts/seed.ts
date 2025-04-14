@@ -1,4 +1,4 @@
-import prisma from "@/db/db";
+import { prisma } from "@/lib/db";
 import { sampleData } from "@/db/sample-data";
 
 async function seedUsers() {

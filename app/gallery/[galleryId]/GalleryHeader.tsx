@@ -1,6 +1,9 @@
 "use client";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useCart } from "@/lib/context/CartContext";
 import { Button } from "@/components/ui/button";
+import { ShoppingCart } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function GalleryHeader({
   name,
@@ -9,24 +12,15 @@ export default function GalleryHeader({
   name: string;
   location?: string;
 }) {
+  const { items } = useCart();
   const router = useRouter();
 
   return (
-    // <div className="flex justify-between items-center p-4 bg-white shadow-md sticky top-0 z-10">
-    //   <Button variant="outline" onClick={() => router.back()}>
-    //     ← Back
-    //   </Button>
-    //   <h1 className="text-xl font-bold text-center">
-    //     {name} - {location || "Unknown"}
-    //   </h1>
-    //   <Button variant="outline">Checkout</Button>
-    // </div>
-
     <header className="w-full border-b bg-stone-100 shadow-md sticky top-0 z-10 mb-1">
-      <div className=" flex justify-between items-center p-4 gap-4 max-w-7xl mx-auto">
+      <div className="flex justify-between items-center p-4 gap-4 max-w-7xl mx-auto">
         <Button
-          className="font-semibold"
           variant="outline"
+          className="font-semibold"
           onClick={() => router.back()}
         >
           ← Back
@@ -36,9 +30,19 @@ export default function GalleryHeader({
           {name} - <span className="font-noto">{location || "Unknown"}</span>
         </h1>
 
-        <Button className="font-semibold" variant="outline">
-          Checkout
-        </Button>
+        <Link href="/cart" className="relative">
+          <Button
+            variant="outline"
+            className="font-semibold flex items-center gap-2"
+          >
+            <ShoppingCart size={24} strokeWidth={2.5} />
+            {items.length > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-sm px-2 rounded-full">
+                {items.length}
+              </span>
+            )}
+          </Button>
+        </Link>
       </div>
     </header>
   );

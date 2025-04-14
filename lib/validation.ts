@@ -1,3 +1,13 @@
+//Zod is a runtime validator —
+//meaning it actually checks the data while the app is running, not just during development.
+//TypeScript only checks types while you're coding — it disappears when the app runs in the browser.
+
+// But Zod does this:
+
+// ✅ Validates data at runtime (e.g. before submitting to API)
+// ✅ Tells you what’s wrong (like "invalid email" or "too short")
+// ✅ Helps you create clean TS types automatically (z.infer)
+
 import { z } from "zod";
 
 // ✅ Schema for user sign-in form
@@ -20,3 +30,26 @@ export const signUpSchema = z
     message: "Passwords don't match",
     path: ["confirmPassword"], // ✅ This ensures the error message is shown next to the confirm password field
   });
+
+//Cart Item schema
+export const cartItemSchema = z.object({
+  photoId: z.string().min(1, "Photo ID is required"),
+  // photoUrl: z.string().url("Invalid photo URL"),
+  photoUrl: z.string().min(1, "Photo URL is required"),
+  price: z.number().min(1, "Price is required"),
+  location: z.string().optional(), // e.g., beach or surf spot
+  takenAt: z.string().datetime().optional(), // ISO date
+  photographerId: z.string().optional(),
+  photographerName: z.string().optional(), // useful for showing in UI or storing
+  slug: z.string().optional(), // optional identifier used in URLs
+});
+
+//Cart schema
+export const insertCartSchema = z.object({
+  items: z.array(cartItemSchema).min(1, "Cart must contain items"),
+  totalPrice: z.number().min(1, "Total price is required"),
+  taxPrice: z.number().optional(),
+  afterTaxPrice: z.number().optional(),
+  sessionCartId: z.string().min(1, "Session cart ID is required"),
+  userId: z.string().optional(), // only if user is logged in
+});

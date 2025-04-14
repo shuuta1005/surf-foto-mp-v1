@@ -7,14 +7,16 @@
 // Callbacks → Controls session behavior.
 // Sign In/Out Handlers → Manages user login/logout.
 
+//🔐 Potential Improvements
+//Limit login attempts >> Prevent brute-force attacks
+//Lowercase email >> Avoid case issues (e.g. A@A.com vs a@a.com)
+//Error logging >> Track weird login issues
+
 import NextAuth, { type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-
-// Prisma client
-const prisma = new PrismaClient();
+import { prisma } from "./lib/db";
 
 // Export reusable auth config
 export const config: NextAuthOptions = {
@@ -24,6 +26,7 @@ export const config: NextAuthOptions = {
   },
   adapter: PrismaAdapter(prisma),
   session: {
+    //🔐 Tip later: Rotate JWT secrets if you get fancy with security.‼️
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },

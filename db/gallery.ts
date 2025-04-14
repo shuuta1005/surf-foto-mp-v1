@@ -1,4 +1,5 @@
-import prisma from "./db"; // ✅ Use Prisma instance
+import { prisma } from "@/lib/db";
+
 import { Gallery } from "@/app/types/gallery";
 
 // ✅ Fetch all galleries (with first photo as cover image)

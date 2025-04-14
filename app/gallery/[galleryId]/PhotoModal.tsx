@@ -1,18 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import {
-  ChevronLeft,
-  ChevronRight,
-  X,
-  ZoomIn,
-  ZoomOut,
-  Download,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
+// import { useCart } from "@/lib/hooks/useCart";
+import { useCart } from "@/lib/context/CartContext";
+
+import { ShoppingCart } from "lucide-react";
 
 export default function PhotoModal({
+  photoId,
   photoUrl,
+  price,
   onClose,
   onNext,
   onPrev,
@@ -20,7 +19,9 @@ export default function PhotoModal({
   isLast,
   caption,
 }: {
+  photoId: string;
   photoUrl: string;
+  price: number;
   onClose: () => void;
   onNext: () => void;
   onPrev: () => void;
@@ -30,6 +31,8 @@ export default function PhotoModal({
 }) {
   const [isLoading, setIsLoading] = useState(true);
   const [zoomLevel, setZoomLevel] = useState(1);
+  const { addToCart, removeFromCart, isInCart } = useCart();
+  const isSelected = isInCart(photoId); // or use a real ID if you have it
 
   // ✅ Memoized functions to prevent unnecessary re-renders
   const handleZoomIn = useCallback(() => {
@@ -74,7 +77,6 @@ export default function PhotoModal({
             <div className="w-12 h-12 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
           </div>
         )}
-
         {/* ✅ Main Image */}
         <div className="relative w-full h-full flex justify-center overflow-hidden">
           <div
@@ -95,7 +97,6 @@ export default function PhotoModal({
             />
           </div>
         </div>
-
         {/* ✅ Caption (if provided) */}
         {caption && (
           <div className="absolute bottom-16 left-0 right-0 text-center">
@@ -104,14 +105,9 @@ export default function PhotoModal({
             </p>
           </div>
         )}
-
         {/* ✅ Controls */}
-        <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center">
-          {/* Image counter */}
-          <div className="bg-black/60 text-white py-1 px-3 rounded-full text-sm backdrop-blur-sm">
-            {isFirst ? "1" : "•"} / {isLast ? "•" : "•"}
-          </div>
 
+        <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center">
           {/* Zoom & Download */}
           <div className="flex gap-2">
             <button
@@ -128,12 +124,6 @@ export default function PhotoModal({
             >
               <ZoomIn size={20} />
             </button>
-            <button
-              className="p-2 bg-black/60 rounded-full backdrop-blur-sm hover:bg-black/80 text-white transition-colors"
-              onClick={() => window.open(photoUrl, "_blank")}
-            >
-              <Download size={20} />
-            </button>
           </div>
         </div>
 
@@ -147,7 +137,6 @@ export default function PhotoModal({
             <ChevronLeft size={24} />
           </button>
         )}
-
         {!isLast && (
           <button
             className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-black/60 rounded-full backdrop-blur-sm hover:bg-black/80 text-white transition-colors"
@@ -157,7 +146,6 @@ export default function PhotoModal({
             <ChevronRight size={24} />
           </button>
         )}
-
         {/* ✅ Close Button */}
         <button
           className="absolute top-4 right-4 p-2 bg-black/60 backdrop-blur-sm rounded-full hover:bg-black/80 text-white transition-colors"
@@ -165,6 +153,26 @@ export default function PhotoModal({
           aria-label="Close modal"
         >
           <X size={24} />
+        </button>
+        {/* ✅ Add to Cart Button */}
+        <button
+          className={`absolute top-4 left-4 p-2 bg-white/80 rounded-full backdrop-blur-sm hover:bg-white z-50 ${
+            isSelected ? "text-red-500" : "text-gray-700"
+          }`}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (isSelected) {
+              removeFromCart(photoId);
+            } else {
+              addToCart({
+                photoId,
+                photoUrl,
+                price,
+              });
+            }
+          }}
+        >
+          <ShoppingCart size={30} />
         </button>
       </div>
     </div>
