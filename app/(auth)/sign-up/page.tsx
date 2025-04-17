@@ -14,10 +14,10 @@ export default function SignUpPage() {
             <CardHeader className="text-center space-y-2">
               <Link href="/" className="flex justify-center">
                 <Image
-                  src="/brafotos-logo-1.svg"
+                  src="/logo.svg"
                   alt="App Logo"
-                  width={180}
-                  height={180}
+                  width={100}
+                  height={100}
                   priority
                 />
               </Link>

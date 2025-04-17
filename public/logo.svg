@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="none" stroke="black" stroke-width="40">
+  <circle cx="512" cy="512" r="60" fill="black"></circle>
+  <!-- Top petal -->
+  <path d="M512 512 L512 150 Q540 120 568 150 Q540 400 512 512 Z" fill="none"></path>
+  <!-- Top-left petal -->
+  <path d="M512 512 L320 200 Q290 230 320 260 Q440 430 512 512 Z" fill="none"></path>
+  <!-- Top-right petal -->
+  <path d="M512 512 L704 200 Q734 230 704 260 Q584 430 512 512 Z" fill="none"></path>
+  <!-- Middle-left petal -->
+  <path d="M512 512 L150 512 Q180 540 150 568 Q400 540 512 512 Z" fill="none"></path>
+  <!-- Middle-right petal -->
+  <path d="M512 512 L874 512 Q844 540 874 568 Q624 540 512 512 Z" fill="none"></path>
+  <!-- Bottom-left fish tail -->
+  <path d="M512 512 L420 874 Q400 844 420 814 Q470 720 512 512 Z" fill="none"></path>
+  <!-- Bottom-right fish tail -->
+  <path d="M512 512 L604 874 Q624 844 604 814 Q554 720 512 512 Z" fill="none"></path>
+</svg>
