@@ -1,13 +1,17 @@
 import { getAllGalleries } from "@/db/gallery";
-import HighlightedGalleriesClient from "./HighlightedGalleriesClient"; // ✅ Import new client component
+import HighlightedGalleriesClient from "./HighlightedGalleriesClient";
 
 export default async function HighlightedGalleries() {
-  const galleries = await getAllGalleries(); // ✅ Fetch directly from DB
+  const galleries = await getAllGalleries();
 
-  // ✅ Ensure location is always a string (replace null with "Unknown")
   const formattedGalleries = galleries.map((gallery) => ({
-    ...gallery,
-    location: gallery.location ?? "Unknown", // ✅ Fix: Ensure it's always a string
+    id: gallery.id,
+    name: gallery.surfSpot, // surfSpot becomes title/name
+    location: gallery.area, // e.g., 千葉北
+    coverImage:
+      gallery.photos.find((p) => p.isCover)?.photoUrl ||
+      gallery.photos[0]?.photoUrl || // fallback if no cover
+      "/placeholder.jpg",
   }));
 
   return <HighlightedGalleriesClient galleries={formattedGalleries} />;

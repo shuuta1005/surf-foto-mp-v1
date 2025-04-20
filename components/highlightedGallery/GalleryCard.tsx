@@ -3,13 +3,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import type { GalleryCardProps } from "@/app/types/gallery";
 
-// interface GalleryCardProps {
-//   id: string;
-//   image: string;
-//   title: string;
-//   location: string;
-// }
-
 const GalleryCard: React.FC<GalleryCardProps> = ({
   id,
   image,
@@ -22,7 +15,7 @@ const GalleryCard: React.FC<GalleryCardProps> = ({
         <CardContent className="relative p-0 h-[300px] w-full">
           <Image
             src={image}
-            alt={title}
+            alt="Gallery Cover Surf Photo"
             fill // Use 'fill' instead of deprecated 'layout="fill"'
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             priority // Optional: for faster initial load

@@ -12,7 +12,7 @@
 //Lowercase email >> Avoid case issues (e.g. A@A.com vs a@a.com)
 //Error logging >> Track weird login issues
 
-import NextAuth, { type NextAuthOptions } from "next-auth";
+import NextAuth, { getServerSession, type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import bcrypt from "bcryptjs";
@@ -80,8 +80,11 @@ export const config: NextAuthOptions = {
 
 // Export helpers
 export const {
-  auth, // to use getServerSession anywhere
+  //auth, // to use getServerSession anywhere
   signIn,
   signOut,
   handlers,
 } = NextAuth(config);
+
+export const authOptions = config;
+export const auth = () => getServerSession(authOptions);

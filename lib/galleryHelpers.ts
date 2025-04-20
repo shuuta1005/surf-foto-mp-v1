@@ -10,9 +10,9 @@ export function formatGalleries(galleries: Gallery[]): Array<{
 }> {
   return galleries.map((gallery) => ({
     id: gallery.id,
-    name: gallery.name,
-    location: gallery.location || null,
-    coverImage: gallery.coverImage ?? "", // Ensure coverImage is never null
+    name: `${gallery.surfSpot}- ${gallery.area}`,
+    location: gallery.surfSpot || null,
+    coverImage: gallery.photos.find((p) => p.isCover)?.photoUrl || "", // Ensure coverImage is never null
     createdAt: gallery.createdAt, // ✅ Include createdAt
     photos: gallery.photos, // ✅ Ensure photos are included
   }));

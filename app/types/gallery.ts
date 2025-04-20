@@ -1,16 +1,22 @@
-export interface Photo {
+export type Photo = {
   id: string;
+  galleryId: string;
   photoUrl: string;
-}
+  uploadedAt: Date;
+  isCover: boolean;
+};
 
-export interface Gallery {
+export type Gallery = {
   id: string;
-  name: string;
-  location?: string | null;
-  coverImage?: string | null; // ✅ Accept both string and null
-  createdAt: Date;
+  prefecture: string;
+  area: string;
+  surfSpot: string;
+  date: Date;
+  isPublic: boolean;
+  photographerId: string;
   photos: Photo[];
-}
+  createdAt: Date;
+};
 
 export type GalleryCardProps = {
   id: string;

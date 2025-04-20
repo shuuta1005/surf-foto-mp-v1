@@ -8,12 +8,8 @@ export async function getPhotosByGalleryId(galleryId: string) {
 }
 
 // ✅ Create a new photo
-export async function createPhoto(
-  galleryId: string,
-  photoUrl: string,
-  title?: string
-) {
+export async function createPhoto(galleryId: string, photoUrl: string) {
   return await prisma.photo.create({
-    data: { galleryId, photoUrl, title },
+    data: { galleryId, photoUrl },
   });
 }

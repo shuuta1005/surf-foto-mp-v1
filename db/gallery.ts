@@ -4,35 +4,40 @@ import { Gallery } from "@/app/types/gallery";
 
 // ✅ Fetch all galleries (with first photo as cover image)
 
-export async function getAllGalleries(): Promise<Gallery[]> {
-  return await prisma.gallery.findMany({
+// ✅ Fetch all galleries with photos and photographer info
+export async function getAllGalleries() {
+  const galleries = await prisma.gallery.findMany({
+    orderBy: { date: "desc" }, // latest first
     include: {
       photos: {
         select: {
           id: true,
-          photoUrl: true,
-          title: true,
-          uploadedAt: true,
           galleryId: true,
+          photoUrl: true,
+          uploadedAt: true,
+          isCover: true,
+        },
+      },
+      photographer: {
+        select: {
+          name: true,
+          email: true,
         },
       },
     },
   });
+
+  return galleries;
 }
 
 // ✅ Fetch a single gallery by ID (with all photos)
 export async function getGalleryById(
   galleryId: string
 ): Promise<Gallery | null> {
-  const gallery = await prisma.gallery.findUnique({
+  return await prisma.gallery.findUnique({
     where: { id: galleryId },
-    include: { photos: true },
+    include: {
+      photos: true, // includes isCover, uploadedAt, etc.
+    },
   });
-
-  if (!gallery) return null;
-
-  return {
-    ...gallery,
-    coverImage: gallery.coverImage ?? "", // Ensure coverImage is never null
-  };
 }

@@ -3,7 +3,7 @@
 import { useCart } from "@/lib/context/CartContext";
 import Image from "next/image";
 import Link from "next/link";
-//import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 
 const CartTable = () => {
-  //const router = useRouter();
+  const router = useRouter();
   const { items, removeFromCart, getTotal } = useCart();
 
   const isEmpty = items.length === 0;
@@ -79,7 +79,8 @@ const CartTable = () => {
               </div>
               <Button
                 className="w-full"
-                onClick={() => alert("Checkout coming soon!")}
+                // onClick={() => alert("Checkout coming soon!")}
+                onClick={() => router.push("/checkout")}
               >
                 Checkout
               </Button>

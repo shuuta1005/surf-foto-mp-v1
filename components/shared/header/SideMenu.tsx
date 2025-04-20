@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 
 const menuItems = [
   { title: "Sign In", icon: <UserIcon />, href: "/sign-in" },
-  { title: "Profile", icon: <UserIcon />, href: "/profile" },
+  { title: "Profile", icon: <UserIcon />, href: "/user" },
   { title: "Photographers", icon: <Camera />, href: "/photographers" },
   { title: "About Us", icon: <Info />, href: "/about" },
   { title: "Terms and Conditions", icon: <FileText />, href: "/terms" },

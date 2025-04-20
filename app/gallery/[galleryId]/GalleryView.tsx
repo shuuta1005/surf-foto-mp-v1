@@ -43,10 +43,7 @@ export default function GalleryView({ gallery }: GalleryViewProps) {
 
   return (
     <div>
-      <GalleryHeader
-        name={gallery.name}
-        location={gallery.location ?? undefined}
-      />
+      <GalleryHeader name={gallery.surfSpot} location={gallery.area} />
 
       {/* ✅ Cover Image */}
       {gallery.photos.length > 0 && (
