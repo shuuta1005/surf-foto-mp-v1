@@ -3,6 +3,8 @@ import { Geist, Geist_Mono, Noto_Serif_JP } from "next/font/google";
 import "@/assets/styles/globals.css";
 import { APP_DESCRIPTION, APP_NAME, SERVER_URL } from "@/lib/constants";
 import { CartProvider } from "@/lib/context/CartContext";
+import { auth } from "@/auth";
+import { SessionProvider } from "next-auth/react";
 
 // Importing Google Fonts
 const geistSans = Geist({
@@ -28,15 +30,19 @@ export const metadata: Metadata = {
   metadataBase: new URL(SERVER_URL),
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const session = await auth();
+
   return (
-    <html lang="ja">
+    <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${notoSerifJP.variable} antialiased`}
       >
-        <CartProvider>{children}</CartProvider>
+        <SessionProvider session={session}>
+          <CartProvider>{children}</CartProvider>
+        </SessionProvider>
       </body>
     </html>
   );
