@@ -11,6 +11,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import Link from "next/link";
+import { ADMIN_EMAILS } from "@/lib/constants"; // ✅ import your admin list
 
 interface Props {
   user: {
@@ -21,6 +23,7 @@ interface Props {
 
 export const UserDropdown = ({ user }: Props) => {
   const firstInitial = user.name?.charAt(0).toUpperCase() ?? "U";
+  const isAdmin = user.email && ADMIN_EMAILS.includes(user.email);
 
   return (
     <DropdownMenu>
@@ -46,8 +49,18 @@ export const UserDropdown = ({ user }: Props) => {
             </p>
           </div>
         </DropdownMenuLabel>
+
+        {/* ✅ Admin Link (only for admins) */}
+        {isAdmin && (
+          <DropdownMenuItem asChild>
+            <Link href="/admin" className="w-full">
+              🛠 Admin Dashboard
+            </Link>
+          </DropdownMenuItem>
+        )}
+
         <DropdownMenuItem
-          className="cursor-pointer"
+          className="cursor-pointer text-red-500"
           onClick={() => signOut({ callbackUrl: "/" })}
         >
           Sign Out
