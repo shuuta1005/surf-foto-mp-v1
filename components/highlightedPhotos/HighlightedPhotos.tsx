@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 const HighlightedPhotos: React.FC = () => {
   const originalPhotos: string[] = [
@@ -10,7 +12,6 @@ const HighlightedPhotos: React.FC = () => {
     "/float1.jpg",
   ];
 
-  // Add the first image at the end to create smooth infinite scrolling
   const highlightedPhotos: string[] = [...originalPhotos, originalPhotos[0]];
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -24,7 +25,7 @@ const HighlightedPhotos: React.FC = () => {
         setTimeout(() => {
           setIsTransitioning(false);
           setCurrentIndex(0);
-        }, 500); // Delay reset to avoid flash
+        }, 500);
       } else {
         setCurrentIndex((prevIndex) => prevIndex + 1);
       }
@@ -50,13 +51,13 @@ const HighlightedPhotos: React.FC = () => {
               layout="fill"
               objectFit="cover"
               className="brightness-75"
-              priority={index === 0} // Optimize first image load
+              priority={index === 0}
             />
           </div>
         ))}
       </div>
 
-      {/* Overlay text */}
+      {/* Overlay content */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center bg-black bg-opacity-20">
         <h2 className="text-white text-3xl md:text-4xl font-extrabold tracking-tight">
           Find Yourself
@@ -64,6 +65,16 @@ const HighlightedPhotos: React.FC = () => {
         <p className="text-white text-lg md:text-xl font-medium mt-2">
           Capture the Ride. Share the Stoke.
         </p>
+
+        <Link href="/galleries" passHref>
+          <Button
+            className="mt-6 px-6 py-3 text-lg font-bold bg-white text-black border border-black
+               hover:bg-black hover:text-white transition-colors duration-300"
+            size="lg"
+          >
+            View All Galleries
+          </Button>
+        </Link>
       </div>
     </div>
   );
