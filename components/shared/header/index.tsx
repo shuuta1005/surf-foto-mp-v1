@@ -1,3 +1,5 @@
+// // components/shared/header/index.tsx
+
 "use client";
 
 import UserButton from "./user-button-client";

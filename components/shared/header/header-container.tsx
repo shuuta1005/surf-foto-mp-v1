@@ -1,10 +1,9 @@
 // components/shared/header/header-container.tsx
-import { getServerSession } from "next-auth";
-import { config } from "@/auth";
+import { auth } from "@/auth";
 import Header from "./index";
 
 const HeaderContainer = async () => {
-  const session = await getServerSession(config);
+  const session = await auth(); // ✅ cleaner
   return <Header session={session} />;
 };
 

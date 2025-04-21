@@ -1,3 +1,5 @@
+// components/shared/header/user-dropdown.tsx
+
 "use client";
 
 import { signOut } from "next-auth/react";

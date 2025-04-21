@@ -1,3 +1,5 @@
+// components/shared/header/user-button.tsx
+
 "use client";
 
 import { UserDropdown } from "./user-dropdown";

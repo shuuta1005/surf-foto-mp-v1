@@ -4,9 +4,6 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { ADMIN_EMAILS } from "@/lib/constants";
 
-// ✅ Only allow these emails
-//const ALLOWED_ADMIN_EMAILS = ["your@email.com", "anotheradmin@email.com"];
-
 export default async function AdminLayout({
   children,
 }: {
