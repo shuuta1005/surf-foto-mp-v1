@@ -7,8 +7,8 @@ export default async function GalleriesPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
-      <h1 className="text-5xl sm:text-5xl font-extrabold text-gray-700 tracking-tight mb-10 text-center">
-        All Galleries
+      <h1 className="text-5xl sm:text-5xl font-extrabold text-gray-700 tracking-tight mb-12 text-center">
+        All Galleries 🤙🏽
       </h1>
 
       {galleries.length === 0 ? (
