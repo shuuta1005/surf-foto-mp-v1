@@ -28,6 +28,8 @@ const CredentialsSignInForm = () => {
     Partial<Record<keyof SignInData, string>>
   >({});
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -36,6 +38,7 @@ const CredentialsSignInForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+    setIsLoading(true);
 
     try {
       //This runs the rules we defined in signInSchema and checks if formData is valid.
@@ -71,6 +74,8 @@ const CredentialsSignInForm = () => {
           variant: "destructive",
         });
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -83,6 +88,7 @@ const CredentialsSignInForm = () => {
         value={formData.email}
         onChange={handleChange}
         error={errors.email}
+        disabled={isLoading}
       />
 
       <FormField
@@ -92,9 +98,12 @@ const CredentialsSignInForm = () => {
         value={formData.password}
         onChange={handleChange}
         error={errors.password}
+        disabled={isLoading}
       />
 
-      <Button className="w-full">Sign In</Button>
+      <Button className="w-full" disabled={isLoading}>
+        Sign In
+      </Button>
 
       <p className="text-sm text-center text-gray-500">
         Don’t have an account?{" "}

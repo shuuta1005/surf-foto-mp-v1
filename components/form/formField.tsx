@@ -9,6 +9,7 @@ type Props = {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   error?: string;
+  disabled?: boolean;
 };
 
 export default function FormField({
@@ -18,6 +19,7 @@ export default function FormField({
   value,
   onChange,
   error,
+  disabled = false,
 }: Props) {
   return (
     <div>
@@ -30,6 +32,7 @@ export default function FormField({
         type={type}
         value={value}
         onChange={onChange}
+        disabled={disabled}
       />
       {error && <p className="text-sm text-red-500">{error}</p>}
     </div>

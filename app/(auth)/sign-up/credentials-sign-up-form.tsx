@@ -17,6 +17,8 @@ const CredentialsSignUpForm = () => {
 
   const [formData, setFormData] = useState<SignUpData>(signUpDefaultValues);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [errors, setErrors] = useState<
     Partial<Record<keyof SignUpData, string>>
   >({});
@@ -29,6 +31,7 @@ const CredentialsSignUpForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+    setIsSubmitting(true);
 
     try {
       const validated = signUpSchema.parse(formData);
@@ -65,6 +68,8 @@ const CredentialsSignUpForm = () => {
           description: "Something went wrong.",
         });
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -76,6 +81,7 @@ const CredentialsSignUpForm = () => {
         value={formData.name}
         onChange={handleChange}
         error={errors.name}
+        disabled={isSubmitting}
       />
 
       <FormField
@@ -85,6 +91,7 @@ const CredentialsSignUpForm = () => {
         value={formData.email}
         onChange={handleChange}
         error={errors.email}
+        disabled={isSubmitting}
       />
 
       <FormField
@@ -94,6 +101,7 @@ const CredentialsSignUpForm = () => {
         value={formData.password}
         onChange={handleChange}
         error={errors.password}
+        disabled={isSubmitting}
       />
 
       <FormField
@@ -103,9 +111,10 @@ const CredentialsSignUpForm = () => {
         value={formData.confirmPassword}
         onChange={handleChange}
         error={errors.confirmPassword}
+        disabled={isSubmitting}
       />
 
-      <Button className="w-full">Sign Up</Button>
+      <Button className="w-full" disabled={isSubmitting}>Sign Up</Button>
 
       <p className="text-sm text-center text-gray-500">
         Already have an account?{" "}

@@ -26,7 +26,7 @@ export default function AboutPage() {
             }`}
           >
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
-              About BraFotos
+              About BrahFotos
             </h1>
             <div className="h-1 w-24 bg-yellow-500 mb-8"></div>
             {/* <p className="text-xl md:text-2xl max-w-3xl font-semibold text-gray-300">

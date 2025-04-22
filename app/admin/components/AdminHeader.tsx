@@ -18,7 +18,7 @@ const AdminHeader = () => {
             // className="w-110 h-10 sm:w-12 sm:h-12"
           />
           <span className="hidden lg:block text-3xl sm:text-2xl md:text-3xl text-black-400 font-bold">
-            BraFotos - Admin
+            BrahFotos - Admin
           </span>
         </Link>
       </div>
