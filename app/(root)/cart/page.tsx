@@ -1,3 +1,5 @@
+//app/cart/page.tsx
+
 import CartTable from "./cart-table";
 
 const CartPage = async () => {
