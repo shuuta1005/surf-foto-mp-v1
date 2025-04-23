@@ -1,103 +1,87 @@
 "use client";
+
 import Image from "next/image";
-import { useState, useEffect } from "react";
 import { ArrowRight } from "lucide-react";
 
 export default function AboutPage() {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-300 to-gray-400">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-gray-300 to-gray-400 text-black relative overflow-hidden">
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle,_transparent_10%,_#000_70%)]"></div>
+    <div className="min-h-screen bg-stone-100 text-gray-900">
+      {/* Hero - Using the same structure as your HighlightedPhotos component */}
+      <div className="relative w-full h-[500px] overflow-hidden">
+        <div className="absolute inset-0">
+          <Image
+            src="/fake-gallery-1/photo-1.jpg"
+            alt="Wave background"
+            fill
+            className="object-cover opacity-20"
+          />
         </div>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative z-10">
-          <div
-            className={`transform transition-all duration-1000 ${
-              isVisible
-                ? "translate-y-0 opacity-100"
-                : "translate-y-10 opacity-0"
-            }`}
-          >
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
-              About BrahFotos
-            </h1>
-            <div className="h-1 w-24 bg-yellow-500 mb-8"></div>
-            {/* <p className="text-xl md:text-2xl max-w-3xl font-semibold text-gray-300">
-              At BraFotos, we believe every wave deserves to be remembered. Our
-              platform seamlessly connects talented surf photographers with wave
-              riders, creating a marketplace where unforgettable moments can be
-              discovered, shared, and cherished.
-            </p> */}
-          </div>
+
+        {/* Overlay content - Positioned absolutely like in HighlightedPhotos */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+            About BraFotos
+          </h1>
+          <div className="h-1 w-16 bg-stone-700 mx-auto mt-4 mb-6" />
+          <p className="text-xl md:text-2xl font-medium text-gray-700">
+            Every wave deserves to be remembered.
+          </p>
         </div>
       </div>
 
-      {/* Mission Statement with Image */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div
-          className={`flex flex-col lg:flex-row items-center gap-12 transform transition-all duration-1000 delay-300 ${
-            isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
-          }`}
-        >
-          <div className="flex-1">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8">
-              Our Mission
-            </h2>
-            <p className="text-lg text-gray-700 leading-relaxed mb-6 font-semibold">
-              At BraFotos, we believe every wave deserves to be remembered.
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed mb-6 font-semibold">
-              Our platform connects photographers with surfers, creating a place
-              where the beauty and thrill of surf culture can be discovered,
-              shared, and remembered forever.
-            </p>
-          </div>
+      {/* Mission Section */}
+      <section className="max-w-6xl mx-auto px-4 py-16 grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-stone-700">Our Mission</h2>
+          <p className="text-lg leading-relaxed text-gray-600 font-md">
+            At BraFotos, we believe every wave deserves to be remembered.
+          </p>
+          <p className="text-lg leading-relaxed text-gray-600 font-md">
+            Our platform connects photographers with surfers, creating a place
+            where the beauty and thrill of surf culture can be discovered,
+            shared, and remembered forever.
+          </p>
+        </div>
 
-          <div className="flex-1 w-full lg:w-auto">
-            <div className="relative h-80 sm:h-96 lg:h-[450px] w-full rounded-lg overflow-hidden shadow-2xl ring-1 ring-gray-700">
-              <Image
-                src="/takeoff1.jpg"
-                alt="Surfer Image"
-                fill
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-40"></div>
+        <div className="relative w-full h-[300px] sm:h-[400px] overflow-hidden rounded-3xl shadow-md">
+          <Image
+            src="/takeoff1.jpg"
+            alt="Surfer Image"
+            fill
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-30 rounded-3xl" />
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="bg-stone-50 border-t border-stone-200 py-16">
+        <div className="max-w-4xl mx-auto text-center px-4">
+          <h2 className="text-2xl font-bold text-stone-800 mb-4">
+            Keen to Join Our Community?
+          </h2>
+
+          <div className="space-y-8">
+            <div>
+              <p className="text-lg text-gray-600 font-medium mb-4">
+                For photographers who are keen to join our community⚡️⚡️
+              </p>
+              <button className="bg-stone-300 hover:bg-stone-500 text-black hover:text-white px-6 py-3 rounded-lg font-semibold transition flex items-center justify-center mx-auto">
+                📸 For Photographers <ArrowRight size={18} className="ml-2" />
+              </button>
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Join Us CTA */}
-      <div className="bg-gradient-to-b from-gray-400 to-gray-500 text-black">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div
-            className={`text-center transform transition-all duration-1000 delay-500 ${
-              isVisible
-                ? "translate-y-0 opacity-100"
-                : "translate-y-10 opacity-0"
-            }`}
-          >
-            <h2 className="text-3xl font-bold mb-6">
-              Keen to Join Our Community?
-            </h2>
-            <p className="text-xl max-w-2xl mx-auto mb-8 text-gray-900 font-semibold">
-              For photographers who are keen to join our community⚡️⚡️
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-yellow-600 hover:bg-yellow-700 text-black px-8 py-4 rounded-lg font-bold transition-colors shadow-lg flex items-center justify-center">
-                For Photographers <ArrowRight size={18} className="ml-2" />
+            <div>
+              <p className="text-lg text-gray-600 font-medium mb-4">
+                For developers who are building the future of surf media⚡️⚡️
+              </p>
+              <button className="bg-gray-300 hover:bg-gray-500 hover:text-white text-black px-6 py-3 rounded-lg font-semibold transition flex items-center justify-center mx-auto">
+                ⚙️ For Developers <ArrowRight size={18} className="ml-2" />
               </button>
             </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
