@@ -11,6 +11,7 @@
 //Limit login attempts >> Prevent brute-force attacks
 //Lowercase email >> Avoid case issues (e.g. A@A.com vs a@a.com)
 //Error logging >> Track weird login issues
+//Do protected paths
 
 import NextAuth, { getServerSession, type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";

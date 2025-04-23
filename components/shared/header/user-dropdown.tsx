@@ -30,8 +30,8 @@ export const UserDropdown = ({ user }: Props) => {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="text-lg w-10 h-10 rounded-full bg-indigo-600 text-white
-           hover:bg-indigo-700 text-center p-0 font-semibold
+          className="text-lg w-10 h-10 rounded-full bg-gray-500 text-white
+           hover:bg-gray-700 text-center p-0 font-semibold
             hover:text-white shadow-sm hover:shadow-md transition
            focus-visible:ring-0 focus-visible:ring-offset-0"
         >

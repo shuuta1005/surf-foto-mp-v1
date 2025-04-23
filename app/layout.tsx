@@ -26,6 +26,7 @@ const notoSerifJP = Noto_Serif_JP({
 export const metadata: Metadata = {
   title: APP_NAME,
   description: APP_DESCRIPTION,
+  icons: { icon: "/logo.svg" },
   metadataBase: new URL(SERVER_URL),
 };
 
