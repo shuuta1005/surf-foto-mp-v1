@@ -13,7 +13,7 @@ export default function AboutPage() {
             src="/fake-gallery-1/photo-1.jpg"
             alt="Wave background"
             fill
-            className="object-cover opacity-20"
+            className="object-cover opacity-30"
           />
         </div>
 
@@ -23,7 +23,7 @@ export default function AboutPage() {
             About BraFotos
           </h1>
           <div className="h-1 w-16 bg-stone-700 mx-auto mt-4 mb-6" />
-          <p className="text-xl md:text-2xl font-medium text-gray-700">
+          <p className="text-xl md:text-2xl font-semibold text-gray-700">
             Every wave deserves to be remembered.
           </p>
         </div>
