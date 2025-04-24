@@ -48,10 +48,9 @@ const HighlightedPhotos: React.FC = () => {
             <Image
               src={photo}
               alt={`Slide ${index + 1}`}
-              layout="fill"
-              objectFit="cover"
-              className="brightness-75"
-              priority={index === 0}
+              fill
+              className="brightness-75 object-cover"
+              priority={index === 0 || photo === "/takeoff1.jpg"}
             />
           </div>
         ))}

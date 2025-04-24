@@ -51,9 +51,8 @@ export default function GalleryView({ gallery }: GalleryViewProps) {
           <Image
             src={gallery.photos[0].photoUrl}
             alt="Gallery Cover"
-            layout="fill"
-            objectFit="cover"
-            className="rounded-md"
+            fill
+            className="rounded-md object-cover"
           />
         </div>
       )}
@@ -63,15 +62,6 @@ export default function GalleryView({ gallery }: GalleryViewProps) {
 
         {/* ✅ Photo Modal */}
         {selectedPhotoIndex !== null && (
-          // <PhotoModal
-          //   photoUrl={gallery.photos[selectedPhotoIndex].photoUrl}
-          //   onClose={handleCloseModal}
-          //   onNext={handleNextPhoto}
-          //   onPrev={handlePrevPhoto}
-          //   isFirst={selectedPhotoIndex === 0}
-          //   isLast={selectedPhotoIndex === gallery.photos.length - 1}
-          // />
-
           <PhotoModal
             photoId={gallery.photos[selectedPhotoIndex].id}
             photoUrl={gallery.photos[selectedPhotoIndex].photoUrl}
