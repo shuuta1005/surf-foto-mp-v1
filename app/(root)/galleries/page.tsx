@@ -1,9 +1,21 @@
-import Link from "next/link";
+import { getFilterOptions } from "@/lib/actions/gallery";
 import { getAllGalleries } from "@/db/gallery";
-import Image from "next/image";
+import GalleryList from "@/components/GalleryList";
 
-export default async function GalleriesPage() {
+// Update the interface to match what Next.js expects in version 15
+interface GalleriesPageProps {
+  searchParams: Promise<{ area?: string }>;
+}
+
+export default async function GalleriesPage({
+  searchParams,
+}: GalleriesPageProps) {
   const galleries = await getAllGalleries();
+  const { areas } = await getFilterOptions();
+
+  // Await searchParams before accessing its properties
+  const params = await searchParams;
+  const selectedArea = params?.area || "";
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
@@ -11,44 +23,11 @@ export default async function GalleriesPage() {
         All Galleries 🤙🏽
       </h1>
 
-      {galleries.length === 0 ? (
-        <p>No galleries uploaded yet.</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {galleries.map((gallery) => {
-            const cover =
-              gallery.photos.find((p) => p.isCover) ?? gallery.photos[0];
-
-            return (
-              <Link
-                key={gallery.id}
-                href={`/gallery/${gallery.id}`}
-                className="block border rounded shadow hover:shadow-lg transition"
-              >
-                {cover && (
-                  <div className="relative w-full h-48">
-                    <Image
-                      src={cover.photoUrl}
-                      alt="Gallery cover"
-                      fill
-                      className="object-cover rounded-t"
-                    />
-                  </div>
-                )}
-                <div className="p-4">
-                  <h2 className="text-xl font-bold">{gallery.surfSpot}</h2>
-                  <p className="text-sm text-gray-600">
-                    {gallery.prefecture} - {gallery.area}
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    {new Date(gallery.date).toLocaleDateString()}
-                  </p>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      )}
+      <GalleryList
+        galleries={galleries}
+        areas={areas}
+        initialSelectedArea={selectedArea}
+      />
     </div>
   );
 }

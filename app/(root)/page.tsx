@@ -3,17 +3,22 @@
 import DestinationsGrid from "@/components/destinationGrid/DestinationsGrid";
 import HighlightedGalleries from "@/components/highlightedGallery/HighlightedGalleries";
 import HighlightedPhotos from "@/components/highlightedPhotos/HighlightedPhotos";
+// import { getFilterOptions } from "@/lib/actions/gallery";
+import { getAllGalleries } from "@/db/gallery";
 
-//const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const Homepage = async () => {
+  // const { areas } = await getFilterOptions();
+  const galleries = await getAllGalleries();
 
-const Homepage = () => {
-  //await delay(1000);
+  // const destinations = areas.map((area) => ({
+  //   area,
+  // }));
 
   return (
     <>
       <HighlightedPhotos />
       <HighlightedGalleries />
-      <DestinationsGrid />
+      <DestinationsGrid galleries={galleries} />
     </>
   );
 };
