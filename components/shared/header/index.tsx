@@ -1,4 +1,5 @@
 // // components/shared/header/index.tsx
+// components/shared/header/index.tsx
 
 "use client";
 
@@ -7,15 +8,14 @@ import { Session } from "next-auth";
 import SideMenu from "./SideMenu";
 import Logo from "./logo";
 import Searchbar from "./searchBar";
-import FilterDropdown from "./FilterDropdown";
+import AreaFilterDropdown from "./AreaFilterDropdown";
 
-// Define the props interface
 interface HeaderProps {
   session: Session | null;
+  areas: string[]; // ✅ Add this
 }
 
-// Use the interface in the component definition
-const Header = ({ session }: HeaderProps) => {
+const Header = ({ session, areas }: HeaderProps) => {
   return (
     <header className="w-full border-b bg-stone-100 shadow-md sticky top-0 z-10">
       <div className="wrapper flex items-center p-4 gap-4 max-w-7xl mx-auto">
@@ -29,7 +29,7 @@ const Header = ({ session }: HeaderProps) => {
         <Searchbar />
 
         {/* Filter Button */}
-        <FilterDropdown />
+        <AreaFilterDropdown areas={areas} />
 
         {/* User Button */}
         <UserButton session={session} />
