@@ -13,23 +13,22 @@
 //Error logging >> Track weird login issues
 //Do protected paths
 
+
 import NextAuth, { getServerSession, type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import bcrypt from "bcryptjs";
-import { prisma } from "./lib/db";
+import { prisma } from "@/lib/db";
 
-// Export reusable auth config
 export const config: NextAuthOptions = {
   pages: {
     signIn: "/sign-in",
-    error: "/sign-in", // Optional: redirect to sign-in on error
+    error: "/sign-in",
   },
   adapter: PrismaAdapter(prisma),
   session: {
-    //🔐 Tip later: Rotate JWT secrets if you get fancy with security.‼️
     strategy: "jwt",
-    maxAge: 10 * 24 * 60 * 60, // 10 days
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   providers: [
     CredentialsProvider({
@@ -39,39 +38,55 @@ export const config: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+        try {
+          if (!credentials?.email || !credentials?.password) return null;
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-        });
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email.toLowerCase() }, // ✅ lowercase email
+          });
 
-        if (!user || !user.password) return null;
+          if (!user || !user.password) return null;
 
-        const isValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
-        if (!isValid) return null;
+          const isValid = await bcrypt.compare(
+            credentials.password,
+            user.password
+          );
+          if (!isValid) return null;
 
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        };
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+          };
+        } catch (error) {
+          console.error("LOGIN ERROR:", error);
+          throw new Error("Invalid login credentials");
+        }
       },
     }),
   ],
   callbacks: {
+    async jwt({ token, user }) {
+      // ✅ Attach user info to JWT when logging in
+      if (user) {
+        token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
+        if ("role" in user) {
+          token.role = user.role;
+        }
+      }
+      return token;
+    },
     async session({ session, token }) {
+      // ✅ Populate session.user from token
       if (token && session.user) {
-        session.user = {
-          id: token.sub as string,
-          name: session.user.name ?? null,
-          email: session.user.email ?? null,
-          image: session.user.image ?? null,
-          role: token.role as string | undefined,
-        };
+        session.user.id = token.id as string;
+        session.user.name = (token.name as string) ?? null;
+        session.user.email = (token.email as string) ?? null;
+        session.user.image = session.user.image ?? null;
+        session.user.role = (token.role as string) ?? undefined;
       }
       return session;
     },
@@ -79,13 +94,8 @@ export const config: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-// Export helpers
-export const {
-  //auth, // to use getServerSession anywhere
-  signIn,
-  signOut,
-  handlers,
-} = NextAuth(config);
+// Export auth helpers
+export const { signIn, signOut, handlers } = NextAuth(config);
 
 export const authOptions = config;
 export const auth = () => getServerSession(authOptions);

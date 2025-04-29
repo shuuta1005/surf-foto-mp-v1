@@ -1,8 +1,9 @@
+// //app/admin/layout.tsx
+
 import { ReactNode } from "react";
 import AdminHeader from "./components/AdminHeader";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { ADMIN_EMAILS } from "@/lib/constants";
 
 export default async function AdminLayout({
   children,
@@ -11,9 +12,7 @@ export default async function AdminLayout({
 }) {
   const session = await auth();
 
-  const userEmail = session?.user?.email;
-
-  if (!userEmail || !ADMIN_EMAILS.includes(userEmail)) {
+  if (!session?.user || session.user.role !== "admin") {
     return redirect("/sign-in"); // 🔐 redirect unauthorized users
   }
 
