@@ -8,25 +8,45 @@ import CredentialsSignUpForm from "./credentials-sign-up-form";
 export default function SignUpPage() {
   return (
     <div className="flex min-h-screen">
-      <div className="w-full md:w-1/2 flex items-center justify-center p-6">
-        <div className="w-full max-w-md">
+      {/* Left Side: Sign Up Form */}
+      <div className="w-full md:w-1/2 flex items-center justify-center">
+        {/* Mobile Version */}
+        <div className="w-full h-full flex items-center justify-center md:hidden px-4 py-6">
+          <div className="w-full space-y-6">
+            <div className="text-center space-y-2">
+              <Link href="/" className="flex justify-center">
+                <Image
+                  src="/brafotos-logo-1.svg"
+                  alt="App Logo"
+                  width={180}
+                  height={180}
+                  priority
+                />
+              </Link>
+              <h2 className="text-2xl font-bold">Create Account</h2>
+              <p className="text-gray-500">Sign up to your BrahFotos account</p>
+            </div>
+            <CredentialsSignUpForm />
+          </div>
+        </div>
+
+        {/* Desktop Version */}
+        <div className="hidden md:block w-full max-w-md p-6">
           <Card className="shadow-lg">
             <CardHeader className="text-center space-y-2">
               <Link href="/" className="flex justify-center">
                 <Image
-                  src="/logo.svg"
+                  src="/brafotos-logo-1.svg"
                   alt="App Logo"
-                  width={100}
-                  height={100}
+                  width={180}
+                  height={180}
                   priority
                 />
               </Link>
               <CardTitle className="text-2xl font-bold">
                 Create Account
               </CardTitle>
-              <p className="text-gray-500">
-                Start uploading and buying surf shots!
-              </p>
+              <p className="text-gray-500">Sign up to your BrahFotos account</p>
             </CardHeader>
             <CardContent>
               <CredentialsSignUpForm />
@@ -35,7 +55,8 @@ export default function SignUpPage() {
         </div>
       </div>
 
-      <div className="hidden md:flex w-1/2 justify-center items-center m-10 ">
+      {/* Right Side: Background Image (Hidden on Mobile) */}
+      <div className="hidden md:flex w-1/2 justify-center items-center m-10 aspect-video">
         <Image
           src="/destinations/kamo.jpg"
           alt="Surfing"

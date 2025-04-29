@@ -1,3 +1,5 @@
+//WILL NOT USE ANYMORE, better to decompose for easier control
+
 //Zod is a runtime validator —
 //meaning it actually checks the data while the app is running, not just during development.
 //TypeScript only checks types while you're coding — it disappears when the app runs in the browser.
@@ -9,6 +11,10 @@
 // ✅ Helps you create clean TS types automatically (z.infer)
 
 import { z } from "zod";
+
+//SCHEMAS FOR SIGN IN AND UP
+//‼️Add stricter password rules in the future (e.g., require numbers/symbols)
+//‼️Add max length limits (e.g., max 255 chars for name, email)
 
 // ✅ Schema for user sign-in form
 export const signInSchema = z.object({

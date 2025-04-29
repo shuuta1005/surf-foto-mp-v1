@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { z } from "zod";
-import { signUpSchema } from "@/lib/validation";
+import { signUpSchema } from "@/lib/validations/validation";
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast";
 import Link from "next/link";
@@ -114,7 +114,9 @@ const CredentialsSignUpForm = () => {
         disabled={isSubmitting}
       />
 
-      <Button className="w-full" disabled={isSubmitting}>Sign Up</Button>
+      <Button className="w-full" disabled={isSubmitting}>
+        {isSubmitting ? "Signing Up..." : "Sign Up"}
+      </Button>
 
       <p className="text-sm text-center text-gray-500">
         Already have an account?{" "}

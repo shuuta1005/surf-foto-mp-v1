@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { signUpSchema } from "@/lib/validation";
+import { signUpSchema } from "@/lib/validations/validation";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/db";

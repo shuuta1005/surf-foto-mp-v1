@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { z } from "zod";
-import { signInSchema } from "@/lib/validation";
+import { signInSchema } from "@/lib/validations/auth/sign-in";
 import { signInDefaultValues } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -16,7 +16,6 @@ type SignInData = z.infer<typeof signInSchema>; // typeof = the type of the Zod 
 const CredentialsSignInForm = () => {
   const router = useRouter();
   const [formData, setFormData] = useState<SignInData>(signInDefaultValues);
-
   // Partial is a type that represents a type that allows all properties to be optional.
   // Required is a type that represents a type that requires all properties to be present.
   // Record is a type that represents a type that is a mapping from string to any.
@@ -102,7 +101,7 @@ const CredentialsSignInForm = () => {
       />
 
       <Button className="w-full" disabled={isLoading}>
-        Sign In
+        {isLoading ? "Signing in..." : "Sign In"}
       </Button>
 
       <p className="text-sm text-center text-gray-500">

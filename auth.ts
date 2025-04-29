@@ -29,7 +29,7 @@ export const config: NextAuthOptions = {
   session: {
     //🔐 Tip later: Rotate JWT secrets if you get fancy with security.‼️
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 10 * 24 * 60 * 60, // 10 days
   },
   providers: [
     CredentialsProvider({

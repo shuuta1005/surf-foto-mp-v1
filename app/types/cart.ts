@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { cartItemSchema } from "@/lib/validation";
+import { cartItemSchema } from "@/lib/validations/validation";
 
 export interface Cart {
   id: string;
