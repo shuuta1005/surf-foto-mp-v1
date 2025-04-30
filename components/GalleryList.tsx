@@ -199,7 +199,9 @@ export default function GalleryList({
       : true;
 
     const matchSearch = searchQuery
-      ? gallery.surfSpot.toLowerCase().includes(searchQuery.toLowerCase())
+      ? [gallery.surfSpot, gallery.area, gallery.prefecture].some((field) =>
+          field.toLowerCase().includes(searchQuery.toLowerCase())
+        )
       : true;
 
     return matchArea && matchDate && matchSearch;
