@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getGalleryById } from "@/db/gallery";
+import { getGalleryById } from "@/lib/queries/gallery";
 import { Gallery } from "@/app/types/gallery";
 import GalleryView from "./GalleryView"; // ✅ Import a separate client component
 

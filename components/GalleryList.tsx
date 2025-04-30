@@ -1,3 +1,4 @@
+// //app/components/GalleryList.tsx
 // "use client";
 
 // import { useState } from "react";
@@ -22,16 +23,18 @@
 //   galleries: Gallery[];
 //   areas: string[];
 //   initialSelectedArea?: string;
+//   initialSearchQuery?: string; // 🆕 Add this
 // }
 
 // export default function GalleryList({
 //   galleries,
 //   areas,
 //   initialSelectedArea = "",
+//   initialSearchQuery = "",
 // }: GalleryListProps) {
-//   //const [selectedArea, setSelectedArea] = useState("");
-//   const [selectedDateRange, setSelectedDateRange] = useState("");
 //   const [selectedArea, setSelectedArea] = useState(initialSelectedArea);
+//   const [selectedDateRange, setSelectedDateRange] = useState("");
+//   const searchQuery = initialSearchQuery;
 
 //   const filteredGalleries = galleries.filter((gallery) => {
 //     const matchArea = selectedArea ? gallery.area === selectedArea : true;
@@ -47,7 +50,11 @@
 //         })()
 //       : true;
 
-//     return matchArea && matchDate;
+//     const matchSearch = searchQuery
+//       ? gallery.surfSpot.toLowerCase().includes(searchQuery.toLowerCase())
+//       : true;
+
+//     return matchArea && matchDate && matchSearch;
 //   });
 
 //   return (
@@ -110,10 +117,10 @@
 //                 )}
 //                 <div className="p-4">
 //                   <h2 className="text-xl font-bold">{gallery.surfSpot}</h2>
-//                   <p className="text-sm text-gray-600">
+//                   <p className="text-sm text-gray-700">
 //                     {gallery.prefecture} - {gallery.area}
 //                   </p>
-//                   <p className="text-xs text-gray-400">
+//                   <p className="text-xs text-gray-600">
 //                     {new Date(gallery.date).toLocaleDateString()}
 //                   </p>
 //                 </div>
@@ -128,7 +135,8 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -146,22 +154,35 @@ interface Gallery {
   photos: Photo[];
 }
 
+// interface GalleryListProps {
+//   galleries: Gallery[];
+//   initialSearchQuery?: string;
+//   initialDateRange?: string;
+// }
+
 interface GalleryListProps {
   galleries: Gallery[];
-  areas: string[];
-  initialSelectedArea?: string;
-  initialSearchQuery?: string; // 🆕 Add this
+  initialSelectedArea?: string; // ✅ Make sure this line is here
+  initialSearchQuery?: string;
+  initialDateRange?: string;
 }
 
 export default function GalleryList({
   galleries,
-  areas,
-  initialSelectedArea = "",
   initialSearchQuery = "",
+  initialDateRange = "",
 }: GalleryListProps) {
-  const [selectedArea, setSelectedArea] = useState(initialSelectedArea);
-  const [selectedDateRange, setSelectedDateRange] = useState("");
+  const searchParams = useSearchParams();
+
+  const [selectedArea, setSelectedArea] = useState("");
+  const [selectedDateRange, setSelectedDateRange] = useState(initialDateRange);
   const searchQuery = initialSearchQuery;
+
+  // ✅ Sync selectedArea from URL on every change
+  useEffect(() => {
+    const areaFromURL = searchParams.get("area") || "";
+    setSelectedArea(areaFromURL);
+  }, [searchParams]);
 
   const filteredGalleries = galleries.filter((gallery) => {
     const matchArea = selectedArea ? gallery.area === selectedArea : true;
@@ -186,22 +207,8 @@ export default function GalleryList({
 
   return (
     <>
-      {/* 🛠 Filter Section */}
-      <div className="flex flex-wrap justify-center gap-4 mb-12">
-        {/* Area Filter */}
-        <select
-          className="border border-gray-300 rounded-md p-2 text-gray-700"
-          value={selectedArea}
-          onChange={(e) => setSelectedArea(e.target.value)}
-        >
-          <option value="">All Areas</option>
-          {areas.map((area) => (
-            <option key={area} value={area}>
-              {area}
-            </option>
-          ))}
-        </select>
-
+      {/* 🛠 Date Filter Section (Area handled by AreaFilterBar) */}
+      <div className="flex justify-center gap-4 mb-12">
         {/* Date Range Filter */}
         <select
           className="border border-gray-300 rounded-md p-2 text-gray-700"
@@ -215,7 +222,7 @@ export default function GalleryList({
         </select>
       </div>
 
-      {/* 🔥 Galleries Grid */}
+      {/* 🔥 Gallery Grid */}
       {filteredGalleries.length === 0 ? (
         <p className="text-center text-gray-500">
           No galleries match the selected filters.
@@ -244,10 +251,10 @@ export default function GalleryList({
                 )}
                 <div className="p-4">
                   <h2 className="text-xl font-bold">{gallery.surfSpot}</h2>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-700">
                     {gallery.prefecture} - {gallery.area}
                   </p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-600">
                     {new Date(gallery.date).toLocaleDateString()}
                   </p>
                 </div>

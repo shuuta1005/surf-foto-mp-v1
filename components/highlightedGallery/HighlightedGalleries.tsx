@@ -1,4 +1,4 @@
-import { getAllGalleries } from "@/db/gallery";
+import { getAllGalleries } from "@/lib/queries/gallery";
 import HighlightedGalleriesClient from "./HighlightedGalleriesClient";
 
 export default async function HighlightedGalleries() {

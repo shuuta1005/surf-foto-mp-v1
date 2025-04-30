@@ -4,7 +4,7 @@ import DestinationsGrid from "@/components/destinationGrid/DestinationsGrid";
 import HighlightedGalleries from "@/components/highlightedGallery/HighlightedGalleries";
 import HighlightedPhotos from "@/components/highlightedPhotos/HighlightedPhotos";
 // import { getFilterOptions } from "@/lib/actions/gallery";
-import { getAllGalleries } from "@/db/gallery";
+import { getAllGalleries } from "@/lib/queries/gallery";
 
 const Homepage = async () => {
   // const { areas } = await getFilterOptions();

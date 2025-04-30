@@ -1,5 +1,6 @@
-import { getFilterOptions } from "@/lib/actions/gallery";
-import { getAllGalleries } from "@/db/gallery";
+//app/(root)/galleries/page.tsx
+
+import { getAllGalleries } from "@/lib/queries/gallery";
 import GalleryList from "@/components/GalleryList";
 
 // Update the interface to match what Next.js expects in version 15
@@ -11,7 +12,6 @@ export default async function GalleriesPage({
   searchParams,
 }: GalleriesPageProps) {
   const galleries = await getAllGalleries();
-  const { areas } = await getFilterOptions();
 
   // Await searchParams before accessing its properties
   const params = await searchParams;
@@ -25,7 +25,7 @@ export default async function GalleriesPage({
 
       <GalleryList
         galleries={galleries}
-        areas={areas}
+        //areas={areas}
         initialSelectedArea={selectedArea}
       />
     </div>

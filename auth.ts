@@ -13,7 +13,6 @@
 //Error logging >> Track weird login issues
 //Do protected paths
 
-
 import NextAuth, { getServerSession, type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
@@ -28,7 +27,7 @@ export const config: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 10 * 24 * 60 * 60, // 10 days
   },
   providers: [
     CredentialsProvider({

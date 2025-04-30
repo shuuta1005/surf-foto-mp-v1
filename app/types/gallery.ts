@@ -1,3 +1,5 @@
+//app/types/gallery.ts
+
 export type Photo = {
   id: string;
   galleryId: string;

@@ -12,6 +12,7 @@ export default function AdminPage() {
   return (
     <div className="space-y-6">
       <h2 className="text-3xl font-extrabold">G&apos;day, {userName}! </h2>
+      <h3 className="font-medium">Proud to have ya in BrahFotots team 🌅</h3>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <AdminActionCard
