@@ -111,11 +111,23 @@ model Gallery {
   createdAt DateTime @default(now())
 }
 
+// model Photo {
+//   id         String   @id @default(uuid())
+//   galleryId  String
+//   gallery    Gallery  @relation(fields: [galleryId], references: [id])
+//   photoUrl   String // Link to image (e.g., from Vercel Blob)
+//   uploadedAt DateTime @default(now())
+//   isCover    Boolean  @default(false) // Optional: used to highlight main image
+// }
+
 model Photo {
-  id         String   @id @default(uuid())
-  galleryId  String
-  gallery    Gallery  @relation(fields: [galleryId], references: [id])
-  photoUrl   String // Link to image (e.g., from Vercel Blob)
+  id        String  @id @default(uuid())
+  galleryId String
+  gallery   Gallery @relation(fields: [galleryId], references: [id])
+
+  photoUrl    String // ✅ Blurred + watermarked (shown publicly)
+  originalUrl String? // ✅ High-res version (downloadable post-purchase)
+
   uploadedAt DateTime @default(now())
-  isCover    Boolean  @default(false) // Optional: used to highlight main image
+  isCover    Boolean  @default(false)
 }
