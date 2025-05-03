@@ -35,7 +35,7 @@ const HighlightedPhotos: React.FC = () => {
   }, [currentIndex, highlightedPhotos.length]);
 
   return (
-    <div className="relative w-full h-[500px] overflow-hidden">
+    <div className="relative w-full h-[300px] sm:h-[400px] md:h-[500px] overflow-hidden">
       <div
         className="flex h-full w-full"
         style={{
