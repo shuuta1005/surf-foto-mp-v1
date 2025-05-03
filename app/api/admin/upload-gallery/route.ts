@@ -1,5 +1,4 @@
 // app/api/admin/upload-gallery/route.ts
-// app/api/admin/upload-gallery/route.ts
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
