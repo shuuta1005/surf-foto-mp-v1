@@ -6,13 +6,21 @@ import {
   SheetTrigger,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { UserIcon, Camera, Info, FileText, Shield, Menu } from "lucide-react";
+import {
+  UserIcon,
+  Camera,
+  Info,
+  FileText,
+  Shield,
+  Menu,
+  WavesIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 const menuItems = [
   { title: "Sign In", icon: <UserIcon />, href: "/sign-in" },
-  { title: "Profile", icon: <UserIcon />, href: "/user" },
+  { title: "My Purchased Photos", icon: <WavesIcon />, href: "/purchases" },
   { title: "Photographers", icon: <Camera />, href: "/photographers" },
   { title: "About Us", icon: <Info />, href: "/about" },
   { title: "Terms and Conditions", icon: <FileText />, href: "/terms" },

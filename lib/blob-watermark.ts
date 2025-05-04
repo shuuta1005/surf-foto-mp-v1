@@ -33,15 +33,18 @@ export async function uploadWithWatermarkAndOriginal(
 
   // Load watermark
   const watermarkPath = path.join(process.cwd(), "public", "watermark.png");
-  const watermarkBuffer = await fs.readFile(watermarkPath);
+  const rawWatermark = await fs.readFile(watermarkPath);
+  const watermarkBuffer = await sharp(rawWatermark)
+    .resize({ width: 700 })
+    .toBuffer();
 
   // Apply blur and watermark
   const blurredWithWatermark = await sharp(fileBuffer)
     .resize(1600) // optional: resize for consistency
-    .blur(3) // moderate blur
+    .blur(1.5) // moderate blur
     .composite([
-      { input: watermarkBuffer, top: 50, left: 50 },
-      { input: watermarkBuffer, top: 300, left: 300 },
+      { input: watermarkBuffer, top: 300, left: 900 },
+      { input: watermarkBuffer, top: 300, left: 50 },
     ])
     .jpeg()
     .toBuffer();

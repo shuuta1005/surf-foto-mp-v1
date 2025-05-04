@@ -1,3 +1,4 @@
+// lib/db
 // 📌 Optional (Later): Use Neon Adapter
 // When you’re ready for production with Neon, we’ll:
 

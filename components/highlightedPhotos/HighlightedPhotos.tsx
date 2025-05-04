@@ -58,18 +58,17 @@ const HighlightedPhotos: React.FC = () => {
 
       {/* Overlay content */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center bg-black bg-opacity-20">
-        <h2 className="text-white text-3xl md:text-4xl font-extrabold tracking-tight">
+        <h2 className="text-white text-xl sm:text-3xl md:text-4xl font-extrabold tracking-tight">
           Find Yourself
         </h2>
-        <p className="text-white text-lg md:text-xl font-medium mt-2">
+        <p className="text-white text-base sm:text-lg md:text-xl font-medium mt-2">
           Capture the Ride. Share the Stoke.
         </p>
 
         <Link href="/galleries" passHref>
           <Button
-            className="mt-6 px-6 py-3 text-lg font-bold bg-white text-black border border-black
-               hover:bg-black hover:text-white transition-colors duration-300"
-            size="lg"
+            className="mt-6 px-4 py-2 text-base sm:px-6 sm:py-3 sm:text-lg font-bold bg-white text-black border border-black
+             hover:bg-black hover:text-white transition-colors duration-300"
           >
             View All Galleries
           </Button>

@@ -117,11 +117,36 @@ const CartTable = () => {
               </div>
 
               <Button
-                className="w-full"
-                onClick={() => router.push("/checkout")}
-              >
-                Checkout
-              </Button>
+  className="w-full"
+  onClick={async () => {
+    try {
+      const photoIds = items.map((item) => item.photoId);
+      const res = await fetch("/api/purchase", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ photoIds }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        console.error("Purchase failed:", data);
+        alert("Purchase failed: " + (data.error || "Something went wrong"));
+        return;
+      }
+
+      alert("Purchase successful! 🎉");
+
+      // ✅ Optionally clear cart and redirect
+      router.push("/purchases");
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      alert("Unexpected error. Please try again.");
+    }
+  }}
+>
+  Checkout
+</Button>
+
 
               <div className="mt-4 text-xs text-gray-600 border-t pt-3 leading-relaxed">
                 <p className="font-semibold">Chuck our pricing logic here</p>
