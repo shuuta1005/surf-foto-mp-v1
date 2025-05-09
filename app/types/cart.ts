@@ -1,3 +1,4 @@
+// types/cart.ts
 import { z } from "zod";
 import { cartItemSchema } from "@/lib/validations/validation";
 

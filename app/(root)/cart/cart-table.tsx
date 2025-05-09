@@ -5,7 +5,7 @@
 import { useCart } from "@/lib/context/CartContext";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+//import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -22,7 +22,7 @@ import { ShoppingCart } from "lucide-react";
 const formatYen = (price: number) => `¥${price.toLocaleString("ja-JP")}`;
 
 const CartTable = () => {
-  const router = useRouter();
+  //const router = useRouter();
   const { items, removeFromCart, getOriginalPrice, getDiscount, getTotal } =
     useCart();
 
@@ -115,39 +115,36 @@ const CartTable = () => {
                   <span>{formatYen(finalPrice)}</span>
                 </div>
               </div>
+              <div>
+                <Button
+                  className="w-full"
+                  onClick={async () => {
+                    try {
+                      const res = await fetch("/api/checkout", {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ items }),
+                      });
 
-              <Button
-  className="w-full"
-  onClick={async () => {
-    try {
-      const photoIds = items.map((item) => item.photoId);
-      const res = await fetch("/api/purchase", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ photoIds }),
-      });
+                      const data = await res.json();
 
-      if (!res.ok) {
-        const data = await res.json();
-        console.error("Purchase failed:", data);
-        alert("Purchase failed: " + (data.error || "Something went wrong"));
-        return;
-      }
-
-      alert("Purchase successful! 🎉");
-
-      // ✅ Optionally clear cart and redirect
-      router.push("/purchases");
-    } catch (err) {
-      console.error("Unexpected error:", err);
-      alert("Unexpected error. Please try again.");
-    }
-  }}
->
-  Checkout
-</Button>
-
-
+                      if (data.url) {
+                        window.location.href = data.url;
+                      } else {
+                        alert("Failed to redirect to checkout.");
+                        console.error(data.error || "Unknown error");
+                      }
+                    } catch (err) {
+                      console.error("Checkout error:", err);
+                      alert("Something went wrong during checkout.");
+                    }
+                  }}
+                >
+                  Checkout
+                </Button>
+              </div>
               <div className="mt-4 text-xs text-gray-600 border-t pt-3 leading-relaxed">
                 <p className="font-semibold">Chuck our pricing logic here</p>
               </div>
