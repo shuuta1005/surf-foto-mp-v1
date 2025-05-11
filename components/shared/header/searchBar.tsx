@@ -160,7 +160,7 @@ const Searchbar = () => {
           {/* Top search bar */}
           <div
             ref={barRef}
-            className="fixed top-0 left-0 right-0 bg-white z-50 shadow-md px-4 py-3 flex items-center gap-2"
+            className="fixed top-0 left-0 right-0 bg-white z-50 shadow-md px-4 py-3 flex items-center gap-2 max-w-screen w-full overflow-hidden"
           >
             <Search size={20} className="text-gray-400" />
             <form onSubmit={handleSearch} className="flex-1">
