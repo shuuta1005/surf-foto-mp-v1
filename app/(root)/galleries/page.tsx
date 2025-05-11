@@ -18,7 +18,7 @@ export default async function GalleriesPage({
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl sm:text-4xl font-bold text-gray-700 tracking-tight mb-8 text-center">
+      <h1 className="text-2xl sm:text-4xl font-bold text-gray-700 tracking-tight mb-2 ">
         {/* All Galleries 🤙🏽 */}
         {selectedArea}
       </h1>
