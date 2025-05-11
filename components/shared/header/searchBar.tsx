@@ -1,21 +1,19 @@
-// //components/shared/header/searchBar.tsx
+// // //components/shared/header/searchBar.tsx
+
 "use client";
 
-import React, { useState } from "react";
-import { Search, X } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const Searchbar = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [isOpen, setIsOpen] = useState(false);
   const [searchValue, setSearchValue] = useState(
     searchParams.get("search") || ""
   );
-
-  const handleClearSearch = () => {
-    setSearchValue("");
-    router.push("/galleries"); // Clear search from URL
-  };
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -23,32 +21,53 @@ const Searchbar = () => {
       router.push(
         `/galleries?search=${encodeURIComponent(searchValue.trim())}`
       );
+      setIsOpen(false);
     }
   };
 
+  const handleClickOutside = (e: MouseEvent) => {
+    if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+      setIsOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <form onSubmit={handleSearch} className="relative flex-1 max-w-md mx-4">
-      <div className="relative flex items-center">
-        <Search className="absolute left-3 text-gray-400 z-10" size={18} />
-        <input
-          type="text"
-          placeholder="Search galleries..."
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
-          className="w-full pl-10 pr-10 py-2 bg-gray-50 border border-gray-200 rounded-md shadow-sm focus:bg-white focus:shadow-md focus:outline-none focus:ring-0 "
-        />
-        {searchValue && (
+    <div className="relative" ref={wrapperRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="text-gray-600 hover:text-black transition"
+        aria-label="Open search"
+      >
+        <Search size={28} />
+      </button>
+
+      {isOpen && (
+        <form
+          onSubmit={handleSearch}
+          className="absolute right-0 mt-2 w-72 bg-white border border-gray-300 shadow-lg rounded-md p-4 z-50"
+        >
+          <input
+            type="text"
+            autoFocus
+            placeholder="Enter keywords..."
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            className="w-full border px-3 py-2 rounded-md mb-3 text-sm focus:outline-none  "
+          />
           <button
-            type="button"
-            onClick={handleClearSearch}
-            className="absolute right-3 text-gray-400 hover:text-gray-600 transition-colors"
-            aria-label="Clear search"
+            type="submit"
+            className="w-full bg-stone-500 hover:bg-stone-600 text-white font-semibold py-2 rounded-md text-sm"
           >
-            <X size={16} />
+            SEARCH
           </button>
-        )}
-      </div>
-    </form>
+        </form>
+      )}
+    </div>
   );
 };
 
