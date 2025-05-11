@@ -49,7 +49,7 @@ const Searchbar = () => {
       {isOpen && (
         <form
           onSubmit={handleSearch}
-          className="absolute right-0 mt-2 w-72 bg-white border border-gray-300 shadow-lg rounded-md p-4 z-50"
+          className="absolute right-0 mt-2 w-[90vw] max-w-xs bg-white border border-gray-300 shadow-lg rounded-md p-4 z-50"
         >
           <input
             type="text"
