@@ -46,14 +46,26 @@ export default function GalleryView({ gallery }: GalleryViewProps) {
       <GalleryHeader name={gallery.surfSpot} location={gallery.area} />
 
       {/* ✅ Cover Image */}
-      {gallery.photos.length > 0 && (
-        <div className="relative w-full h-96 overflow-hidden">
+      {/* {gallery.photos.length > 0 && (
+        <div className="relative w-full aspect-[3/1] sm:aspect-[5/2] md:aspect-[16/5] overflow-hidden">
           <Image
             src={gallery.photos[0].photoUrl}
             alt="Gallery Cover"
             fill
             className="rounded-md object-cover"
           />
+        </div>
+      )} */}
+      {gallery.photos.length > 0 && (
+        <div className="relative w-full bg-transparent">
+          <div className="relative aspect-[16/9] sm:aspect-[3/1] md:aspect-[21/9]">
+            <Image
+              src={gallery.photos[0].photoUrl}
+              alt="Gallery Cover"
+              fill
+              className="object-contain"
+            />
+          </div>
         </div>
       )}
       <div className="max-w-7xl mx-auto">
