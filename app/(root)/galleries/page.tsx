@@ -17,9 +17,10 @@ export default async function GalleriesPage({
   const searchQuery = params?.search || "";
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
-      <h1 className="text-5xl sm:text-5xl font-extrabold text-gray-700 tracking-tight mb-12 text-center">
-        All Galleries 🤙🏽
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <h1 className="text-3xl sm:text-4xl font-bold text-gray-700 tracking-tight mb-8 text-center">
+        {/* All Galleries 🤙🏽 */}
+        {selectedArea}
       </h1>
 
       <GalleryList
