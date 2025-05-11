@@ -3,9 +3,7 @@
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
-// import { useCart } from "@/lib/hooks/useCart";
 import { useCart } from "@/lib/context/CartContext";
-
 import { ShoppingCart } from "lucide-react";
 
 export default function PhotoModal({
@@ -32,9 +30,8 @@ export default function PhotoModal({
   const [isLoading, setIsLoading] = useState(true);
   const [zoomLevel, setZoomLevel] = useState(1);
   const { addToCart, removeFromCart, isInCart } = useCart();
-  const isSelected = isInCart(photoId); // or use a real ID if you have it
+  const isSelected = isInCart(photoId);
 
-  // ✅ Memoized functions to prevent unnecessary re-renders
   const handleZoomIn = useCallback(() => {
     if (zoomLevel < 2) setZoomLevel((prev) => prev + 0.25);
   }, [zoomLevel]);
@@ -43,7 +40,6 @@ export default function PhotoModal({
     if (zoomLevel > 0.5) setZoomLevel((prev) => prev - 0.25);
   }, [zoomLevel]);
 
-  // ✅ Handle keyboard navigation and shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -53,14 +49,14 @@ export default function PhotoModal({
       if (e.key === "-") handleZoomOut();
     };
 
-    document.body.style.overflow = "hidden"; // Prevent background scrolling
+    document.body.style.overflow = "hidden";
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "auto"; // Restore scrolling on unmount
+      document.body.style.overflow = "auto";
     };
-  }, [onClose, onNext, onPrev, isFirst, isLast, handleZoomIn, handleZoomOut]); // ✅ Added missing dependencies
+  }, [onClose, onNext, onPrev, isFirst, isLast, handleZoomIn, handleZoomOut]);
 
   return (
     <div
@@ -68,16 +64,17 @@ export default function PhotoModal({
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-6xl h-[85vh] flex flex-col items-center justify-center"
-        onClick={(e) => e.stopPropagation()} // Prevent closing on inner clicks
+        className="relative w-full max-w-6xl max-h-[90vh] px-4 flex flex-col items-center justify-center"
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* ✅ Loading Indicator */}
+        {/* Loading Spinner */}
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-12 h-12 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
           </div>
         )}
-        {/* ✅ Main Image */}
+
+        {/* Image */}
         <div className="relative w-full h-full flex justify-center overflow-hidden">
           <div
             className="transition-transform duration-300 ease-out"
@@ -97,7 +94,8 @@ export default function PhotoModal({
             />
           </div>
         </div>
-        {/* ✅ Caption (if provided) */}
+
+        {/* Caption */}
         {caption && (
           <div className="absolute bottom-16 left-0 right-0 text-center">
             <p className="bg-black/60 text-white py-2 px-4 mx-auto inline-block rounded-full text-sm backdrop-blur-sm">
@@ -105,10 +103,9 @@ export default function PhotoModal({
             </p>
           </div>
         )}
-        {/* ✅ Controls */}
 
+        {/* Zoom Controls */}
         <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center">
-          {/* Zoom & Download */}
           <div className="flex gap-2">
             <button
               className="p-2 bg-black/60 rounded-full backdrop-blur-sm hover:bg-black/80 text-white transition-colors"
@@ -127,7 +124,7 @@ export default function PhotoModal({
           </div>
         </div>
 
-        {/* ✅ Navigation Arrows */}
+        {/* Navigation Arrows */}
         {!isFirst && (
           <button
             className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-black/60 rounded-full backdrop-blur-sm hover:bg-black/80 text-white transition-colors"
@@ -146,7 +143,8 @@ export default function PhotoModal({
             <ChevronRight size={24} />
           </button>
         )}
-        {/* ✅ Close Button */}
+
+        {/* Close Button */}
         <button
           className="absolute top-4 right-4 p-2 bg-black/60 backdrop-blur-sm rounded-full hover:bg-black/80 text-white transition-colors"
           onClick={onClose}
@@ -154,7 +152,8 @@ export default function PhotoModal({
         >
           <X size={24} />
         </button>
-        {/* ✅ Add to Cart Button */}
+
+        {/* Add to Cart */}
         <button
           className={`absolute top-4 left-4 p-2 bg-white/80 rounded-full backdrop-blur-sm hover:bg-white z-50 ${
             isSelected ? "text-red-500" : "text-gray-700"
@@ -164,11 +163,7 @@ export default function PhotoModal({
             if (isSelected) {
               removeFromCart(photoId);
             } else {
-              addToCart({
-                photoId,
-                photoUrl,
-                price,
-              });
+              addToCart({ photoId, photoUrl, price });
             }
           }}
         >
