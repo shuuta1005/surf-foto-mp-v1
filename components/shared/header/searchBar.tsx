@@ -3,7 +3,7 @@
 // "use client";
 
 // import React, { useState, useRef, useEffect } from "react";
-// import { Search } from "lucide-react";
+// import { Search, X } from "lucide-react";
 // import { useRouter, useSearchParams } from "next/navigation";
 
 // const Searchbar = () => {
@@ -13,7 +13,7 @@
 //   const [searchValue, setSearchValue] = useState(
 //     searchParams.get("search") || ""
 //   );
-//   const wrapperRef = useRef<HTMLDivElement>(null);
+//   const barRef = useRef<HTMLDivElement>(null);
 
 //   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
 //     e.preventDefault();
@@ -26,48 +26,69 @@
 //   };
 
 //   const handleClickOutside = (e: MouseEvent) => {
-//     if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+//     if (barRef.current && !barRef.current.contains(e.target as Node)) {
 //       setIsOpen(false);
 //     }
 //   };
 
 //   useEffect(() => {
-//     document.addEventListener("mousedown", handleClickOutside);
-//     return () => document.removeEventListener("mousedown", handleClickOutside);
-//   }, []);
+//     if (isOpen) {
+//       document.addEventListener("mousedown", handleClickOutside);
+//       document.body.style.overflow = "hidden"; // optional: prevent scroll
+//     } else {
+//       document.removeEventListener("mousedown", handleClickOutside);
+//       document.body.style.overflow = ""; // reset
+//     }
+//     return () => {
+//       document.removeEventListener("mousedown", handleClickOutside);
+//       document.body.style.overflow = "";
+//     };
+//   }, [isOpen]);
 
 //   return (
-//     <div className="relative" ref={wrapperRef}>
+//     <>
+//       {/* Search icon button */}
 //       <button
-//         onClick={() => setIsOpen(!isOpen)}
+//         onClick={() => setIsOpen(true)}
 //         className="text-gray-600 hover:text-black transition"
 //         aria-label="Open search"
 //       >
-//         <Search size={28} />
+//         <Search className="w-5 h-5 sm:w-6 sm:h-6" />
 //       </button>
 
+//       {/* Overlay with top search bar */}
 //       {isOpen && (
-//         <form
-//           onSubmit={handleSearch}
-//           className="absolute right-0 mt-2 w-[90vw] max-w-xs bg-white border border-gray-300 shadow-lg rounded-md p-4 z-50"
-//         >
-//           <input
-//             type="text"
-//             autoFocus
-//             placeholder="Enter keywords..."
-//             value={searchValue}
-//             onChange={(e) => setSearchValue(e.target.value)}
-//             className="w-full border px-3 py-2 rounded-md mb-3 text-sm focus:outline-none  "
-//           />
-//           <button
-//             type="submit"
-//             className="w-full bg-stone-500 hover:bg-stone-600 text-white font-semibold py-2 rounded-md text-sm"
+//         <>
+//           {/* Dimmed background */}
+//           <div className="fixed inset-0 bg-black bg-opacity-40 z-40" />
+
+//           {/* Search bar */}
+//           <div
+//             ref={barRef}
+//             className="fixed top-0 left-0 right-0 bg-white z-50 shadow-md px-4 py-3 flex items-center gap-2"
 //           >
-//             SEARCH
-//           </button>
-//         </form>
+//             <Search className="text-gray-400" />
+//             <form onSubmit={handleSearch} className="flex-1">
+//               <input
+//                 autoFocus
+//                 type="text"
+//                 value={searchValue}
+//                 onChange={(e) => setSearchValue(e.target.value)}
+//                 placeholder="Search"
+//                 className="w-full text-sm bg-transparent focus:outline-none"
+//               />
+//             </form>
+//             <button
+//               onClick={() => setIsOpen(false)}
+//               aria-label="Close search"
+//               className="text-gray-500 hover:text-black"
+//             >
+//               <X size={22} />
+//             </button>
+//           </div>
+//         </>
 //       )}
-//     </div>
+//     </>
 //   );
 // };
 
@@ -75,7 +96,7 @@
 
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -107,11 +128,12 @@ const Searchbar = () => {
   useEffect(() => {
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
-      document.body.style.overflow = "hidden"; // optional: prevent scroll
+      document.body.style.overflow = "hidden"; // prevent scroll
     } else {
       document.removeEventListener("mousedown", handleClickOutside);
-      document.body.style.overflow = ""; // reset
+      document.body.style.overflow = "";
     }
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.body.style.overflow = "";
@@ -120,7 +142,7 @@ const Searchbar = () => {
 
   return (
     <>
-      {/* Search icon button */}
+      {/* Search icon */}
       <button
         onClick={() => setIsOpen(true)}
         className="text-gray-600 hover:text-black transition"
@@ -129,25 +151,25 @@ const Searchbar = () => {
         <Search size={22} />
       </button>
 
-      {/* Overlay with top search bar */}
+      {/* Search overlay + top bar */}
       {isOpen && (
         <>
           {/* Dimmed background */}
           <div className="fixed inset-0 bg-black bg-opacity-40 z-40" />
 
-          {/* Search bar */}
+          {/* Top search bar */}
           <div
             ref={barRef}
             className="fixed top-0 left-0 right-0 bg-white z-50 shadow-md px-4 py-3 flex items-center gap-2"
           >
-            <Search className="text-gray-400" size={20} />
+            <Search size={20} className="text-gray-400" />
             <form onSubmit={handleSearch} className="flex-1">
               <input
                 autoFocus
                 type="text"
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
-                placeholder="Search"
+                placeholder="Search galleries..."
                 className="w-full text-sm bg-transparent focus:outline-none"
               />
             </form>

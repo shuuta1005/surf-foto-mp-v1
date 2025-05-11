@@ -22,9 +22,9 @@ const UserButton = ({ session: serverSession }: UserButtonProps) => {
 
   if (!session) {
     return (
-      <Button asChild className="rounded-full ">
+      <Button asChild className="rounded-full p-2 sm:p-3">
         <Link href="/sign-in">
-          <UserIcon size={22} />
+          <UserIcon className="w-4 h-4 sm:w-6 sm:h-6" />
         </Link>
       </Button>
     );

@@ -13,7 +13,7 @@ const CartButton = () => {
       href="/cart"
       className="relative text-gray-600 hover:text-black transition"
     >
-      <ShoppingCart size={28} />
+      <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
       {items.length > 0 && (
         <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs font-bold rounded-full px-1.5">
           {items.length}
