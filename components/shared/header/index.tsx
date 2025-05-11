@@ -15,8 +15,8 @@ interface HeaderProps {
 
 const Header = ({ session, areas }: HeaderProps) => {
   return (
-    <header className="w-full bg-stone-100 shadow-md sticky top-0 z-40">
-      <div className="relative flex items-center justify-between max-w-7xl mx-auto px-4 py-4 border-b">
+    <header className="w-full bg-stone-100 shadow-md sticky top-0 z-50">
+      <div className="flex items-center justify-between max-w-7xl mx-auto px-4 py-4 border-b">
         {/* Left: Side menu */}
         <div className="flex items-center gap-2">
           <SideMenu />

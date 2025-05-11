@@ -77,14 +77,15 @@ const SideMenu = () => {
 
         <nav className="mt-6 space-y-4">
           {menuItems.map((item, index) => (
-            <Link
-              key={index}
-              href={item.href}
-              className="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-md"
-            >
-              {item.icon}
-              <span className="font-semibold">{item.title}</span>
-            </Link>
+            <SheetClose asChild key={index}>
+              <Link
+                href={item.href}
+                className="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-md"
+              >
+                {item.icon}
+                <span className="font-semibold">{item.title}</span>
+              </Link>
+            </SheetClose>
           ))}
         </nav>
       </SheetContent>
