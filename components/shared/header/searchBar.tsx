@@ -48,7 +48,6 @@ const Searchbar = () => {
 
   return (
     <>
-      {/* Search icon */}
       <button
         onClick={() => setIsOpen(true)}
         className="text-gray-600 hover:text-black transition"
@@ -57,7 +56,6 @@ const Searchbar = () => {
         <Search size={22} />
       </button>
 
-      {/* Search overlay and bar */}
       {isOpen && (
         <>
           {/* Dimmed background */}
@@ -66,9 +64,9 @@ const Searchbar = () => {
           {/* Top search bar */}
           <div
             ref={barRef}
-            className="fixed top-0 left-0 right-0 bg-white z-50 shadow-md w-full max-w-screen overflow-hidden px-4 py-3 flex items-center gap-2"
+            className="fixed top-0 left-0 w-screen max-w-[100vw] bg-white z-50 shadow-md px-4 py-3 flex items-center gap-2"
           >
-            <Search size={20} className="text-gray-400" />
+            <Search size={20} className="text-gray-400 shrink-0" />
 
             <form onSubmit={handleSearch} className="flex-1 overflow-hidden">
               <input
@@ -77,14 +75,14 @@ const Searchbar = () => {
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
                 placeholder="Search galleries..."
-                className="w-full max-w-full text-sm bg-transparent focus:outline-none"
+                className="w-full max-w-[100%] text-base bg-transparent focus:outline-none"
               />
             </form>
 
             <button
               onClick={() => setIsOpen(false)}
               aria-label="Close search"
-              className="text-gray-500 hover:text-black"
+              className="text-gray-500 hover:text-black shrink-0"
             >
               <X size={22} />
             </button>
