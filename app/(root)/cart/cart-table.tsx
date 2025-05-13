@@ -5,7 +5,6 @@
 import { useCart } from "@/lib/context/CartContext";
 import Image from "next/image";
 import Link from "next/link";
-//import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -16,13 +15,11 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
-import { ShoppingCart } from "lucide-react";
+import { Trash2, ShoppingCart } from "lucide-react";
 
 const formatYen = (price: number) => `¥${price.toLocaleString("ja-JP")}`;
 
 const CartTable = () => {
-  //const router = useRouter();
   const { items, removeFromCart, getOriginalPrice, getDiscount, getTotal } =
     useCart();
 
@@ -34,7 +31,9 @@ const CartTable = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
       <div className="border-b pb-4 mb-6">
-        <h1 className="text-3xl font-bold">🛒 Your Shopping Cart</h1>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">
+          🛒 Your Shopping Cart
+        </h1>
       </div>
 
       {isEmpty ? (
@@ -58,7 +57,7 @@ const CartTable = () => {
           </p>
         </div>
       ) : (
-        <div className="grid md:grid-cols-4 md:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-6">
           {/* Cart Items */}
           <div className="overflow-x-auto md:col-span-3">
             <Table>
@@ -99,7 +98,7 @@ const CartTable = () => {
           </div>
 
           {/* 💰 Summary Section */}
-          <Card className="bg-stone-100 border w-full md:w-80 ml-auto shadow-lg">
+          <Card className="bg-stone-100 border w-full md:w-80 shadow-lg">
             <CardContent className="p-4 flex flex-col gap-4 text-sm">
               <div className="space-y-1">
                 <div className="flex justify-between">
@@ -115,6 +114,7 @@ const CartTable = () => {
                   <span>{formatYen(finalPrice)}</span>
                 </div>
               </div>
+
               <div>
                 <Button
                   className="w-full"
@@ -142,9 +142,10 @@ const CartTable = () => {
                     }
                   }}
                 >
-                  Checkout
+                  Go To Checkout
                 </Button>
               </div>
+
               <div className="mt-4 text-xs text-gray-600 border-t pt-3 leading-relaxed">
                 <p className="font-semibold">Chuck our pricing logic here</p>
               </div>
