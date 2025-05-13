@@ -108,18 +108,18 @@ export default function PhotoModal({
         <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center">
           <div className="flex gap-2">
             <button
-              className="p-2 bg-black/60 rounded-full backdrop-blur-sm hover:bg-black/80 text-white transition-colors"
+              className="p-2 sm:p-3 bg-black/60 rounded-full backdrop-blur-sm hover:bg-black/80 text-white transition-colors"
               onClick={handleZoomOut}
               disabled={zoomLevel <= 0.5}
             >
-              <ZoomOut size={20} />
+              <ZoomOut className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
             <button
-              className="p-2 bg-black/60 rounded-full backdrop-blur-sm hover:bg-black/80 text-white transition-colors"
+              className="p-2 sm:p-3 bg-black/60 rounded-full backdrop-blur-sm hover:bg-black/80 text-white transition-colors"
               onClick={handleZoomIn}
               disabled={zoomLevel >= 2}
             >
-              <ZoomIn size={20} />
+              <ZoomIn className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
           </div>
         </div>
@@ -127,35 +127,35 @@ export default function PhotoModal({
         {/* Navigation Arrows */}
         {!isFirst && (
           <button
-            className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-black/60 rounded-full backdrop-blur-sm hover:bg-black/80 text-white transition-colors"
+            className="absolute left-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 bg-black/60 rounded-full backdrop-blur-sm hover:bg-black/80 text-white transition-colors"
             onClick={onPrev}
             aria-label="Previous photo"
           >
-            <ChevronLeft size={24} />
+            <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         )}
         {!isLast && (
           <button
-            className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-black/60 rounded-full backdrop-blur-sm hover:bg-black/80 text-white transition-colors"
+            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 bg-black/60 rounded-full backdrop-blur-sm hover:bg-black/80 text-white transition-colors"
             onClick={onNext}
             aria-label="Next photo"
           >
-            <ChevronRight size={24} />
+            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         )}
 
         {/* Close Button */}
         <button
-          className="absolute top-4 right-4 p-2 bg-black/60 backdrop-blur-sm rounded-full hover:bg-black/80 text-white transition-colors"
+          className="absolute top-4 right-4 p-2 sm:p-3 bg-black/60 backdrop-blur-sm rounded-full hover:bg-black/80 text-white transition-colors"
           onClick={onClose}
           aria-label="Close modal"
         >
-          <X size={24} />
+          <X className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
 
         {/* Add to Cart */}
         <button
-          className={`absolute top-4 left-4 p-2 bg-white/80 rounded-full backdrop-blur-sm hover:bg-white z-50 ${
+          className={`absolute top-4 left-4 p-2 sm:p-3 bg-white/80 rounded-full backdrop-blur-sm hover:bg-white z-50 ${
             isSelected ? "text-red-500" : "text-gray-700"
           }`}
           onClick={(e) => {
@@ -167,7 +167,7 @@ export default function PhotoModal({
             }
           }}
         >
-          <ShoppingCart size={30} />
+          <ShoppingCart className="w-6 h-6 sm:w-7 sm:h-7" />
         </button>
       </div>
     </div>
