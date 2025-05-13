@@ -1,126 +1,169 @@
 //components/footer/footer.tsx
 
-// import { APP_NAME } from "@/lib/constants";
-// const Footer = () => {
-//   const currentYear = new Date().getFullYear();
-//   return (
-//     <footer className="border-t">
-//       <div className="p-5 flex-center">
-//         {currentYear} {APP_NAME}. All Rights Recerved
-//       </div>
-//     </footer>
-//   );
-// };
-
-// export default Footer;
+"use client";
 
 import Link from "next/link";
 import { APP_NAME } from "@/lib/constants";
-import { FaInstagram, FaTwitter, FaFacebookF, FaYoutube } from "react-icons/fa";
+import { useState } from "react";
+import { FaInstagram, FaTwitter, FaFacebookF } from "react-icons/fa";
+import { ChevronDown } from "lucide-react";
+import Image from "next/image";
 
 const Footer = () => {
   const year = new Date().getFullYear();
 
+  const [openExplore, setOpenExplore] = useState(false);
+  const [openHelp, setOpenHelp] = useState(false);
+
   return (
-    <footer className="bg-stone-900 text-white">
-      {/* TOP */}
-      <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 border-b border-stone-700">
-        {/* Explore */}
-        <div>
-          <h4 className="text-sm font-bold mb-4">Explore</h4>
-          <ul className="space-y-2 text-sm text-gray-300">
-            <li>
-              <Link href="/galleries" className="hover:underline">
-                Galleries
-              </Link>
-            </li>
-            <li>
-              <Link href="/about" className="hover:underline">
-                About Us
-              </Link>
-            </li>
-            <li>
-              <Link href="/terms" className="hover:underline">
-                Terms of Service
-              </Link>
-            </li>
-            <li>
-              <Link href="/privacy" className="hover:underline">
-                Privacy Policy
-              </Link>
-            </li>
-          </ul>
-        </div>
+    <footer className="bg-stone-900 text-white text-sm">
+      {/* Top Section */}
+      <div className="max-w-7xl mx-auto px-6 py-10 border-b border-stone-700">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+          {/* Explore */}
+          <div>
+            <div className="md:hidden">
+              <button
+                onClick={() => setOpenExplore(!openExplore)}
+                className="w-full flex justify-between items-center font-bold"
+              >
+                Explore
+                <ChevronDown
+                  className={`transition-transform ${
+                    openExplore ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+              {openExplore && (
+                <ul className="mt-3 space-y-2 text-gray-300">
+                  <li>
+                    <Link href="/galleries">Galleries</Link>
+                  </li>
+                  <li>
+                    <Link href="/about">About Us</Link>
+                  </li>
+                  <li>
+                    <Link href="/terms">Terms</Link>
+                  </li>
+                  <li>
+                    <Link href="/privacy">Privacy</Link>
+                  </li>
+                </ul>
+              )}
+            </div>
 
-        {/* Help */}
-        <div>
-          <h4 className="text-sm font-bold mb-4">Help</h4>
-          <ul className="space-y-2 text-sm text-gray-300">
-            <li>
-              <Link href="/pricing" className="hover:underline">
-                Pricing
-              </Link>
-            </li>
-            <li>
-              <Link href="/faq" className="hover:underline">
-                FAQ
-              </Link>
-            </li>
-            <li>
-              <Link href="/contact" className="hover:underline">
-                Contact
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Categories (Optional) */}
-        <div>
-          <h4 className="text-sm font-bold mb-4">Popular Spots</h4>
-          <ul className="space-y-2 text-sm text-gray-300">
-            <li>
-              <Link href="/galleries?area=千葉北" className="hover:underline">
-                千葉北
-              </Link>
-            </li>
-            <li>
-              <Link href="/galleries?area=湘南" className="hover:underline">
-                湘南
-              </Link>
-            </li>
-            <li>
-              <Link href="/galleries?area=Bali" className="hover:underline">
-                仙台
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Newsletter & Social */}
-        <div>
-          <h4 className="text-sm font-bold mb-4">Connect with Us</h4>
-          <div className="flex gap-4 mb-4">
-            <FaInstagram className="hover:text-pink-400 cursor-pointer" />
-            <FaTwitter className="hover:text-blue-400 cursor-pointer" />
-            <FaFacebookF className="hover:text-blue-600 cursor-pointer" />
-            <FaYoutube className="hover:text-red-500 cursor-pointer" />
+            <div className="hidden md:block">
+              <h4 className="font-bold mb-4">Explore</h4>
+              <ul className="space-y-2 text-gray-300">
+                <li>
+                  <Link href="/galleries">Galleries</Link>
+                </li>
+                <li>
+                  <Link href="/about">About Us</Link>
+                </li>
+                <li>
+                  <Link href="/terms">Terms</Link>
+                </li>
+                <li>
+                  <Link href="/privacy">Privacy</Link>
+                </li>
+              </ul>
+            </div>
           </div>
-          <form className="flex flex-col gap-2">
-            <input
-              type="email"
-              placeholder="Email address"
-              className="px-3 py-2 rounded-md bg-stone-800 text-white text-sm placeholder:text-gray-400 border border-stone-700"
-            />
-            <button className="bg-stone-500 hover:bg-stone-600 text-white text-sm font-semibold px-3 py-2 rounded-md">
-              Subscribe
-            </button>
-          </form>
+
+          {/* Help */}
+          <div>
+            <div className="md:hidden">
+              <button
+                onClick={() => setOpenHelp(!openHelp)}
+                className="w-full flex justify-between items-center font-bold"
+              >
+                Help
+                <ChevronDown
+                  className={`transition-transform ${
+                    openHelp ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+              {openHelp && (
+                <ul className="mt-3 space-y-2 text-gray-300">
+                  <li>
+                    <Link href="/pricing">Pricing</Link>
+                  </li>
+                  <li>
+                    <Link href="/faq">FAQ</Link>
+                  </li>
+                  <li>
+                    <Link href="/contact">Contact</Link>
+                  </li>
+                </ul>
+              )}
+            </div>
+
+            <div className="hidden md:block">
+              <h4 className="font-bold mb-4">Help</h4>
+              <ul className="space-y-2 text-gray-300">
+                <li>
+                  <Link href="/pricing">Pricing</Link>
+                </li>
+                <li>
+                  <Link href="/faq">FAQ</Link>
+                </li>
+                <li>
+                  <Link href="/contact">Contact</Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Connect */}
+          <div>
+            <h4 className="font-bold mb-4">Follow Us</h4>
+            <div className="flex gap-4 text-xl text-gray-300">
+              <FaInstagram className="hover:text-pink-400 cursor-pointer" />
+              <FaTwitter className="hover:text-blue-400 cursor-pointer" />
+              <FaFacebookF className="hover:text-blue-600 cursor-pointer" />
+            </div>
+          </div>
+
+          {/* Payment */}
+          <div>
+            <h4 className="font-bold mb-4">Payments Accepted</h4>
+            <div className="flex flex-wrap gap-4 items-center">
+              <Image
+                src="/payments/visa.svg"
+                alt="Visa"
+                width={48}
+                height={32}
+              />
+              <Image
+                src="/payments/mastercard.svg"
+                alt="Mastercard"
+                width={48}
+                height={32}
+              />
+              <Image
+                src="/payments/amex.svg"
+                alt="American Express"
+                width={48}
+                height={32}
+              />
+              <Image
+                src="/payments/stripe.svg"
+                alt="Stripe"
+                width={48}
+                height={32}
+              />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* BOTTOM */}
-      <div className="text-center text-xs text-gray-400 py-4">
-        © {year} {APP_NAME}. All rights reserved.
+      {/* Bottom Bar */}
+      <div className="bg-stone-800">
+        <div className="max-w-7xl mx-auto px-6 py-4 text-center text-xs text-gray-400">
+          © {year} {APP_NAME}. All rights reserved.
+        </div>
       </div>
     </footer>
   );
