@@ -3,7 +3,7 @@
 
 // app/(root)/layout.tsx
 
-import Footer from "@/components/shared/footer";
+import Footer from "@/components/footer/footer";
 import HeaderContainer from "@/components/shared/header/header-container";
 
 export default async function RootLayout({
