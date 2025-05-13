@@ -6,12 +6,13 @@ const LoadingPage = () => {
     <div className="flex flex-col items-center justify-center h-screen w-screen bg-white text-center px-4">
       <Image
         src={waveLoader}
-        height={160}
-        width={160}
+        height={320}
+        width={320}
         alt="Loading..."
         className="animate-pulse"
       />
-      <p className="mt-6 text-gray-600 text-sm sm:text-base">
+      {/* ‼️Mayble we can display different messages depending on user actions */}
+      <p className="mt-6 text-gray-600 text-sm sm:text-lg font-semibold">
         Loading... Please hang tight 🌊
       </p>
     </div>
