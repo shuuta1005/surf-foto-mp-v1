@@ -1,3 +1,4 @@
+//components/shared/filters/AreaFilterBar.tsx
 "use client";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -19,11 +20,15 @@ const AreaFilterBar = ({ areas }: AreaFilterBarProps) => {
 
   const handleClick = (area: string) => {
     const newParams = new URLSearchParams(searchParams.toString());
+
     if (area === "") {
       newParams.delete("area");
     } else {
       newParams.set("area", area);
     }
+
+    newParams.delete("search"); // ✅ Clear the search param when a filter is clicked
+
     router.push(`/galleries?${newParams.toString()}`);
   };
 
