@@ -18,6 +18,10 @@ export type Gallery = {
   photographerId: string;
   photos: Photo[];
   createdAt: Date;
+
+  // ✅ New optional fields
+  sessionTime?: string;
+  coverPhoto?: string;
 };
 
 export type GalleryCardProps = {
@@ -25,6 +29,7 @@ export type GalleryCardProps = {
   image: string;
   title: string;
   location: string;
+  sessionTime?: string;
 };
 
 export type GalleryViewProps = {

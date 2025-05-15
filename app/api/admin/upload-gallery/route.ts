@@ -8,7 +8,6 @@ import { Readable } from "stream";
 import formidable, { File as FormidableFile } from "formidable";
 import { uploadWithWatermarkAndOriginal } from "@/lib/blob-watermark";
 
-// ✅ Required: use Node.js runtime to support form parsing
 export const runtime = "nodejs";
 
 async function streamRequest(req: Request): Promise<Readable> {
@@ -37,7 +36,6 @@ async function streamRequest(req: Request): Promise<Readable> {
   return readable;
 }
 
-// ✅ Parse multipart form data
 async function parseForm(readable: Readable): Promise<{
   fields: formidable.Fields;
   files: formidable.Files;
@@ -55,7 +53,6 @@ async function parseForm(readable: Readable): Promise<{
   });
 }
 
-// ✅ Handle POST request
 export async function POST(req: Request) {
   try {
     const session = await auth();
@@ -66,7 +63,21 @@ export async function POST(req: Request) {
     const readable = await streamRequest(req);
     const { fields, files } = await parseForm(readable);
 
-    const { prefecture, area, surfSpot, date } = fields;
+    const prefecture = Array.isArray(fields.prefecture)
+      ? fields.prefecture[0]
+      : fields.prefecture;
+    const area = Array.isArray(fields.area) ? fields.area[0] : fields.area;
+    const surfSpot = Array.isArray(fields.surfSpot)
+      ? fields.surfSpot[0]
+      : fields.surfSpot;
+    const date = Array.isArray(fields.date) ? fields.date[0] : fields.date;
+    const sessionTime = Array.isArray(fields.sessionTime)
+      ? fields.sessionTime[0]
+      : fields.sessionTime;
+
+    const coverPhotoFile = Array.isArray(files.coverPhoto)
+      ? files.coverPhoto[0]
+      : files.coverPhoto;
 
     const photoFiles = Array.isArray(files.photos)
       ? files.photos
@@ -93,12 +104,25 @@ export async function POST(req: Request) {
       })
     );
 
+    let coverPhotoUrl: string | undefined = undefined;
+    if (coverPhotoFile) {
+      if (!coverPhotoFile.filepath) {
+        throw new Error("Cover photo file is missing a filepath");
+      }
+      const { originalUrl } = await uploadWithWatermarkAndOriginal(
+        coverPhotoFile
+      );
+      coverPhotoUrl = originalUrl;
+    }
+
     const newGallery = await prisma.gallery.create({
       data: {
         prefecture: String(prefecture),
         area: String(area),
         surfSpot: String(surfSpot),
         date: new Date(String(date)),
+        sessionTime: sessionTime || "",
+        coverPhoto: coverPhotoUrl || "",
         photographerId: session.user.id,
         isPublic: true,
         photos: {

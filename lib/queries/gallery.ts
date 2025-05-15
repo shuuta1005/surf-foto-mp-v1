@@ -6,8 +6,24 @@ import { Gallery } from "@/app/types/gallery"; // ✅ your custom Gallery type
 // ✅ Fetch all galleries with photos and photographer info
 export async function getAllGalleries(): Promise<Gallery[]> {
   const galleries = await prisma.gallery.findMany({
-    orderBy: { date: "desc" }, // latest first
-    include: {
+    orderBy: { date: "desc" },
+    select: {
+      id: true,
+      prefecture: true,
+      area: true,
+      surfSpot: true,
+      date: true,
+      sessionTime: true, // ✅ include this
+      coverPhoto: true, // ✅ include this
+      isPublic: true,
+      photographerId: true,
+      createdAt: true,
+      photographer: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
       photos: {
         select: {
           id: true,
@@ -17,16 +33,10 @@ export async function getAllGalleries(): Promise<Gallery[]> {
           isCover: true,
         },
       },
-      photographer: {
-        select: {
-          name: true,
-          email: true,
-        },
-      },
     },
   });
 
-  return galleries as Gallery[]; // ✅ Tell TypeScript to trust your Gallery type
+  return galleries as Gallery[];
 }
 
 // ✅ Fetch a single gallery by ID (with all photos)

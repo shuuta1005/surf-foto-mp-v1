@@ -3,14 +3,16 @@
 import { useState } from "react";
 import GalleryList from "./GalleryList";
 import GalleryPagination from "./GalleryPagination";
-import { useIsMobile } from "@/lib/hooks/useIsMobile"; // Adjust path as needed
+import { useIsMobile } from "@/lib/hooks/useIsMobile";
 
 interface HighlightedGalleriesProps {
   galleries: {
     id: string;
-    coverImage?: string | null;
-    name: string;
-    location?: string;
+    coverPhoto?: string | null;
+    surfSpot: string;
+    prefecture: string;
+    area: string;
+    sessionTime?: string | null;
   }[];
 }
 
@@ -20,7 +22,7 @@ export default function HighlightedGalleriesClient({
   galleries,
 }: HighlightedGalleriesProps) {
   const [currentPage, setCurrentPage] = useState(0);
-  const isMobile = useIsMobile(); // ✅ use the hook
+  const isMobile = useIsMobile();
   const totalPages = Math.ceil(galleries.length / galleriesPerPage);
 
   const nextPage = () =>
@@ -35,7 +37,6 @@ export default function HighlightedGalleriesClient({
   return (
     <div className="w-full px-4 py-8">
       <div className="max-w-7xl mx-auto">
-        {/* Header and Pagination */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg sm:text-xl md:text-2xl font-bold">
             Recent Scores🔥最近の1173
@@ -51,7 +52,7 @@ export default function HighlightedGalleriesClient({
           )}
         </div>
 
-        {/* Render galleries based on screen size */}
+        {/* ✅ Pass correct props to GalleryList */}
         <GalleryList galleries={isMobile ? galleries : getCurrentGalleries()} />
       </div>
     </div>

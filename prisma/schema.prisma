@@ -105,6 +105,9 @@ model Gallery {
   date       DateTime
   isPublic   Boolean  @default(false)
 
+  sessionTime String? // ✅ NEW
+  coverPhoto  String? // ✅ NEW
+
   photographerId String
   photographer   User   @relation("PhotographerGalleries", fields: [photographerId], references: [id])
 

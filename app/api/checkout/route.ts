@@ -41,6 +41,7 @@ export async function POST(req: Request) {
       line_items: lineItems,
       success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout/success`,
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/cart`,
+      locale: "en",
       metadata: {
         userId: session.user.id,
         cart: JSON.stringify(items.map((item) => ({ photoId: item.photoId }))),

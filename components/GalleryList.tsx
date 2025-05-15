@@ -1,28 +1,16 @@
 // //app/components/GalleryList.tsx
+
 "use client";
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-
-interface Photo {
-  photoUrl: string;
-  isCover?: boolean;
-}
-
-interface Gallery {
-  id: string;
-  area: string;
-  surfSpot: string;
-  prefecture: string;
-  date: Date;
-  photos: Photo[];
-}
+import type { Gallery } from "@/app/types/gallery";
 
 interface GalleryListProps {
   galleries: Gallery[];
-  initialSelectedArea?: string; // ✅ Make sure this line is here
+  initialSelectedArea?: string;
   initialSearchQuery?: string;
   initialDateRange?: string;
 }
@@ -38,7 +26,6 @@ export default function GalleryList({
   const [selectedDateRange, setSelectedDateRange] = useState(initialDateRange);
   const searchQuery = initialSearchQuery;
 
-  // ✅ Sync selectedArea from URL on every change
   useEffect(() => {
     const areaFromURL = searchParams.get("area") || "";
     setSelectedArea(areaFromURL);
@@ -69,9 +56,8 @@ export default function GalleryList({
 
   return (
     <>
-      {/* 🛠 Date Filter Section (Area handled by AreaFilterBar) */}
+      {/* 🛠 Date Filter Section */}
       <div className="flex justify-center gap-4 mb-12">
-        {/* Date Range Filter */}
         <select
           className="border border-gray-300 rounded-md p-2 text-gray-700 focus:outline-stone-400 focus:ring-0"
           value={selectedDateRange}
@@ -94,38 +80,43 @@ export default function GalleryList({
         </p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {filteredGalleries.map((gallery) => {
-            const cover =
-              gallery.photos.find((p) => p.isCover) ?? gallery.photos[0];
-
-            return (
-              <Link
-                key={gallery.id}
-                href={`/gallery/${gallery.id}`}
-                className="block border rounded shadow hover:shadow-lg transition"
-              >
-                {cover && (
-                  <div className="relative w-full h-48">
-                    <Image
-                      src={cover.photoUrl}
-                      alt="Gallery cover"
-                      fill
-                      className="object-cover rounded-t"
-                    />
-                  </div>
-                )}
-                <div className="p-4">
-                  <h2 className="text-xl font-bold">{gallery.surfSpot}</h2>
-                  <p className="text-sm text-gray-700">
-                    {gallery.prefecture} - {gallery.area}
-                  </p>
-                  <p className="text-xs text-gray-600">
-                    {new Date(gallery.date).toLocaleDateString()}
-                  </p>
+          {filteredGalleries.map((gallery) => (
+            <Link
+              key={gallery.id}
+              href={`/gallery/${gallery.id}`}
+              className="block border rounded shadow hover:shadow-lg transition"
+            >
+              {/* ✅ Cover Image */}
+              {gallery.coverPhoto && (
+                <div className="relative w-full h-48">
+                  <Image
+                    src={gallery.coverPhoto}
+                    alt="Gallery cover"
+                    fill
+                    className="object-cover rounded-t"
+                  />
                 </div>
-              </Link>
-            );
-          })}
+              )}
+
+              <div className="p-4">
+                <h2 className="text-xl font-bold">{gallery.surfSpot}</h2>
+                <p className="text-sm text-gray-700">
+                  {gallery.prefecture} - {gallery.area}
+                </p>
+
+                {/* ✅ Session Time (optional) */}
+                {gallery.sessionTime && (
+                  <p className="text-xs text-gray-600 italic">
+                    Session: {gallery.sessionTime}
+                  </p>
+                )}
+
+                <p className="text-xs text-gray-600">
+                  {new Date(gallery.date).toLocaleDateString()}
+                </p>
+              </div>
+            </Link>
+          ))}
         </div>
       )}
     </>

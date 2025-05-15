@@ -14,13 +14,14 @@ export default function UploadForm() {
   const [area, setArea] = useState("");
   const [surfSpot, setSurfSpot] = useState("");
   const [date, setDate] = useState("");
+  const [sessionTime, setSessionTime] = useState("");
   const [files, setFiles] = useState<FileList | null>(null);
+  const [coverPhoto, setCoverPhoto] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!files || files.length === 0) return;
 
     setIsUploading(true);
@@ -31,14 +32,19 @@ export default function UploadForm() {
       formData.append("area", area);
       formData.append("surfSpot", surfSpot);
       formData.append("date", date);
+      formData.append("sessionTime", sessionTime);
 
       Array.from(files).forEach((file) => {
-        formData.append("photos", file); // must match field name used in route.ts
+        formData.append("photos", file);
       });
+
+      if (coverPhoto) {
+        formData.append("coverPhoto", coverPhoto);
+      }
 
       const res = await fetch("/api/admin/upload-gallery", {
         method: "POST",
-        body: formData, // ✅ send actual files
+        body: formData,
       });
 
       if (res.ok) {
@@ -115,6 +121,16 @@ export default function UploadForm() {
               disabled={isUploading}
             />
           </div>
+          <div>
+            <Label htmlFor="sessionTime">セッション時間</Label>
+            <Input
+              id="sessionTime"
+              placeholder="e.g. 2PM - 4PM"
+              value={sessionTime}
+              onChange={(e) => setSessionTime(e.target.value)}
+              disabled={isUploading}
+            />
+          </div>
         </CardContent>
       </Card>
 
@@ -126,19 +142,33 @@ export default function UploadForm() {
           <Label htmlFor="photos">Surf Fotos</Label>
           <Input
             id="photos"
-            name="photos" // ✅ Add this line
+            name="photos"
             type="file"
             multiple
             accept="image/*"
             onChange={(e) => setFiles(e.target.files)}
             disabled={isUploading}
           />
-
           {files && (
             <p className="text-sm text-muted-foreground">
               {files.length} file(s) selected
             </p>
           )}
+
+          <div className="pt-4">
+            <Label htmlFor="coverPhoto">カバーフォト</Label>
+            <Input
+              id="coverPhoto"
+              name="coverPhoto"
+              type="file"
+              accept="image/*"
+              onChange={(e) => setCoverPhoto(e.target.files?.[0] || null)}
+              disabled={isUploading}
+            />
+            {coverPhoto && (
+              <p className="text-sm text-muted-foreground">{coverPhoto.name}</p>
+            )}
+          </div>
         </CardContent>
       </Card>
 
