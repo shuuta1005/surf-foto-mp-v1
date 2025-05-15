@@ -8,15 +8,6 @@ import PhotoModal from "./PhotoModal";
 import { GalleryViewProps } from "@/app/types/gallery";
 
 export default function GalleryView({ gallery }: GalleryViewProps) {
-  //   🧠 React is “Top-Down” (Unidirectional Data Flow)
-  // This means:
-
-  // State should live in the parent if multiple children need to share or update it
-
-  // The parent controls the logic
-
-  // It passes props (data + functions) down to the children
-
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(
     null
   );
@@ -45,22 +36,38 @@ export default function GalleryView({ gallery }: GalleryViewProps) {
     <div>
       <GalleryHeader name={gallery.surfSpot} location={gallery.area} />
 
-      {/* ✅ Cover Image */}
-
-      {gallery.photos.length > 0 && (
+      {/* ✅ Cover Image with Metadata Overlay */}
+      {gallery.coverPhoto && (
         <div className="relative w-full bg-white">
           <div className="relative aspect-[16/9] sm:aspect-[3/1] md:aspect-[21/9]">
             <Image
-              src={gallery.photos[0].photoUrl}
+              src={gallery.coverPhoto}
               alt="Gallery Cover"
               fill
-              className="object-contain"
+              className="object-cover brightness-75"
             />
+            <div className="absolute inset-0 flex flex-col justify-center items-center text-white text-center px-4">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
+                {gallery.surfSpot}
+              </h1>
+              <p className="text-sm sm:text-base md:text-lg font-bold">
+                {gallery.prefecture} - {gallery.area}
+              </p>
+              <p className="text-xs sm:text-sm md:text-lg font-semibold">
+                {new Date(gallery.date).toLocaleDateString()}
+              </p>
+              {gallery.sessionTime && (
+                <p className="text-sm sm:text-lg italic font-semibold mt-1">
+                  Session: {gallery.sessionTime}
+                </p>
+              )}
+            </div>
           </div>
         </div>
       )}
+
+      {/* ✅ Gallery Grid */}
       <div className="max-w-7xl mx-auto">
-        {/* ✅ Gallery Grid */}
         <GalleryGrid gallery={gallery} onPhotoClick={handlePhotoClick} />
 
         {/* ✅ Photo Modal */}
