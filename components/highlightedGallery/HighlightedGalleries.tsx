@@ -6,11 +6,12 @@ export default async function HighlightedGalleries() {
 
   const formattedGalleries = galleries.map((gallery) => ({
     id: gallery.id,
-    coverPhoto: gallery.coverPhoto, // ✅ use the proper one!
+    coverPhoto: gallery.coverPhoto,
     surfSpot: gallery.surfSpot,
     prefecture: gallery.prefecture,
     area: gallery.area,
     sessionTime: gallery.sessionTime,
+    date: gallery.date, // ✅ Add this
   }));
 
   return <HighlightedGalleriesClient galleries={formattedGalleries} />;

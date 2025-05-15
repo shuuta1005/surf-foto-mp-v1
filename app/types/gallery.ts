@@ -29,7 +29,8 @@ export type GalleryCardProps = {
   image: string;
   title: string;
   location: string;
-  sessionTime?: string;
+  sessionTime?: string | null;
+  date?: string | Date | null; // ✅ Add this
 };
 
 export type GalleryViewProps = {

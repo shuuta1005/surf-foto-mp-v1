@@ -3,7 +3,14 @@
 // import Link from "next/link";
 // import { Card, CardContent } from "@/components/ui/card";
 // import Image from "next/image";
-// import type { GalleryCardProps } from "@/app/types/gallery";
+
+// interface GalleryCardProps {
+//   id: string;
+//   image: string;
+//   title: string;
+//   location: string;
+//   sessionTime?: string | null;
+// }
 
 // const GalleryCard: React.FC<GalleryCardProps> = ({
 //   id,
@@ -49,14 +56,7 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
-
-interface GalleryCardProps {
-  id: string;
-  image: string;
-  title: string;
-  location: string;
-  sessionTime?: string | null;
-}
+import type { GalleryCardProps } from "@/app/types/gallery";
 
 const GalleryCard: React.FC<GalleryCardProps> = ({
   id,
@@ -64,6 +64,7 @@ const GalleryCard: React.FC<GalleryCardProps> = ({
   title,
   location,
   sessionTime,
+  date, // ✅ Add this line
 }) => {
   return (
     <Link href={`/gallery/${id}`} className="block">
@@ -86,8 +87,14 @@ const GalleryCard: React.FC<GalleryCardProps> = ({
             </p>
 
             {sessionTime && (
-              <p className="text-[10px] sm:text-xs md:text-sm font-light italic">
+              <p className="text-[10px] sm:text-xs md:text-sm font-semibold italic">
                 {sessionTime}
+              </p>
+            )}
+
+            {date && (
+              <p className="text-[10px] sm:text-xs md:text-sm font-semibold mt-1">
+                {new Date(date).toLocaleDateString()}
               </p>
             )}
           </div>

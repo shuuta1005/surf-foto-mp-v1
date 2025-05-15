@@ -13,6 +13,7 @@ interface HighlightedGalleriesProps {
     prefecture: string;
     area: string;
     sessionTime?: string | null;
+    date?: string | Date | null; // ✅ Add this
   }[];
 }
 
