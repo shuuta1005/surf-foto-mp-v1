@@ -49,7 +49,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ url: checkoutSession.url });
   } catch (err) {
-    console.error("Checkout error:", err);
+    console.error("Checkout error:", JSON.stringify(err, null, 2));
     return NextResponse.json(
       { error: "Something went wrong" },
       { status: 500 }
