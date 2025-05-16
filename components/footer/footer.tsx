@@ -120,7 +120,13 @@ const Footer = () => {
           <div>
             <h4 className="font-bold mb-4">Follow Us</h4>
             <div className="flex gap-4 text-xl text-gray-300">
-              <FaInstagram className="hover:text-pink-400 cursor-pointer" />
+              <Link
+                href="https://www.instagram.com/brah_surf_fotos?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <FaInstagram className="hover:text-pink-400 cursor-pointer" />
+              </Link>
               <FaTwitter className="hover:text-blue-400 cursor-pointer" />
               <FaFacebookF className="hover:text-blue-600 cursor-pointer" />
             </div>
