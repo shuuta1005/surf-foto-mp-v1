@@ -1,4 +1,4 @@
-//api/stripe/webhook/route.ts
+// api/stripe/webhook/route.ts
 
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
@@ -12,9 +12,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 export async function POST(req: Request) {
-  // 🧾 Get raw body & signature
   const body = await req.text();
-  const sig = (await headers()).get("stripe-signature");
+  const rawHeaders = await headers(); // ✅ FIXED
+  const sig = rawHeaders.get("stripe-signature");
 
   console.log("📦 Raw body received:", body.slice(0, 200));
   console.log("🧾 Signature header:", sig);
@@ -33,10 +33,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  // 🧠 Handle checkout session completion
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     console.log("💳 Session metadata:", session.metadata);
+
+    // ✅ Only proceed if the session is fully completed and paid
+    if (session.payment_status !== "paid" || session.status !== "complete") {
+      console.warn("⚠️ Skipping session: not marked as paid and complete");
+      return NextResponse.json({ skipped: true }, { status: 200 });
+    }
 
     try {
       const userId = session.metadata?.userId;
@@ -50,16 +55,15 @@ export async function POST(req: Request) {
         );
       }
 
-      // ✅ Create purchase records
       await Promise.all(
-        cartItems.map((item: { photoId: string }) => {
-          return prisma.purchase.create({
+        cartItems.map((item: { photoId: string }) =>
+          prisma.purchase.create({
             data: {
               userId,
               photoId: item.photoId,
             },
-          });
-        })
+          })
+        )
       );
 
       console.log("✅ Purchase records created");
