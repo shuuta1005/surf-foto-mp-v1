@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { IncomingMessage } from "http";
 import { Readable } from "stream";
-import formidable, { File as FormidableFile } from "formidable";
+import formidable, { File as FormidableFile, Fields, Files } from "formidable";
 import { uploadWithWatermarkAndOriginal } from "@/lib/blob-watermark";
 
 export const runtime = "nodejs";
@@ -37,8 +37,8 @@ async function streamRequest(req: Request): Promise<Readable> {
 }
 
 async function parseForm(readable: Readable): Promise<{
-  fields: formidable.Fields;
-  files: formidable.Files;
+  fields: Fields;
+  files: Files;
 }> {
   const form = formidable({
     multiples: true,
@@ -63,17 +63,14 @@ export async function POST(req: Request) {
     const readable = await streamRequest(req);
     const { fields, files } = await parseForm(readable);
 
-    const prefecture = Array.isArray(fields.prefecture)
-      ? fields.prefecture[0]
-      : fields.prefecture;
-    const area = Array.isArray(fields.area) ? fields.area[0] : fields.area;
-    const surfSpot = Array.isArray(fields.surfSpot)
-      ? fields.surfSpot[0]
-      : fields.surfSpot;
-    const date = Array.isArray(fields.date) ? fields.date[0] : fields.date;
-    const sessionTime = Array.isArray(fields.sessionTime)
-      ? fields.sessionTime[0]
-      : fields.sessionTime;
+    const getString = (field: string | string[] | undefined): string =>
+      Array.isArray(field) ? field[0] : field || "";
+
+    const prefecture = getString(fields.prefecture);
+    const area = getString(fields.area);
+    const surfSpot = getString(fields.surfSpot);
+    const dateStr = getString(fields.date);
+    const sessionTime = getString(fields.sessionTime);
 
     const coverPhotoFile = Array.isArray(files.coverPhoto)
       ? files.coverPhoto[0]
@@ -105,10 +102,7 @@ export async function POST(req: Request) {
     );
 
     let coverPhotoUrl: string | undefined = undefined;
-    if (coverPhotoFile) {
-      if (!coverPhotoFile.filepath) {
-        throw new Error("Cover photo file is missing a filepath");
-      }
+    if (coverPhotoFile && coverPhotoFile.filepath) {
       const { originalUrl } = await uploadWithWatermarkAndOriginal(
         coverPhotoFile
       );
@@ -117,11 +111,11 @@ export async function POST(req: Request) {
 
     const newGallery = await prisma.gallery.create({
       data: {
-        prefecture: String(prefecture),
-        area: String(area),
-        surfSpot: String(surfSpot),
-        date: new Date(String(date)),
-        sessionTime: sessionTime || "",
+        prefecture,
+        area,
+        surfSpot,
+        date: new Date(dateStr),
+        sessionTime,
         coverPhoto: coverPhotoUrl || "",
         photographerId: session.user.id,
         isPublic: true,
@@ -132,8 +126,12 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ gallery: newGallery }, { status: 201 });
-  } catch (error) {
-    console.error("Upload failed:", error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "An unknown server error occurred";
+    console.error("Upload failed:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
