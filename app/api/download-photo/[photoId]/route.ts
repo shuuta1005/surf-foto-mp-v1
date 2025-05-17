@@ -30,7 +30,21 @@ export async function GET(
       return NextResponse.json({ error: "Not Found" }, { status: 404 });
     }
 
-    return NextResponse.redirect(purchase.photo.originalUrl);
+    const fileRes = await fetch(purchase.photo.originalUrl);
+
+    const blob = await fileRes.blob();
+    const arrayBuffer = await blob.arrayBuffer();
+
+    const filename = `BraFotos-${photoId}.jpg`;
+
+    return new Response(Buffer.from(arrayBuffer), {
+      status: 200,
+      headers: {
+        "Content-Type": fileRes.headers.get("Content-Type") || "image/jpeg",
+        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Content-Length": String(arrayBuffer.byteLength),
+      },
+    });
   } catch (error) {
     console.error("Download error:", error);
     return NextResponse.json({ error: "Server Error" }, { status: 500 });
