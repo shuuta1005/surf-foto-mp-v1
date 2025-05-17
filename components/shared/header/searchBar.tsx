@@ -11,7 +11,7 @@ const Searchbar = () => {
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
   const [searchValue, setSearchValue] = useState(
-    searchParams.get("search") || ""
+    searchParams?.get("search") || ""
   );
   const barRef = useRef<HTMLDivElement>(null);
 

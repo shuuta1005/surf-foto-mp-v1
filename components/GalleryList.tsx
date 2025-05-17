@@ -27,7 +27,7 @@ export default function GalleryList({
   const searchQuery = initialSearchQuery;
 
   useEffect(() => {
-    const areaFromURL = searchParams.get("area") || "";
+    const areaFromURL = searchParams?.get("area") || "";
     setSelectedArea(areaFromURL);
   }, [searchParams]);
 

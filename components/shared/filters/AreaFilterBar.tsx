@@ -14,12 +14,12 @@ const AreaFilterBar = ({ areas }: AreaFilterBarProps) => {
   const [activeArea, setActiveArea] = useState<string>("");
 
   useEffect(() => {
-    const areaParam = searchParams.get("area") || "";
+    const areaParam = searchParams?.get("area") || "";
     setActiveArea(areaParam);
   }, [searchParams]);
 
   const handleClick = (area: string) => {
-    const newParams = new URLSearchParams(searchParams.toString());
+    const newParams = new URLSearchParams(searchParams?.toString());
 
     if (area === "") {
       newParams.delete("area");
