@@ -39,9 +39,11 @@ export async function POST(req: Request) {
       payment_method_types: ["card"],
       mode: "payment",
       line_items: lineItems,
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout/success`,
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment-success`,
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/cart`,
       locale: "en",
+      customer_email: session.user.email ?? undefined,
+      customer_creation: "always", //
       metadata: {
         userId: session.user.id,
         cart: JSON.stringify(items.map((item) => ({ photoId: item.photoId }))),

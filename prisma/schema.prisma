@@ -9,29 +9,26 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(uuid())
-  name          String    @default("NO_NAME")
-  email         String    @unique(map: "user_email_idx")
+  id            String     @id @default(uuid())
+  name          String     @default("NO_NAME")
+  email         String     @unique(map: "user_email_idx")
   emailVerified DateTime?
   image         String?
   password      String?
-  role          String    @default("user")
-  local_break   Json?     @db.Json
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  accounts Account[]
-  sessions Session[]
-  carts    Cart[]
-
-  // 👇 This line is new
-  galleries Gallery[]  @relation("PhotographerGalleries")
-  Purchase  Purchase[]
+  role          String     @default("user")
+  local_break   Json?      @db.Json
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  accounts      Account?
+  carts         Cart[]
+  galleries     Gallery[]  @relation("PhotographerGalleries")
+  Purchase      Purchase[]
+  sessions      Session[]
 }
 
 model Account {
-  id                String  @id @default(uuid()) // ✅ Added ID for better management
-  userId            String  @unique
+  id                String   @id @default(uuid())
+  userId            String   @unique
   type              String
   provider          String
   providerAccountId String
@@ -42,13 +39,11 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId]) // ✅ More efficient indexing
+  @@unique([provider, providerAccountId])
 }
 
 model Session {
@@ -57,8 +52,7 @@ model Session {
   expires      DateTime
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
@@ -73,18 +67,17 @@ model Cart {
   id            String     @id @default(uuid())
   sessionCartId String     @unique
   userId        String?
-  user          User?      @relation(fields: [userId], references: [id])
-  items         CartItem[]
   totalPrice    Int
   taxPrice      Int?
   afterTaxPrice Int?
   createdAt     DateTime   @default(now())
+  user          User?      @relation(fields: [userId], references: [id])
+  items         CartItem[]
 }
 
 model CartItem {
   id               String    @id @default(uuid())
   cartId           String
-  cart             Cart      @relation(fields: [cartId], references: [id])
   photoId          String
   photoUrl         String
   price            Int
@@ -93,48 +86,40 @@ model CartItem {
   photographerId   String?
   photographerName String?
   slug             String?
+  cart             Cart      @relation(fields: [cartId], references: [id])
 }
 
-// -----------------------NEW MODELS---------------------------------
-
 model Gallery {
-  id         String   @id @default(uuid())
-  prefecture String
-  area       String
-  surfSpot   String
-  date       DateTime
-  isPublic   Boolean  @default(false)
-
-  sessionTime String? // ✅ NEW
-  coverPhoto  String? // ✅ NEW
-
+  id             String   @id @default(uuid())
+  createdAt      DateTime @default(now())
+  area           String
+  date           DateTime
+  isPublic       Boolean  @default(false)
   photographerId String
-  photographer   User   @relation("PhotographerGalleries", fields: [photographerId], references: [id])
-
-  photos    Photo[]
-  createdAt DateTime @default(now())
+  prefecture     String
+  surfSpot       String
+  coverPhoto     String?
+  sessionTime    String?
+  photographer   User     @relation("PhotographerGalleries", fields: [photographerId], references: [id])
+  photos         Photo[]
 }
 
 model Photo {
-  id        String  @id @default(uuid())
-  galleryId String
-  gallery   Gallery @relation(fields: [galleryId], references: [id])
-
-  photoUrl    String // ✅ Blurred + watermarked (shown publicly)
-  originalUrl String? // ✅ High-res version (downloadable post-purchase)
-
-  uploadedAt DateTime   @default(now())
-  isCover    Boolean    @default(false)
-  Purchase   Purchase[]
+  id          String     @id @default(uuid())
+  galleryId   String
+  photoUrl    String
+  uploadedAt  DateTime   @default(now())
+  isCover     Boolean    @default(false)
+  originalUrl String?
+  gallery     Gallery    @relation(fields: [galleryId], references: [id])
+  Purchase    Purchase[]
 }
 
 model Purchase {
-  id     String @id @default(uuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  photoId String
-  photo   Photo  @relation(fields: [photoId], references: [id])
-
+  id        String   @id @default(uuid())
+  userId    String
+  photoId   String
   createdAt DateTime @default(now())
+  photo     Photo    @relation(fields: [photoId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 }
