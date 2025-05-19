@@ -5,13 +5,17 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { CheckCircle } from "lucide-react";
-import { useCart } from "@/lib/context/CartContext"; // ✅ adjust import path as needed
+import { useCart } from "@/lib/context/CartContext"; // Confirmed correct
 
 export default function PaymentSuccessPage() {
   const { clearCart } = useCart();
 
   useEffect(() => {
-    clearCart(); // ✅ this clears state + localStorage and dispatches event
+    try {
+      clearCart();
+    } catch (err) {
+      console.error("❌ Failed to clear cart on success page:", err);
+    }
   }, [clearCart]);
 
   return (
