@@ -1,16 +1,18 @@
 // app/payment-success/page.tsx
 
-"use client";
+"use client"; // ✅ This enables useEffect to run!
 
 import { useEffect } from "react";
 import Link from "next/link";
 import { CheckCircle } from "lucide-react";
 
 export default function PaymentSuccessPage() {
-  // ✅ Clear cart on page load
   useEffect(() => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("cart");
+
+      // 👇 Optional: dispatch a custom event to notify the app (cart icon, etc.)
+      window.dispatchEvent(new Event("cart-updated"));
     }
   }, []);
 
