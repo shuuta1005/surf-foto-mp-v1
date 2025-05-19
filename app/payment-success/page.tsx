@@ -2,21 +2,21 @@
 
 "use client";
 
-import { useEffect } from "react";
+//import { useEffect } from "react";
 import Link from "next/link";
 import { CheckCircle } from "lucide-react";
-import { useCart } from "@/lib/context/CartContext"; // Confirmed correct
+//import { useCart } from "@/lib/context/CartContext"; // Confirmed correct
 
 export default function PaymentSuccessPage() {
-  const { clearCart } = useCart();
+  // const { clearCart } = useCart();
 
-  useEffect(() => {
-    try {
-      clearCart();
-    } catch (err) {
-      console.error("❌ Failed to clear cart on success page:", err);
-    }
-  }, [clearCart]);
+  // useEffect(() => {
+  //   try {
+  //     clearCart();
+  //   } catch (err) {
+  //     console.error("❌ Failed to clear cart on success page:", err);
+  //   }
+  // }, [clearCart]);
 
   return (
     <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 text-center">
