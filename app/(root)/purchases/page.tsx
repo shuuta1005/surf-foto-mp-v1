@@ -16,7 +16,10 @@ export default async function PurchasesPage() {
   const userId = session.user.id;
 
   const purchases = await prisma.purchase.findMany({
-    where: { userId },
+    where: {
+      userId,
+      refunded: false,
+    },
     include: {
       photo: {
         include: {
