@@ -1,9 +1,19 @@
 // app/payment-success/page.tsx
 
+"use client";
+
+import { useEffect } from "react";
 import Link from "next/link";
 import { CheckCircle } from "lucide-react";
 
 export default function PaymentSuccessPage() {
+  // ✅ Clear cart on page load
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("cart");
+    }
+  }, []);
+
   return (
     <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 text-center">
       <CheckCircle className="text-green-500 w-16 h-16 mb-4" />
