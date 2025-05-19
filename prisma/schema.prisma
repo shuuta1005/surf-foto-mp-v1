@@ -116,10 +116,13 @@ model Photo {
 }
 
 model Purchase {
-  id        String   @id @default(uuid())
-  userId    String
-  photoId   String
-  createdAt DateTime @default(now())
-  photo     Photo    @relation(fields: [photoId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
+  id              String   @id @default(uuid())
+  userId          String
+  photoId         String
+  createdAt       DateTime @default(now())
+  paymentIntentId String? // 🛠 Rename if needed to match webhook (was previously stripePaymentIntentId)
+  refunded        Boolean  @default(false) // ✅ Add this
+
+  photo Photo @relation(fields: [photoId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
 }
