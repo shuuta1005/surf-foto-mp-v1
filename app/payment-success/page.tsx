@@ -1,22 +1,24 @@
-// app/payment-success/page.tsx
-
 "use client";
 
-//import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CheckCircle } from "lucide-react";
-//import { useCart } from "@/lib/context/CartContext"; // Confirmed correct
+import { useCart } from "@/lib/context/CartContext";
 
 export default function PaymentSuccessPage() {
-  // const { clearCart } = useCart();
+  const { clearCart } = useCart();
+  const [hasCleared, setHasCleared] = useState(false);
 
-  // useEffect(() => {
-  //   try {
-  //     clearCart();
-  //   } catch (err) {
-  //     console.error("❌ Failed to clear cart on success page:", err);
-  //   }
-  // }, [clearCart]);
+  useEffect(() => {
+    if (typeof window !== "undefined" && !hasCleared) {
+      try {
+        clearCart();
+        setHasCleared(true); // ✅ avoid repeated calls
+      } catch (err) {
+        console.error("❌ Failed to clear cart on success page:", err);
+      }
+    }
+  }, [clearCart, hasCleared]);
 
   return (
     <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 text-center">
