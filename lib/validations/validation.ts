@@ -59,3 +59,12 @@ export const insertCartSchema = z.object({
   sessionCartId: z.string().min(1, "Session cart ID is required"),
   userId: z.string().optional(), // only if user is logged in
 });
+
+// ✅ Gallery upload validation
+export const uploadGallerySchema = z.object({
+  prefecture: z.string().min(1, "Prefecture is required"),
+  area: z.string().min(1, "Area is required"),
+  surfSpot: z.string().min(1, "Surf spot is required"),
+  date: z.string().min(1, "Date is required"), // Can add regex or transform to Date if needed
+  sessionTime: z.string().optional(),
+});
