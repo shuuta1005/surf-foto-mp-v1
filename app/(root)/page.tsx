@@ -1,8 +1,8 @@
 //page.tsx defines the homepage content and gets inserted into layout.tsx.
 
-import DestinationsGrid from "@/components/destinationGrid/DestinationsGrid";
-import HighlightedGalleries from "@/components/highlightedGallery/HighlightedGalleries";
-import HighlightedPhotos from "@/components/highlightedPhotos/HighlightedPhotos";
+import DestinationsGrid from "@/components/homePageComponents/destinationGrid/DestinationsGrid";
+import HighlightedGalleries from "@/components/homePageComponents/highlightedGallery/HighlightedGalleries";
+import HighlightedPhotos from "@/components/homePageComponents/highlightedPhotos/HighlightedPhotos";
 // import { getFilterOptions } from "@/lib/actions/gallery";
 import { getAllGalleries } from "@/lib/queries/gallery";
 

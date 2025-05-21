@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getGalleryById } from "@/lib/queries/gallery";
-import { Gallery } from "@/app/types/gallery";
+import { Gallery } from "@/types/gallery";
 import GalleryView from "./GalleryView"; // ✅ Import a separate client component
 
 export default async function GalleryPage({

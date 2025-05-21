@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
-import { useCart } from "@/lib/context/CartContext";
+import { useCart } from "@/features/cart/CartContext";
 import { ShoppingCart } from "lucide-react";
 
 export default function PhotoModal({

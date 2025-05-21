@@ -9,7 +9,7 @@ import { signInDefaultValues } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { toast } from "@/components/ui/use-toast";
-import FormField from "@/components/form/formField";
+import FormField from "@/components/shared/formField";
 
 type SignInData = z.infer<typeof signInSchema>; // typeof = the type of the Zod object
 

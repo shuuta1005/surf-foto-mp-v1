@@ -63,8 +63,8 @@
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import type { CartItem } from "@/app/types/cart";
-import { getDiscountedTotal } from "@/lib/cart-utils"; // ✅ import new util
+import type { CartItem } from "@/types/cart";
+import { getDiscountedTotal } from "@/features/cart/cart-utils"; // ✅ import new util
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-04-30.basil",

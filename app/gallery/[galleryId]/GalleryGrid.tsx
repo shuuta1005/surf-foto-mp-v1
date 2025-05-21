@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { Gallery } from "@/app/types/gallery";
+import { Gallery } from "@/types/gallery";
 import { ShoppingCart } from "lucide-react";
-import { useCart } from "@/lib/context/CartContext";
+import { useCart } from "@/features/cart/CartContext";
 
 type GalleryGridProps = {
   gallery: Gallery;

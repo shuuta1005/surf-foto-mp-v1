@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CheckCircle } from "lucide-react";
-import { useCart } from "@/lib/context/CartContext";
+import { useCart } from "@/features/cart/CartContext";
 
 export default function PaymentSuccessPage() {
   const { clearCart } = useCart();

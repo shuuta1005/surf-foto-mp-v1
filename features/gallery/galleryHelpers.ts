@@ -1,4 +1,4 @@
-import { Gallery } from "@/app/types/gallery";
+import { Gallery } from "@/types/gallery";
 
 export function formatGalleries(galleries: Gallery[]): Array<{
   id: string;

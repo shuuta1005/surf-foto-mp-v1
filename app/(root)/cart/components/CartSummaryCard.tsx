@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useCart } from "@/lib/context/CartContext";
+import { useCart } from "@/features/cart/CartContext";
 
 const formatYen = (price: number) => `¥${price.toLocaleString("ja-JP")}`;
 

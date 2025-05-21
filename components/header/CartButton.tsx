@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
-import { useCart } from "@/lib/context/CartContext";
+import { useCart } from "@/features/cart/CartContext";
 
 const CartButton = () => {
   const { items } = useCart();

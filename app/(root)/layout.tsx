@@ -4,7 +4,7 @@
 // app/(root)/layout.tsx
 
 import Footer from "@/components/footer/footer";
-import HeaderContainer from "@/components/shared/header/header-container";
+import HeaderContainer from "@/components/header/header-container";
 
 export default async function RootLayout({
   children,

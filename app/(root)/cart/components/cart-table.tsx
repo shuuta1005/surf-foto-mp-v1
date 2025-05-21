@@ -1,7 +1,7 @@
 // // //app/(root)/cart/cart-table.tsx
 "use client";
 
-import { useCart } from "@/lib/context/CartContext";
+import { useCart } from "@/features/cart/CartContext";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import CartItemsTable from "./CartItemsTable";

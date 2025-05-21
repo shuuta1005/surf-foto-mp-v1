@@ -1,7 +1,7 @@
 //app/(root)/galleries/page.tsx
 
 import { getAllGalleries } from "@/lib/queries/gallery";
-import GalleryList from "@/components/GalleryList";
+import GalleryList from "@/components/shared/GalleryList";
 
 interface GalleriesPageProps {
   searchParams: Promise<{ area?: string; search?: string }>;

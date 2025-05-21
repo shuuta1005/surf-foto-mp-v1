@@ -1,3 +1,5 @@
+//app/no-found.tsx
+
 "use client";
 
 import { APP_NAME } from "@/lib/constants";

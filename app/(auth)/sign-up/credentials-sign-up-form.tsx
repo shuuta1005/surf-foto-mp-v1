@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import FormField from "@/components/form/formField";
+import FormField from "@/components/shared/formField";
 import { signUpDefaultValues } from "@/lib/constants";
 
 type SignUpData = z.infer<typeof signUpSchema>;

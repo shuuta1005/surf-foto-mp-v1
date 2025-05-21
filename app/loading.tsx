@@ -1,3 +1,5 @@
+//app/loading.tsx
+
 import Image from "next/image";
 import waveLoader from "@/assets/wave-loader.gif";
 

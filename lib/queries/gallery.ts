@@ -1,7 +1,7 @@
 // db/gallery.ts
 
 import { prisma } from "@/lib/db";
-import { Gallery } from "@/app/types/gallery"; // ✅ your custom Gallery type
+import { Gallery } from "@/types/gallery"; // ✅ your custom Gallery type
 
 // ✅ Fetch all galleries with photos and photographer info
 export async function getAllGalleries(): Promise<Gallery[]> {

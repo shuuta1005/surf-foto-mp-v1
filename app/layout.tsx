@@ -1,9 +1,11 @@
+//app/layout.tsx
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Noto_Serif_JP } from "next/font/google";
 import "@/assets/styles/globals.css";
 import { APP_DESCRIPTION, APP_NAME, SERVER_URL } from "@/lib/constants";
-import { CartProvider } from "@/lib/context/CartContext";
-import NextAuthProvider from "@/components/providers/session-provider";
+import { CartProvider } from "@/features/cart/CartContext";
+import NextAuthProvider from "@/app/providers/session-provider";
 
 // Importing Google Fonts
 const geistSans = Geist({

@@ -3,7 +3,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { CartItem } from "@/app/types/cart";
+import { CartItem } from "@/types/cart";
 
 type CartContextType = {
   items: CartItem[];

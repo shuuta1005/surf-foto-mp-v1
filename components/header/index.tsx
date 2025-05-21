@@ -1,13 +1,13 @@
 // components/shared/header/index.tsx
 
-import UserButton from "./user-button-client";
+import UserButton from "./user-button/user-button-client";
 import { Session } from "next-auth";
 import SideMenu from "./SideMenu";
 import Logo from "./logo";
 import Searchbar from "./searchBar";
-import AreaFilterBar from "@/components/shared/filters/AreaFilterBar";
+import AreaFilterBar from "@/components/filters/AreaFilterBar";
 import CartButton from "./CartButton";
-import AnnouncementBar from "../announcementBar/AnnouncementBar"; // ✅ already imported
+import AnnouncementBar from "../homePageComponents/announcementBar/AnnouncementBar"; // ✅ already imported
 
 interface HeaderProps {
   session: Session | null;

@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import type { Gallery } from "@/app/types/gallery";
+import type { Gallery } from "@/types/gallery";
 
 interface GalleryListProps {
   galleries: Gallery[];

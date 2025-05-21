@@ -56,7 +56,7 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
-import type { GalleryCardProps } from "@/app/types/gallery";
+import type { GalleryCardProps } from "@/types/gallery";
 
 const GalleryCard: React.FC<GalleryCardProps> = ({
   id,

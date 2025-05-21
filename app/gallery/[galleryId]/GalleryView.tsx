@@ -5,7 +5,7 @@ import Image from "next/image";
 import GalleryHeader from "./GalleryHeader";
 import GalleryGrid from "./GalleryGrid";
 import PhotoModal from "./PhotoModal";
-import { GalleryViewProps } from "@/app/types/gallery";
+import { GalleryViewProps } from "@/types/gallery";
 
 export default function GalleryView({ gallery }: GalleryViewProps) {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(
