@@ -1,14 +1,16 @@
-// app/admin/upload/components/UploadForm.tsx
+// // // app/admin/upload/components/UploadForm.tsx
+
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@radix-ui/react-label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import UploadingOverlay from "./UploadingOverlay";
+import UploadSessionDetails from "./UploadSessionDetails";
+import UploadPhotoSelector from "./UploadPhotoSelector";
+import { uploadGallerySchema } from "@/lib/validations/validation";
 
 export default function UploadForm() {
   const [prefecture, setPrefecture] = useState("");
@@ -19,11 +21,59 @@ export default function UploadForm() {
   const [files, setFiles] = useState<FileList | null>(null);
   const [coverPhoto, setCoverPhoto] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
   const router = useRouter();
+
+  const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const dropped = e.dataTransfer.files;
+    if (dropped.length) setFiles(dropped);
+  };
+
+  const handleCoverDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const dropped = e.dataTransfer.files;
+    if (dropped.length) setCoverPhoto(dropped[0]); // only use the first one
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!files || files.length === 0) return;
+
+    const validation = uploadGallerySchema.safeParse({
+      prefecture,
+      area,
+      surfSpot,
+      date,
+      sessionTime,
+    });
+
+    if (!validation.success) {
+      const fieldErrors: Record<string, string> = {};
+      for (const err of validation.error.errors) {
+        if (err.path[0]) {
+          fieldErrors[err.path[0] as string] = err.message;
+        }
+      }
+      setFormErrors(fieldErrors);
+      toast({
+        title: "Validation Error",
+        description: "Please fix the highlighted fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setFormErrors({});
+
+    if (!files || files.length === 0) {
+      toast({
+        title: "No photos",
+        description: "Please select at least one photo.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsUploading(true);
 
@@ -34,11 +84,7 @@ export default function UploadForm() {
       formData.append("surfSpot", surfSpot);
       formData.append("date", date);
       formData.append("sessionTime", sessionTime);
-
-      Array.from(files).forEach((file) => {
-        formData.append("photos", file);
-      });
-
+      Array.from(files).forEach((file) => formData.append("photos", file));
       if (coverPhoto) {
         formData.append("coverPhoto", coverPhoto);
       }
@@ -50,13 +96,12 @@ export default function UploadForm() {
 
       if (res.ok) {
         toast({
-          title: "Gallery uploaded",
+          title: "Gallery uploaded 🎉",
           description: "Your photos are live!",
         });
         router.push("/galleries");
       } else {
         const data = await res.json();
-        console.error("Upload failed:", data);
         toast({
           title: "Upload failed",
           description: data.message || "Please try again.",
@@ -84,56 +129,20 @@ export default function UploadForm() {
             <CardTitle>Surf Session Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="prefecture">都道府県</Label>
-              <Input
-                id="prefecture"
-                value={prefecture}
-                onChange={(e) => setPrefecture(e.target.value)}
-                placeholder="e.g. 千葉"
-                disabled={isUploading}
-              />
-            </div>
-            <div>
-              <Label htmlFor="area">エリア</Label>
-              <Input
-                id="area"
-                value={area}
-                onChange={(e) => setArea(e.target.value)}
-                placeholder="e.g. 千葉北"
-                disabled={isUploading}
-              />
-            </div>
-            <div>
-              <Label htmlFor="surfSpot">サーフスポット</Label>
-              <Input
-                id="surfSpot"
-                value={surfSpot}
-                onChange={(e) => setSurfSpot(e.target.value)}
-                placeholder="e.g. 一宮海岸"
-                disabled={isUploading}
-              />
-            </div>
-            <div>
-              <Label htmlFor="date">日にち</Label>
-              <Input
-                id="date"
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                disabled={isUploading}
-              />
-            </div>
-            <div>
-              <Label htmlFor="sessionTime">セッション時間</Label>
-              <Input
-                id="sessionTime"
-                placeholder="e.g. 2PM - 4PM"
-                value={sessionTime}
-                onChange={(e) => setSessionTime(e.target.value)}
-                disabled={isUploading}
-              />
-            </div>
+            <UploadSessionDetails
+              prefecture={prefecture}
+              setPrefecture={setPrefecture}
+              area={area}
+              setArea={setArea}
+              surfSpot={surfSpot}
+              setSurfSpot={setSurfSpot}
+              date={date}
+              setDate={setDate}
+              sessionTime={sessionTime}
+              setSessionTime={setSessionTime}
+              disabled={isUploading}
+              formErrors={formErrors}
+            />
           </CardContent>
         </Card>
 
@@ -141,39 +150,16 @@ export default function UploadForm() {
           <CardHeader>
             <CardTitle>Photos</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <Label htmlFor="photos">Surf Fotos</Label>
-            <Input
-              id="photos"
-              name="photos"
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={(e) => setFiles(e.target.files)}
+          <CardContent className="space-y-4">
+            <UploadPhotoSelector
+              files={files}
+              setFiles={setFiles}
+              coverPhoto={coverPhoto}
+              setCoverPhoto={setCoverPhoto}
               disabled={isUploading}
+              onDrop={handleFileDrop}
+              onCoverDrop={handleCoverDrop} // ✅ ADD THIS LINE
             />
-            {files && (
-              <p className="text-sm text-muted-foreground">
-                {files.length} file(s) selected
-              </p>
-            )}
-
-            <div className="pt-4">
-              <Label htmlFor="coverPhoto">カバーフォト</Label>
-              <Input
-                id="coverPhoto"
-                name="coverPhoto"
-                type="file"
-                accept="image/*"
-                onChange={(e) => setCoverPhoto(e.target.files?.[0] || null)}
-                disabled={isUploading}
-              />
-              {coverPhoto && (
-                <p className="text-sm text-muted-foreground">
-                  {coverPhoto.name}
-                </p>
-              )}
-            </div>
           </CardContent>
         </Card>
 
@@ -184,22 +170,3 @@ export default function UploadForm() {
     </>
   );
 }
-
-// 🧠 Reminder: Why Zod will eventually matter
-// Later, when your upload forms get more complex (e.g., optional fields, price settings, photo rights, photographer assignments, etc.) manually checking all fields becomes:
-
-// Repetitive
-
-// Hard to maintain
-
-// Easy to make mistakes
-
-// Zod allows you to:
-
-// ✅ Define your upload schema once
-// ✅ Validate incoming form data both on the client and server easily
-// ✅ Show super clean error messages to users
-// ✅ Trust your data even if users tamper with the frontend
-
-// But no rush —
-// You’re doing the right thing focusing on shipping clean MVP first!

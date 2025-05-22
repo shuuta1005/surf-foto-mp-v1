@@ -1,8 +1,8 @@
 // lib/blob-watermark.ts
 
-import sharp from "sharp";
+import sharp from "sharp"; //sharp is a library for editing images (resizing, adding watermarks, etc.)
 import { put } from "@vercel/blob";
-import fs from "fs/promises";
+import fs from "fs/promises"; //fs is Node's file system module (promises version).
 import path from "path";
 import { File as FormidableFile } from "formidable";
 
@@ -23,19 +23,22 @@ export async function uploadWithWatermarkAndOriginal(
 
   // Upload original photo
   const original = await put(
+    //put(...) uploads the original photo using its filename or “original.jpg”
     file.originalFilename || "original.jpg",
-    fileBuffer,
+    fileBuffer, //fileBuffer is the actual photo data.
     {
-      access: "public",
-      token,
+      access: "public", //access: "public" means people can view it online.
+      token, //token is needed to upload.
     }
   );
 
   // Load watermark
-  const watermarkPath = path.join(process.cwd(), "public", "watermark.png");
-  const rawWatermark = await fs.readFile(watermarkPath);
-  const watermarkBuffer = await sharp(rawWatermark)
+  const watermarkPath = path.join(process.cwd(), "public", "watermark.png"); //Builds the full file path to public/watermark.png.
+  const rawWatermark = await fs.readFile(watermarkPath); //Reads the watermark image file into memory.
+  const watermarkBuffer = await sharp(rawWatermark) //Resize the watermark image to 700px wide
     .resize({ width: 700 })
+    // You want to “compose” the watermark onto another image — like putting a sticker on a photo.
+    // To do that, both images must be in memory, and in a format sharp understands — that’s a Buffer.
     .toBuffer();
 
   // Apply blur and watermark
@@ -46,8 +49,8 @@ export async function uploadWithWatermarkAndOriginal(
       { input: watermarkBuffer, top: 300, left: 900 },
       { input: watermarkBuffer, top: 300, left: 50 },
     ])
-    .jpeg()
-    .toBuffer();
+    .jpeg() //Convert the final image into JPEG format
+    .toBuffer(); //Output it as a buffer ready to upload
 
   // Upload watermarked image
   const watermarked = await put(
