@@ -1,5 +1,8 @@
 // //app/components/GalleryList.tsx
 
+//used in
+////app/(root)/galleries/page.tsx
+
 "use client";
 
 import { useEffect, useState } from "react";

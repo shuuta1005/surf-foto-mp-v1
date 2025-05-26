@@ -4,6 +4,7 @@ import { getAllGalleries } from "@/lib/queries/gallery";
 import GalleryList from "@/components/shared/GalleryList";
 
 interface GalleriesPageProps {
+  //Maybe move this?
   searchParams: Promise<{ area?: string; search?: string }>;
 }
 
