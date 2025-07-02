@@ -41,3 +41,21 @@ export const isStrongPassword = (password: string): boolean => {
   const regex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
   return regex.test(password);
 };
+
+export const validatePassword = (password: string): string[] => {
+  const errors: string[] = [];
+
+  if (password.length < 8) {
+    errors.push("Password must be at least 8 characters long.");
+  }
+
+  if (!/[A-Za-z]/.test(password)) {
+    errors.push("Password must include at least one letter.");
+  }
+
+  if (!/\d/.test(password)) {
+    errors.push("Password must include at least one number.");
+  }
+
+  return errors;
+};
