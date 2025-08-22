@@ -17,4 +17,8 @@ export const signUpDefaultValues = {
 };
 
 // lib/constants.ts
-export const ADMIN_EMAILS = ["adminbra1@email.com", "adminbra2@email.com"];
+export const ADMIN_EMAILS = [
+  "adminbra1@email.com",
+  "adminbra2@email.com",
+  "shutafute26@gmail.com",
+];
