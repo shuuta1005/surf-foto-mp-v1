@@ -1,3 +1,4 @@
+//app/(auth)/layout.tsx
 import { Toaster } from "sonner";
 
 export default function AuthLayout({
