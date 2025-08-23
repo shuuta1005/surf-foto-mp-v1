@@ -1,3 +1,5 @@
+// app/admin/upload/components/UploadPhotoSelector.tsx
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-label";
 import { UploadCloud, XCircle } from "lucide-react";

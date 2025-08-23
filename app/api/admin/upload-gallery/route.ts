@@ -12,7 +12,6 @@ import type { Fields, Files } from "formidable";
 
 export const runtime = "nodejs";
 
-// This is a function you wrote yourself, right in this file.
 // It takes the incoming request (req) — which includes:
 // fields like “surfSpot”, “area”, etc.
 // and uploaded files (images)
@@ -45,7 +44,7 @@ function parseFormData(
     //Now that you have lots of small pieces (chunks), you stick them together to make one full thing.
     const buffer = Buffer.concat(chunks);
 
-    //This part is weird, but here's what it does:
+    // This part is weird, but here's what it does:
     // You turn that full buffer into a stream (like a pipe that Formidable can drink from).
     // Then you manually attach some “headers” to this stream — so Formidable knows what kind of data it's getting.
     const stream = Readable.from(buffer);
@@ -83,16 +82,18 @@ export async function POST(req: Request) {
 
     const data = {
       //“If it's an array, grab the first item. Otherwise, use it as is.”
-      prefecture: fields.prefecture?.[0] || fields.prefecture,
-      area: fields.area?.[0] || fields.area,
-      surfSpot: fields.surfSpot?.[0] || fields.surfSpot,
-      date: fields.date?.[0] || fields.date,
-      sessionTime: fields.sessionTime?.[0] || fields.sessionTime,
+
+      prefecture: fields.prefecture,
+      area: fields.area,
+      surfSpot: fields.surfSpot,
+      date: fields.date,
+      sessionTime: fields.sessionTime,
     };
 
     //This uses the Zod schema to check that the form input is correct.
     //safeParse(data) tries to validate the fields.
-    const parsed = uploadGallerySchema.safeParse(data);
+    const parsed = uploadGallerySchema.safeParse(data); //TODO: Review zod schemas
+
     if (!parsed.success) {
       //If validation fails, you return an error.
       return NextResponse.json(
@@ -108,6 +109,15 @@ export async function POST(req: Request) {
     const coverPhotoFile = Array.isArray(files.coverPhoto)
       ? files.coverPhoto[0]
       : files.coverPhoto;
+
+    //Simple check: if not no cover photo is updated return an error.
+
+    if (!coverPhotoFile || !coverPhotoFile.filepath) {
+      return NextResponse.json(
+        { error: "Cover photo is required" },
+        { status: 400 }
+      );
+    }
 
     //This makes sure photoFiles is always an array, even if there’s only one photo.
     const photoFiles = Array.isArray(files.photos)
@@ -189,155 +199,3 @@ export async function POST(req: Request) {
     );
   }
 }
-
-// // app/api/admin/upload-gallery/route.ts
-
-// import { auth } from "@/auth";
-// import { prisma } from "@/lib/db";
-// import { NextResponse } from "next/server";
-// import { IncomingMessage } from "http"; // used for handling file streams
-// import { Readable } from "stream"; // lets us turn uploaded files into readable data
-// import formidable, { File as FormidableFile, Fields, Files } from "formidable"; // used to handle form uploads
-// import { uploadWithWatermarkAndOriginal } from "@/lib/blob-watermark";
-
-// export const runtime = "nodejs";
-
-// async function streamRequest(req: Request): Promise<Readable> {
-//   // 💬 You’re creating a function called streamRequest.
-//   // It takes the uploaded request (req) and turns it into something readable.
-
-//   const reader = req.body?.getReader();
-//   if (!reader) throw new Error("No readable stream");
-
-//   const chunks: Uint8Array[] = [];
-//   let done = false;
-
-//   while (!done) {
-//     // 🔍 This loop:　Reads the upload bit by bit
-//     // Stores those pieces in an array called chunks
-//     const { value, done: readerDone } = await reader.read();
-//     if (value) chunks.push(value);
-//     done = readerDone;
-//   }
-//   //All your chunks are merged into one thing (buffer)
-//   const buffer = Buffer.concat(chunks);
-//   //Then it gets turned into a readable stream — like opening a file
-//   const readable = Readable.from(buffer);
-
-//   Object.assign(readable, {
-//     headers: {
-//       "content-type": req.headers.get("content-type") || "",
-//       "content-length": buffer.length.toString(),
-//     },
-//   });
-
-//   return readable;
-// }
-
-// //You're creating another function: this one splits the form into:
-// // fields: the text (like “prefecture”, “surfSpot”)
-// // files: the uploaded photos
-// async function parseForm(readable: Readable): Promise<{
-//   fields: Fields;
-//   files: Files;
-// }> {
-//   const form = formidable({
-//     multiples: true,
-//     keepExtensions: true,
-//   });
-//   // You parse the file. If it works,
-//   // you return the text fields and file uploads.
-//   // If it fails, it throws an error.
-//   return new Promise((resolve, reject) => {
-//     form.parse(readable as IncomingMessage, (err, fields, files) => {
-//       if (err) reject(err);
-//       else resolve({ fields, files });
-//     });
-//   });
-// }
-
-// //This is the function that actually runs when someone uploads a new gallery.
-// export async function POST(req: Request) {
-//   try {
-//     const session = await auth();
-//     if (!session?.user?.id) {
-//       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-//     }
-
-//     //Reads the uploaded form
-//     const readable = await streamRequest(req);
-//     //Extracts text and file data from it
-//     const { fields, files } = await parseForm(readable);
-
-//     const getString = (field: string | string[] | undefined): string =>
-//       Array.isArray(field) ? field[0] : field || "";
-
-//     const prefecture = getString(fields.prefecture);
-//     const area = getString(fields.area);
-//     const surfSpot = getString(fields.surfSpot);
-//     const dateStr = getString(fields.date);
-//     const sessionTime = getString(fields.sessionTime);
-
-//     const coverPhotoFile = Array.isArray(files.coverPhoto)
-//       ? files.coverPhoto[0]
-//       : files.coverPhoto;
-
-//     const photoFiles = Array.isArray(files.photos)
-//       ? files.photos
-//       : files.photos
-//       ? [files.photos]
-//       : [];
-
-//     if (photoFiles.length === 0) {
-//       return NextResponse.json(
-//         { error: "No photos provided" },
-//         { status: 400 }
-//       );
-//     }
-
-//     const uploaded = await Promise.all(
-//       photoFiles.map(async (file: FormidableFile, index: number) => {
-//         const { originalUrl, watermarkedUrl } =
-//           await uploadWithWatermarkAndOriginal(file);
-//         return {
-//           photoUrl: watermarkedUrl,
-//           originalUrl,
-//           isCover: index === 0,
-//         };
-//       })
-//     );
-
-//     let coverPhotoUrl: string | undefined = undefined;
-//     if (coverPhotoFile && coverPhotoFile.filepath) {
-//       const { originalUrl } = await uploadWithWatermarkAndOriginal(
-//         coverPhotoFile
-//       );
-//       coverPhotoUrl = originalUrl;
-//     }
-
-//     const newGallery = await prisma.gallery.create({
-//       data: {
-//         prefecture,
-//         area,
-//         surfSpot,
-//         date: new Date(dateStr),
-//         sessionTime,
-//         coverPhoto: coverPhotoUrl || "",
-//         photographerId: session.user.id,
-//         isPublic: true,
-//         photos: {
-//           create: uploaded,
-//         },
-//       },
-//     });
-
-//     return NextResponse.json({ gallery: newGallery }, { status: 201 });
-//   } catch (error: unknown) {
-//     const message =
-//       error instanceof Error
-//         ? error.message
-//         : "An unknown server error occurred";
-//     console.error("Upload failed:", message);
-//     return NextResponse.json({ error: message }, { status: 500 });
-//   }
-// }
