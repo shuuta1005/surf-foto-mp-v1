@@ -109,7 +109,7 @@ model Photo {
   galleryId   String
   photoUrl    String
   uploadedAt  DateTime   @default(now())
-  isCover     Boolean    @default(false)
+  //isCover     Boolean    @default(false)
   originalUrl String?
   gallery     Gallery    @relation(fields: [galleryId], references: [id])
   Purchase    Purchase[]

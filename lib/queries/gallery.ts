@@ -30,7 +30,6 @@ export async function getAllGalleries(): Promise<Gallery[]> {
           galleryId: true,
           photoUrl: true,
           uploadedAt: true,
-          isCover: true,
         },
       },
     },

@@ -137,7 +137,7 @@ export async function POST(req: Request) {
     const uploaded = await Promise.all(
       //Promise.all(...) = this runs a bunch of async tasks at the same time and waits until all of them are done.
       //“Run all the photo uploads at the same time. When they’re all done, give me the results.”
-      photoFiles.map(async (file: FormidableFile, index: number) => {
+      photoFiles.map(async (file: FormidableFile) => {
         const { originalUrl, watermarkedUrl } =
           await uploadWithWatermarkAndOriginal(file);
         return {
@@ -150,8 +150,6 @@ export async function POST(req: Request) {
           // 2. Remove `isCover` from Prisma schema
           // 3. Run `npx prisma migrate dev` or `db push`
           // 4. Search for any `.isCover` usage and clean up
-
-          isCover: index === 0,
         };
       })
     );

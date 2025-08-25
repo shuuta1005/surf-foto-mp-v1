@@ -5,7 +5,6 @@ export type Photo = {
   galleryId: string;
   photoUrl: string;
   uploadedAt: Date;
-  isCover: boolean;
 };
 
 export type Gallery = {
