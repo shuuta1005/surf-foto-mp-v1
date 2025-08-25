@@ -44,7 +44,6 @@ function parseFormData(
     //Now that you have lots of small pieces (chunks), you stick them together to make one full thing.
     const buffer = Buffer.concat(chunks);
 
-    // This part is weird, but here's what it does:
     // You turn that full buffer into a stream (like a pipe that Formidable can drink from).
     // Then you manually attach some “headers” to this stream — so Formidable knows what kind of data it's getting.
     const stream = Readable.from(buffer);
@@ -81,36 +80,27 @@ export async function POST(req: Request) {
     const { fields, files } = await parseFormData(req);
 
     const data = {
-      //“If it's an array, grab the first item. Otherwise, use it as is.”
-
-      prefecture: fields.prefecture,
-      area: fields.area,
-      surfSpot: fields.surfSpot,
-      date: fields.date,
-      sessionTime: fields.sessionTime,
+      prefecture: Array.isArray(fields.prefecture) ? fields.prefecture[0] : fields.prefecture,
+      area: Array.isArray(fields.area) ? fields.area[0] : fields.area,
+      surfSpot: Array.isArray(fields.surfSpot) ? fields.surfSpot[0] : fields.surfSpot,
+      date: Array.isArray(fields.date) ? fields.date[0] : fields.date,
+      sessionTime: Array.isArray(fields.sessionTime) ? fields.sessionTime[0] : fields.sessionTime,
     };
 
-    //This uses the Zod schema to check that the form input is correct.
-    //safeParse(data) tries to validate the fields.
-    const parsed = uploadGallerySchema.safeParse(data); //TODO: Review zod schemas
-
+    const parsed = uploadGallerySchema.safeParse(data);
     if (!parsed.success) {
-      //If validation fails, you return an error.
+      console.error("❌ Invalid form data:", parsed.error.format());
       return NextResponse.json(
         { error: "Invalid form data", details: parsed.error.format() },
         { status: 400 }
       );
     }
 
-    //Now you can use the cleaned and validated values from the form.
     const { prefecture, area, surfSpot, date, sessionTime } = parsed.data;
 
-    //→ If coverPhoto is an array, grab the first image. If not, just use it directly.
     const coverPhotoFile = Array.isArray(files.coverPhoto)
       ? files.coverPhoto[0]
       : files.coverPhoto;
-
-    //Simple check: if not no cover photo is updated return an error.
 
     if (!coverPhotoFile || !coverPhotoFile.filepath) {
       return NextResponse.json(
@@ -119,14 +109,12 @@ export async function POST(req: Request) {
       );
     }
 
-    //This makes sure photoFiles is always an array, even if there’s only one photo.
     const photoFiles = Array.isArray(files.photos)
       ? files.photos
       : files.photos
       ? [files.photos]
       : [];
 
-    //Simple check: if no photos were uploaded, return an error.
     if (photoFiles.length === 0) {
       return NextResponse.json(
         { error: "No photos provided" },
@@ -135,42 +123,21 @@ export async function POST(req: Request) {
     }
 
     const uploaded = await Promise.all(
-      //Promise.all(...) = this runs a bunch of async tasks at the same time and waits until all of them are done.
-      //“Run all the photo uploads at the same time. When they’re all done, give me the results.”
       photoFiles.map(async (file: FormidableFile) => {
-        const { originalUrl, watermarkedUrl } =
-          await uploadWithWatermarkAndOriginal(file);
+        const { originalUrl, watermarkedUrl } = await uploadWithWatermarkAndOriginal(file);
         return {
           photoUrl: watermarkedUrl,
           originalUrl,
-          // TODO: Remove `isCover` field from photo upload logic, Photo model, and any related UI or DB logic.
-          // Reason: `coverPhoto` is now handled separately and isCover is unused/redundant.
-          // Steps:
-          // 1. Remove `isCover` from the upload return object
-          // 2. Remove `isCover` from Prisma schema
-          // 3. Run `npx prisma migrate dev` or `db push`
-          // 4. Search for any `.isCover` usage and clean up
         };
       })
     );
 
-    //Upload the cover photo (original only, no watermark)
-    //If there is a cover photo uploaded, upload it and get the URL.
-    // Save that as coverPhotoUrl.
     let coverPhotoUrl = "";
     if (coverPhotoFile && coverPhotoFile.filepath) {
-      const { originalUrl } = await uploadWithWatermarkAndOriginal(
-        coverPhotoFile
-      );
+      const { originalUrl } = await uploadWithWatermarkAndOriginal(coverPhotoFile);
       coverPhotoUrl = originalUrl;
     }
 
-    // You’re now creating a new gallery in your database with:
-    // 📍 prefecture, area, surfSpot
-    // 📅 date, sessionTime
-    // 🖼️ coverPhoto
-    // 👤 photographerId
-    // 📸 An array of photos (from the uploaded list)
     const newGallery = await prisma.gallery.create({
       data: {
         prefecture,
@@ -187,7 +154,7 @@ export async function POST(req: Request) {
       },
     });
 
-    //If everything worked, you send a 201 Created response with the saved gallery info.
+    console.log("✅ Gallery created:", newGallery.id);
     return NextResponse.json({ gallery: newGallery }, { status: 201 });
   } catch (error) {
     console.error("❌ Upload failed:", error);

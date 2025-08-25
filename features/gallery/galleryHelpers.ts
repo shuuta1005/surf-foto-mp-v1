@@ -12,7 +12,8 @@
 //     id: gallery.id,
 //     name: `${gallery.surfSpot}- ${gallery.area}`,
 //     location: gallery.surfSpot || null,
-//     coverImage: gallery.photos.find((p) => p.isCover)?.photoUrl || "", // Ensure coverImage is never null
+//     // coverImage: gallery.photos.find((p) => p.isCover)?.photoUrl || "", // Ensure coverImage is never null
+//     coverImage: "", // Ensure coverImage is never null
 //     createdAt: gallery.createdAt, // ✅ Include createdAt
 //     photos: gallery.photos, // ✅ Ensure photos are included
 //   }));

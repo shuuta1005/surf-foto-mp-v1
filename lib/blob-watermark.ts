@@ -67,3 +67,40 @@ export async function uploadWithWatermarkAndOriginal(
     watermarkedUrl: watermarked.url,
   };
 }
+
+// ✅ Future To-Do List: Photo Deletion System
+// Here’s a clean checklist you can revisit when you’re ready:
+
+// 🔧 Core Logic
+// [ ] Add photoUrl and originalUrl fields to your Prisma schema (if not already)
+
+// [ ] Create a reusable deletePhoto(photoId) function
+
+// [ ] Wrap DB + Blob deletion in a Prisma transaction
+
+// [ ] Add error handling and logging for failed deletions
+
+// 🖼️ Gallery-Level Cleanup
+// [ ] Create deleteGallery(galleryId) function
+
+// [ ] Fetch all photos linked to the gallery
+
+// [ ] Loop through and delete each Blob file
+
+// [ ] Delete photo records and gallery record from DB
+
+// 🧪 Testing
+// [ ] Test single photo deletion with dummy data
+
+// [ ] Test gallery deletion with multiple photos
+
+// [ ] Simulate failure cases (missing URLs, network errors)
+
+// 🧠 Optional Enhancements
+// [ ] Add a confirmation modal in the frontend before deletion
+
+// [ ] Log deleted URLs for audit/debugging
+
+// [ ] Add a fallback queue for failed deletions (e.g. retry later)
+
+// [ ] Build a cron job to clean up orphaned Blob files
