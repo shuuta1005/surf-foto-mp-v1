@@ -67,7 +67,7 @@ import type { CartItem } from "@/types/cart";
 import { getDiscountedTotal } from "@/features/cart/cart-utils"; // ✅ import new util
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-04-30.basil",
+  apiVersion: "2025-07-30.basil",
 });
 
 export async function POST(req: Request) {
