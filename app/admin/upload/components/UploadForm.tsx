@@ -1,185 +1,137 @@
 // app/admin/upload/components/UploadForm.tsx
 
-"use client";
-
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "@/components/ui/use-toast";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import axios from "axios";
+import UploadPhotoSelector from "./UploadPhotoSelector";
 import UploadingOverlay from "./UploadingOverlay";
 import UploadSessionDetails from "./UploadSessionDetails";
-import UploadPhotoSelector from "./UploadPhotoSelector";
-import { uploadGallerySchema } from "@/lib/validations/validation";
 
 export default function UploadForm() {
+  const [files, setFiles] = useState<FileList | null>(null);
+  const [coverPhoto, setCoverPhoto] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  // Metadata fields
   const [prefecture, setPrefecture] = useState("");
   const [area, setArea] = useState("");
   const [surfSpot, setSurfSpot] = useState("");
   const [date, setDate] = useState("");
   const [sessionTime, setSessionTime] = useState("");
-  const [files, setFiles] = useState<FileList | null>(null);
-  const [coverPhoto, setCoverPhoto] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const isFormReady =
-    prefecture &&
-    area &&
-    surfSpot &&
-    date &&
-    sessionTime &&
-    files &&
-    files.length > 0 &&
-    coverPhoto;
 
-  const router = useRouter();
+  const handleUpload = async () => {
+    const errors: Record<string, string> = {};
 
-  const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const dropped = e.dataTransfer.files;
-    if (dropped.length) setFiles(dropped);
-  };
+    if (!prefecture) errors.prefecture = "都道府県を入力してください";
+    if (!area) errors.area = "エリアを入力してください";
+    if (!surfSpot) errors.surfSpot = "スポット名を入力してください";
+    if (!date) errors.date = "日にちを選択してください";
+    if (!sessionTime) errors.sessionTime = "セッション時間を設定してください";
+    if (!files || files.length === 0) errors.files = "写真を選択してください";
+    if (!coverPhoto) errors.coverPhoto = "カバー写真を選択してください";
 
-  const handleCoverDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const dropped = e.dataTransfer.files;
-    if (dropped.length) setCoverPhoto(dropped[0]); // only use the first one
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const validation = uploadGallerySchema.safeParse({
-      prefecture,
-      area,
-      surfSpot,
-      date,
-      sessionTime,
-    });
-
-    if (!validation.success) {
-      const fieldErrors: Record<string, string> = {};
-      for (const err of validation.error.errors) {
-        if (err.path[0]) {
-          fieldErrors[err.path[0] as string] = err.message;
-        }
-      }
-      setFormErrors(fieldErrors);
-      toast({
-        title: "Validation Error",
-        description: "Please fix the highlighted fields.",
-        variant: "destructive",
-      });
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
       return;
     }
 
-    setFormErrors({});
-
-    if (!files || files.length === 0) {
-      toast({
-        title: "No photos",
-        description: "Please select at least one photo.",
-        variant: "destructive",
-      });
-      return;
+    const formData = new FormData();
+    if (files) {
+      Array.from(files).forEach((file) => formData.append("photos", file));
     }
+    
+    if (coverPhoto) {
+  formData.append("coverPhoto", coverPhoto);
+}
+
+    formData.append("prefecture", prefecture);
+    formData.append("area", area);
+    formData.append("surfSpot", surfSpot);
+    formData.append("date", date);
+    formData.append("sessionTime", sessionTime);
 
     setIsUploading(true);
+    setUploadProgress(0);
+    setFormErrors({}); // Clear errors on submit
 
     try {
-      const formData = new FormData();
-      formData.append("prefecture", prefecture);
-      formData.append("area", area);
-      formData.append("surfSpot", surfSpot);
-      formData.append("date", date);
-      formData.append("sessionTime", sessionTime);
-      Array.from(files).forEach((file) => formData.append("photos", file));
-      if (coverPhoto) {
-        formData.append("coverPhoto", coverPhoto);
-      }
-
-      const res = await fetch("/api/admin/upload-gallery", {
-        method: "POST",
-        body: formData,
+      await axios.post("/api/admin/upload-gallery", formData, {
+        onUploadProgress: (event) => {
+          const percent = event.total
+            ? Math.round((event.loaded * 100) / event.total)
+            : 0;
+          setUploadProgress(percent);
+        },
       });
 
-      if (res.ok) {
-        toast({
-          title: "Gallery uploaded 🎉",
-          description: "Your photos are live!",
-        });
-        router.push("/galleries");
-      } else {
-        const data = await res.json();
-        toast({
-          title: "Upload failed",
-          description: data.message || "Please try again.",
-          variant: "destructive",
-        });
-      }
-    } catch (err) {
-      console.error(err);
-      toast({
-        title: "Unexpected error",
-        description: "Something went wrong.",
-        variant: "destructive",
-      });
+      // Success handling
+      setFiles(null);
+      setCoverPhoto(null);
+      setPrefecture("");
+      setArea("");
+      setSurfSpot("");
+      setDate("");
+      setSessionTime("");
+      setUploadProgress(0);
+      alert("Upload complete!");
+    } catch (error) {
+      console.error("Upload failed:", error);
+      alert("Upload failed. Please try again.");
     } finally {
       setIsUploading(false);
     }
   };
 
   return (
-    <>
-      {isUploading && <UploadingOverlay />}
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Surf Session Details</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <UploadSessionDetails
-              prefecture={prefecture}
-              setPrefecture={setPrefecture}
-              area={area}
-              setArea={setArea}
-              surfSpot={surfSpot}
-              setSurfSpot={setSurfSpot}
-              date={date}
-              setDate={setDate}
-              sessionTime={sessionTime}
-              setSessionTime={setSessionTime}
-              disabled={isUploading}
-              formErrors={formErrors}
-            />
-          </CardContent>
-        </Card>
+    <div className="relative space-y-8">
+      <UploadSessionDetails
+        prefecture={prefecture}
+        setPrefecture={setPrefecture}
+        area={area}
+        setArea={setArea}
+        surfSpot={surfSpot}
+        setSurfSpot={setSurfSpot}
+        date={date}
+        setDate={setDate}
+        sessionTime={sessionTime}
+        setSessionTime={setSessionTime}
+        disabled={isUploading}
+        formErrors={formErrors}
+      />
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Photos</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <UploadPhotoSelector
-              files={files}
-              setFiles={setFiles}
-              coverPhoto={coverPhoto}
-              setCoverPhoto={setCoverPhoto}
-              disabled={isUploading}
-              onDrop={handleFileDrop}
-              onCoverDrop={handleCoverDrop} // ✅ ADD THIS LINE
-            />
-          </CardContent>
-        </Card>
+      <UploadPhotoSelector
+        files={files}
+        setFiles={setFiles}
+        coverPhoto={coverPhoto}
+        setCoverPhoto={setCoverPhoto}
+        disabled={isUploading}
+        onDrop={(e) => setFiles(e.dataTransfer.files)}
+        onCoverDrop={(e) => setCoverPhoto(e.dataTransfer.files?.[0] || null)}
+      />
 
-        <Button
-          type="submit"
-          disabled={isUploading || !isFormReady}
-          className="w-full"
-        >
-          {isUploading ? "Uploading..." : "Upload Gallery"}
-        </Button>
-      </form>
-    </>
+      {formErrors.files && (
+        <p className="text-sm text-red-500 mt-1">{formErrors.files}</p>
+      )}
+      {formErrors.coverPhoto && (
+        <p className="text-sm text-red-500 mt-1">{formErrors.coverPhoto}</p>
+      )}
+
+      <button
+        onClick={handleUpload}
+        disabled={isUploading}
+        className="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+      >
+        Upload Gallery
+      </button>
+
+      {isUploading && (
+        <UploadingOverlay
+          fileCount={files?.length || 0}
+          coverName={coverPhoto?.name || ""}
+          progress={uploadProgress}
+        />
+      )}
+    </div>
   );
 }

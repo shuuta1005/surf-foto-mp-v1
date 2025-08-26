@@ -163,7 +163,6 @@ export async function POST(req: Request) {
       },
     });
 
-    console.log("✅ Gallery created:", newGallery.id);
     return NextResponse.json({ gallery: newGallery }, { status: 201 });
   } catch (error) {
     console.error("❌ Upload failed:", error);
