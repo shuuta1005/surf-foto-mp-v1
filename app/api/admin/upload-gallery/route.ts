@@ -80,11 +80,17 @@ export async function POST(req: Request) {
     const { fields, files } = await parseFormData(req);
 
     const data = {
-      prefecture: Array.isArray(fields.prefecture) ? fields.prefecture[0] : fields.prefecture,
+      prefecture: Array.isArray(fields.prefecture)
+        ? fields.prefecture[0]
+        : fields.prefecture,
       area: Array.isArray(fields.area) ? fields.area[0] : fields.area,
-      surfSpot: Array.isArray(fields.surfSpot) ? fields.surfSpot[0] : fields.surfSpot,
+      surfSpot: Array.isArray(fields.surfSpot)
+        ? fields.surfSpot[0]
+        : fields.surfSpot,
       date: Array.isArray(fields.date) ? fields.date[0] : fields.date,
-      sessionTime: Array.isArray(fields.sessionTime) ? fields.sessionTime[0] : fields.sessionTime,
+      sessionTime: Array.isArray(fields.sessionTime)
+        ? fields.sessionTime[0]
+        : fields.sessionTime,
     };
 
     const parsed = uploadGallerySchema.safeParse(data);
@@ -124,7 +130,8 @@ export async function POST(req: Request) {
 
     const uploaded = await Promise.all(
       photoFiles.map(async (file: FormidableFile) => {
-        const { originalUrl, watermarkedUrl } = await uploadWithWatermarkAndOriginal(file);
+        const { originalUrl, watermarkedUrl } =
+          await uploadWithWatermarkAndOriginal(file);
         return {
           photoUrl: watermarkedUrl,
           originalUrl,
@@ -134,7 +141,9 @@ export async function POST(req: Request) {
 
     let coverPhotoUrl = "";
     if (coverPhotoFile && coverPhotoFile.filepath) {
-      const { originalUrl } = await uploadWithWatermarkAndOriginal(coverPhotoFile);
+      const { originalUrl } = await uploadWithWatermarkAndOriginal(
+        coverPhotoFile
+      );
       coverPhotoUrl = originalUrl;
     }
 
@@ -164,3 +173,27 @@ export async function POST(req: Request) {
     );
   }
 }
+
+// 📋 Mobile (and Safari) Upload Optimization To-Do List
+// 🔧 Frontend Improvements
+// [ ] Add image size check before upload Warn users if the photo exceeds a mobile-safe threshold (e.g. 5MB).
+
+// [ ] Implement client-side image compression Use canvas or ImageBitmap to resize large images before uploading.
+
+// [ ] Add upload progress indicator Show a progress bar or spinner to reassure users during upload.
+
+// [ ] Improve error handling for mobile uploads Catch and display specific errors (e.g. timeout, file too large, unsupported format).
+
+// 📱 Mobile-Specific UX
+// [ ] Detect mobile device and adjust UI Use navigator.userAgent or similar to tailor messages and limits.
+
+// [ ] Add mobile upload tips Suggest using Wi-Fi or switching to desktop for large files.
+
+// [ ] Prevent background suspension issues Consider chunked uploads or direct-to-storage to avoid browser suspensions.
+
+// 🧪 Testing & Debugging
+// [ ] Test uploads on Safari and Chrome (iOS) Try with different image sizes and network conditions.
+
+// [ ] Log upload failures with device info Capture browser, OS, and error type for debugging.
+
+// [ ] Simulate slow network conditions Use dev tools to throttle and observe mobile behavior.

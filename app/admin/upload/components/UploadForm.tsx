@@ -22,6 +22,15 @@ export default function UploadForm() {
   const [coverPhoto, setCoverPhoto] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const isFormReady =
+    prefecture &&
+    area &&
+    surfSpot &&
+    date &&
+    sessionTime &&
+    files &&
+    files.length > 0 &&
+    coverPhoto;
 
   const router = useRouter();
 
@@ -163,7 +172,11 @@ export default function UploadForm() {
           </CardContent>
         </Card>
 
-        <Button type="submit" disabled={isUploading} className="w-full">
+        <Button
+          type="submit"
+          disabled={isUploading || !isFormReady}
+          className="w-full"
+        >
           {isUploading ? "Uploading..." : "Upload Gallery"}
         </Button>
       </form>
