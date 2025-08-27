@@ -1,3 +1,5 @@
+// app/(root)/cart/components/CartItemTable.tsx
+
 "use client";
 
 import { useCart } from "@/features/cart/CartContext";

@@ -1,3 +1,6 @@
+//Used for checkout??
+
+//This function is used in checkout api to return the discounted price depending on the number of photos in the cart
 export function getDiscountedTotal(count: number): number {
   if (count === 1) return 1000;
   if (count === 2) return 1600;

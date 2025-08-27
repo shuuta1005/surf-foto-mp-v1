@@ -33,33 +33,58 @@ export async function POST(req: Request) {
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
-      const userId = session.metadata?.userId;
-      const cart = session.metadata?.cart;
+      const metadata = session.metadata;
       const paymentIntentId = session.payment_intent as string;
 
-      if (!userId || !cart || !paymentIntentId) {
+      console.log("📦 Metadata received:", metadata);
+      console.log("💳 PaymentIntent ID:", paymentIntentId);
+
+      if (!metadata?.userId || !metadata?.cart || !paymentIntentId) {
         console.error("❌ Missing metadata or paymentIntentId");
         return NextResponse.json({ error: "Missing data" }, { status: 400 });
       }
 
-      const cartItems: { photoId: string }[] = JSON.parse(cart);
+      let cartItems: { photoId: string; location?: string }[] = [];
+
+      try {
+        cartItems = JSON.parse(metadata.cart);
+        console.log("🛒 Parsed cart items:", cartItems);
+      } catch (err) {
+        console.error("❌ Failed to parse cart metadata:", metadata.cart, err);
+        return NextResponse.json(
+          { error: "Invalid cart metadata" },
+          { status: 400 }
+        );
+      }
 
       try {
         await Promise.all(
-          cartItems.map((item) =>
-            prisma.purchase.create({
-              data: {
-                userId,
-                photoId: item.photoId,
-                paymentIntentId: paymentIntentId,
-                refunded: false,
-              },
-            })
-          )
+          cartItems.map(async (item) => {
+            if (!item.photoId || typeof item.photoId !== "string") {
+              console.warn("⚠️ Skipping invalid photoId:", item.photoId);
+              return;
+            }
+
+            try {
+              await prisma.purchase.create({
+                data: {
+                  userId: metadata.userId,
+                  photoId: item.photoId,
+                  paymentIntentId,
+                  refunded: false,
+                },
+              });
+              console.log(`✅ Saved purchase for photoId: ${item.photoId}`);
+            } catch (err) {
+              console.error(
+                `❌ Failed to save purchase for photoId: ${item.photoId}`,
+                err
+              );
+            }
+          })
         );
-        console.log("✅ Purchases saved");
       } catch (err) {
-        console.error("❌ Failed to save purchases:", err);
+        console.error("❌ Unexpected error during purchase saving:", err);
         return NextResponse.json({ error: "Database error" }, { status: 500 });
       }
 
@@ -86,7 +111,6 @@ export async function POST(req: Request) {
           where: { paymentIntentId: intentId },
           data: { refunded: true },
         });
-
         console.log("✅ Marked purchases as refunded");
       } catch (err) {
         console.error("❌ Failed to mark refunded purchases:", err);

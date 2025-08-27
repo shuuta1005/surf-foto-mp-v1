@@ -1,4 +1,4 @@
-// // //app/(root)/cart/cart-table.tsx
+// app/(root)/cart/components/cart-table.tsx
 "use client";
 
 import { useCart } from "@/features/cart/CartContext";

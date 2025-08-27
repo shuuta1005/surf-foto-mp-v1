@@ -1,3 +1,5 @@
+// app/(root)/cart/components/EmptyCartMessage.tsx
+
 "use client";
 
 import { ShoppingCart } from "lucide-react";

@@ -21,6 +21,8 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
 
+  //Load cart from browser storage
+  //When the page loads, it checks if the user already had items saved in the cart. If yes, it loads them.
   useEffect(() => {
     const loadCart = () => {
       const stored = localStorage.getItem("brafotos-cart");
@@ -45,10 +47,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("cart-updated", handleCartUpdate);
   }, []);
 
+  //Save cart when it changes
+  //Every time the cart changes, it saves the new version to the browser so it doesn’t get lost.
   useEffect(() => {
     localStorage.setItem("brafotos-cart", JSON.stringify(items));
   }, [items]);
 
+  //Add and remove items
+
+  //These functions let us add or remove photos from the cart. They check for duplicates and update the list.
   const addToCart = (item: CartItem) => {
     if (!items.some((i) => i.photoId === item.photoId)) {
       setItems((prev) => [...prev, item]);
@@ -62,6 +69,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const isInCart = (photoId: string) => {
     return items.some((item) => item.photoId === photoId);
   };
+
+  //Clear the cart
+  //This wipes the cart clean and deletes it from the browser.
 
   const clearCart = () => {
     setItems([]);
