@@ -19,29 +19,6 @@ const CartTable = () => {
 
   const isEmpty = items.length === 0;
 
-  // const handleCheckout = async () => {
-  //   if (!isSignedIn || !agreed) return;
-  //   setIsLoading(true);
-  //   try {
-  //     const res = await fetch("/api/checkout", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({ items }),
-  //     });
-
-  //     const data = await res.json();
-  //     if (data.url) {
-  //       window.location.href = data.url;
-  //     } else {
-  //       alert("Checkout failed. Please try again.");
-  //     }
-  //   } catch (err) {
-  //     console.error("Checkout error:", err);
-  //     alert("Something went wrong during checkout.");
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
   const handleCheckout = async () => {
     if (!isSignedIn || !agreed) return;
     setIsLoading(true);
