@@ -1,4 +1,4 @@
-//lin/context/CartContext
+//features/cart/CartContext.tsx
 
 "use client";
 

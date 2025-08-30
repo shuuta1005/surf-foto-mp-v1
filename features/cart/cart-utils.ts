@@ -1,4 +1,4 @@
-//Used for checkout??
+//features/cart/cart-utils.ts
 
 //This function is used in checkout api to return the discounted price depending on the number of photos in the cart
 export function getDiscountedTotal(count: number): number {
