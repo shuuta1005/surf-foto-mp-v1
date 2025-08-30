@@ -1,4 +1,4 @@
-// app/api/stripe/webhook/route.ts
+// // app/api/stripe/webhook/route.ts
 
 // import { NextResponse } from "next/server";
 // import Stripe from "stripe";
@@ -36,11 +36,28 @@
 //       const metadata = session.metadata;
 //       const paymentIntentId = session.payment_intent as string;
 
-//       console.log("📦 Metadata received:", metadata);
+//       // 🐛 ENHANCED DEBUG: Let's see exactly what we're receiving
+//       console.log("=== WEBHOOK DEBUG START ===");
+//       console.log("📦 Raw metadata:", JSON.stringify(metadata, null, 2));
 //       console.log("💳 PaymentIntent ID:", paymentIntentId);
+//       console.log("🔍 Available metadata keys:", Object.keys(metadata || {}));
+//       console.log("🛒 Raw cart data:", metadata?.cart);
+//       console.log("👤 User ID:", metadata?.userId);
+//       console.log("📋 Order ID:", metadata?.orderId);
+
+//       // Check if cart data looks like JSON
+//       if (metadata?.cart) {
+//         console.log("🔍 Cart data type:", typeof metadata.cart);
+//         console.log("🔍 Cart data length:", metadata.cart.length);
+//         console.log("🔍 First 100 chars:", metadata.cart.substring(0, 100));
+//       }
+//       console.log("=== WEBHOOK DEBUG END ===");
 
 //       if (!metadata?.userId || !metadata?.cart || !paymentIntentId) {
-//         console.error("❌ Missing metadata or paymentIntentId");
+//         console.error("❌ Missing required data:");
+//         console.error("  - Missing userId:", !metadata?.userId);
+//         console.error("  - Missing cart:", !metadata?.cart);
+//         console.error("  - Missing paymentIntentId:", !paymentIntentId);
 //         return NextResponse.json({ error: "Missing data" }, { status: 400 });
 //       }
 
@@ -48,41 +65,93 @@
 
 //       try {
 //         cartItems = JSON.parse(metadata.cart);
-//         console.log("🛒 Parsed cart items:", cartItems);
+//         console.log(
+//           "🛒 Successfully parsed cart items:",
+//           cartItems.length,
+//           "items"
+//         );
+
+//         // Debug each item structure
+//         cartItems.forEach((item, index) => {
+//           console.log(`📷 Item ${index + 1}:`, {
+//             photoId: item.photoId,
+//             hasPhotoId: !!item.photoId,
+//             photoIdType: typeof item.photoId,
+//             location: item.location,
+//             allKeys: Object.keys(item),
+//           });
+//         });
 //       } catch (err) {
-//         console.error("❌ Failed to parse cart metadata:", metadata.cart, err);
+//         console.error("❌ Failed to parse cart metadata:");
+//         console.error("  - Raw cart data:", metadata.cart);
+//         console.error("  - Parse error:", err);
 //         return NextResponse.json(
 //           { error: "Invalid cart metadata" },
 //           { status: 400 }
 //         );
 //       }
 
+//       // Database operations with enhanced error handling
 //       try {
-//         await Promise.all(
-//           cartItems.map(async (item) => {
+//         console.log(`📝 Attempting to save ${cartItems.length} purchases...`);
+
+//         const results = await Promise.allSettled(
+//           cartItems.map(async (item, index) => {
+//             console.log(`💾 Processing item ${index + 1}: ${item.photoId}`);
+
 //             if (!item.photoId || typeof item.photoId !== "string") {
-//               console.warn("⚠️ Skipping invalid photoId:", item.photoId);
-//               return;
+//               console.warn(
+//                 `⚠️ Skipping invalid photoId at index ${index}:`,
+//                 item.photoId
+//               );
+//               return { success: false, reason: "Invalid photoId" };
 //             }
 
 //             try {
-//               await prisma.purchase.create({
+//               const purchase = await prisma.purchase.create({
 //                 data: {
-//                   userId: metadata.userId,
+//                   userId: metadata.userId!,
 //                   photoId: item.photoId,
 //                   paymentIntentId,
 //                   refunded: false,
 //                 },
 //               });
-//               console.log(`✅ Saved purchase for photoId: ${item.photoId}`);
+//               console.log(
+//                 `✅ Successfully saved purchase for photoId: ${item.photoId}`,
+//                 {
+//                   id: purchase.id,
+//                   createdAt: purchase.createdAt,
+//                 }
+//               );
+//               return { success: true, purchaseId: purchase.id };
 //             } catch (err) {
 //               console.error(
-//                 `❌ Failed to save purchase for photoId: ${item.photoId}`,
+//                 `❌ Database error for photoId ${item.photoId}:`,
 //                 err
 //               );
+//               return { success: false, error: err, photoId: item.photoId };
 //             }
 //           })
 //         );
+
+//         // Summary of results
+//         const successful = results.filter(
+//           (r) => r.status === "fulfilled" && r.value.success
+//         ).length;
+//         const failed = results.length - successful;
+
+//         console.log(
+//           `📊 Purchase creation summary: ${successful} successful, ${failed} failed`
+//         );
+
+//         if (failed > 0) {
+//           console.error("❌ Some purchases failed:");
+//           results.forEach((result, index) => {
+//             if (result.status === "rejected" || !result.value.success) {
+//               console.error(`  - Item ${index + 1}:`, result);
+//             }
+//           });
+//         }
 //       } catch (err) {
 //         console.error("❌ Unexpected error during purchase saving:", err);
 //         return NextResponse.json({ error: "Database error" }, { status: 500 });
@@ -107,11 +176,11 @@
 //       console.log(`💸 Refund received for payment intent: ${intentId}`);
 
 //       try {
-//         await prisma.purchase.updateMany({
+//         const result = await prisma.purchase.updateMany({
 //           where: { paymentIntentId: intentId },
 //           data: { refunded: true },
 //         });
-//         console.log("✅ Marked purchases as refunded");
+//         console.log(`✅ Marked ${result.count} purchases as refunded`);
 //       } catch (err) {
 //         console.error("❌ Failed to mark refunded purchases:", err);
 //       }
@@ -167,69 +236,55 @@ export async function POST(req: Request) {
       console.log("📦 Raw metadata:", JSON.stringify(metadata, null, 2));
       console.log("💳 PaymentIntent ID:", paymentIntentId);
       console.log("🔍 Available metadata keys:", Object.keys(metadata || {}));
-      console.log("🛒 Raw cart data:", metadata?.cart);
+      console.log("🛒 Raw photoIds data:", metadata?.photoIds);
       console.log("👤 User ID:", metadata?.userId);
       console.log("📋 Order ID:", metadata?.orderId);
-
-      // Check if cart data looks like JSON
-      if (metadata?.cart) {
-        console.log("🔍 Cart data type:", typeof metadata.cart);
-        console.log("🔍 Cart data length:", metadata.cart.length);
-        console.log("🔍 First 100 chars:", metadata.cart.substring(0, 100));
+      
+      // Check if photoIds data looks like JSON
+      if (metadata?.photoIds) {
+        console.log("🔍 PhotoIds data type:", typeof metadata.photoIds);
+        console.log("🔍 PhotoIds data length:", metadata.photoIds.length);
       }
       console.log("=== WEBHOOK DEBUG END ===");
 
-      if (!metadata?.userId || !metadata?.cart || !paymentIntentId) {
+      if (!metadata?.userId || !metadata?.photoIds || !paymentIntentId) {
         console.error("❌ Missing required data:");
         console.error("  - Missing userId:", !metadata?.userId);
-        console.error("  - Missing cart:", !metadata?.cart);
+        console.error("  - Missing photoIds:", !metadata?.photoIds);
         console.error("  - Missing paymentIntentId:", !paymentIntentId);
         return NextResponse.json({ error: "Missing data" }, { status: 400 });
       }
 
-      let cartItems: { photoId: string; location?: string }[] = [];
+      let photoIds: string[] = [];
 
       try {
-        cartItems = JSON.parse(metadata.cart);
-        console.log(
-          "🛒 Successfully parsed cart items:",
-          cartItems.length,
-          "items"
-        );
-
-        // Debug each item structure
-        cartItems.forEach((item, index) => {
-          console.log(`📷 Item ${index + 1}:`, {
-            photoId: item.photoId,
-            hasPhotoId: !!item.photoId,
-            photoIdType: typeof item.photoId,
-            location: item.location,
-            allKeys: Object.keys(item),
-          });
+        photoIds = JSON.parse(metadata.photoIds);
+        console.log("🛒 Successfully parsed photo IDs:", photoIds.length, "items");
+        
+        // Debug each photo ID
+        photoIds.forEach((photoId, index) => {
+          console.log(`📷 Photo ${index + 1}: ${photoId}`);
         });
       } catch (err) {
-        console.error("❌ Failed to parse cart metadata:");
-        console.error("  - Raw cart data:", metadata.cart);
+        console.error("❌ Failed to parse photoIds metadata:");
+        console.error("  - Raw photoIds data:", metadata.photoIds);
         console.error("  - Parse error:", err);
         return NextResponse.json(
-          { error: "Invalid cart metadata" },
+          { error: "Invalid photoIds metadata" },
           { status: 400 }
         );
       }
 
       // Database operations with enhanced error handling
       try {
-        console.log(`📝 Attempting to save ${cartItems.length} purchases...`);
-
+        console.log(`📝 Attempting to save ${photoIds.length} purchases...`);
+        
         const results = await Promise.allSettled(
-          cartItems.map(async (item, index) => {
-            console.log(`💾 Processing item ${index + 1}: ${item.photoId}`);
-
-            if (!item.photoId || typeof item.photoId !== "string") {
-              console.warn(
-                `⚠️ Skipping invalid photoId at index ${index}:`,
-                item.photoId
-              );
+          photoIds.map(async (photoId, index) => {
+            console.log(`💾 Processing photo ${index + 1}: ${photoId}`);
+            
+            if (!photoId || typeof photoId !== "string") {
+              console.warn(`⚠️ Skipping invalid photoId at index ${index}:`, photoId);
               return { success: false, reason: "Invalid photoId" };
             }
 
@@ -237,47 +292,38 @@ export async function POST(req: Request) {
               const purchase = await prisma.purchase.create({
                 data: {
                   userId: metadata.userId!,
-                  photoId: item.photoId,
+                  photoId: photoId,
                   paymentIntentId,
                   refunded: false,
                 },
               });
-              console.log(
-                `✅ Successfully saved purchase for photoId: ${item.photoId}`,
-                {
-                  id: purchase.id,
-                  createdAt: purchase.createdAt,
-                }
-              );
+              console.log(`✅ Successfully saved purchase for photoId: ${photoId}`, {
+                id: purchase.id,
+                createdAt: purchase.createdAt
+              });
               return { success: true, purchaseId: purchase.id };
             } catch (err) {
-              console.error(
-                `❌ Database error for photoId ${item.photoId}:`,
-                err
-              );
-              return { success: false, error: err, photoId: item.photoId };
+              console.error(`❌ Database error for photoId ${photoId}:`, err);
+              return { success: false, error: err, photoId: photoId };
             }
           })
         );
 
         // Summary of results
-        const successful = results.filter(
-          (r) => r.status === "fulfilled" && r.value.success
-        ).length;
+        const successful = results.filter(r => r.status === 'fulfilled' && r.value.success).length;
         const failed = results.length - successful;
-
-        console.log(
-          `📊 Purchase creation summary: ${successful} successful, ${failed} failed`
-        );
-
+        
+        console.log(`📊 Purchase creation summary: ${successful} successful, ${failed} failed`);
+        
         if (failed > 0) {
           console.error("❌ Some purchases failed:");
           results.forEach((result, index) => {
-            if (result.status === "rejected" || !result.value.success) {
-              console.error(`  - Item ${index + 1}:`, result);
+            if (result.status === 'rejected' || !result.value.success) {
+              console.error(`  - Photo ${index + 1}:`, result);
             }
           });
         }
+
       } catch (err) {
         console.error("❌ Unexpected error during purchase saving:", err);
         return NextResponse.json({ error: "Database error" }, { status: 500 });
