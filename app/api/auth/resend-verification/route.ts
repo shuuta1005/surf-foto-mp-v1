@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { addMinutes } from "date-fns";
 import { randomBytes } from "crypto";
 import { Resend } from "resend";
+import { BASE_URL } from "@/lib/constants";
 
 const TOKEN_TTL_MIN = 15;
 const RESEND_COOLDOWN_SEC = 60;
@@ -56,7 +57,9 @@ export async function POST(req: Request) {
       data: { token, expires, lastSentAt: now },
     });
 
-    const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${token}`;
+    // const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${token}`;
+    const verifyUrl = `${BASE_URL}/verify-email?token=${token}`;
+
 
     await resend.emails.send({
       from: "verify@surfphotosjapan.com",

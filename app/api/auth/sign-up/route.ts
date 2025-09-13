@@ -108,6 +108,7 @@ import bcrypt from "bcryptjs";
 import { Resend } from "resend";
 import { signUpSchema } from "@/lib/validations/validation";
 import { validatePassword } from "@/lib/validations/auth/sign-up";
+import { BASE_URL } from "@/lib/constants";
 
 const TOKEN_TTL_MIN = 15;
 const RESEND_COOLDOWN_SEC = 60;
@@ -180,7 +181,8 @@ export async function POST(req: Request) {
       });
     }
 
-    const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${token}`;
+    //const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${token}`;
+    const verifyUrl = `${BASE_URL}/verify-email?token=${token}`;
 
     await resend.emails.send({
       from: "verify@surfphotosjapan.com",

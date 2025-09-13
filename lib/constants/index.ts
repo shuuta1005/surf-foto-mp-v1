@@ -22,3 +22,5 @@ export const ADMIN_EMAILS = [
   "adminbra2@email.com",
   "shutafute26@gmail.com",
 ];
+
+export const BASE_URL = "https://surfphotosjapan.com";
