@@ -1,15 +1,118 @@
 // /app/api/auth/sign-up/route.ts
 
+// TODO: Track email usage to monitor Resend quota
+// Consider logging each email send event to a database or in-memory store
+// Example: increment dailyEmailCount and check against threshold (e.g., 80% of free limit)
+
+// TODO: Add fallback logic if Resend quota is exceeded
+// If Resend fails due to quota, retry later or switch to backup provider (e.g., SendGrid, Postmark)
+// Use try/catch around resend.emails.send and handle gracefully
+
+// TODO: Optional — notify admin when usage is high
+// Send alert (email, Slack, dashboard widget) when nearing daily/monthly limit
+
+// import { NextResponse } from "next/server";
+// import { signUpSchema } from "@/lib/validations/validation";
+// import { validatePassword } from "@/lib/validations/auth/sign-up";
+// import bcrypt from "bcryptjs";
+// import { prisma } from "@/lib/db";
+// import { randomBytes } from "crypto";
+// import { addMinutes } from "date-fns";
+// import { Resend } from "resend";
+
+// const resend = new Resend(process.env.RESEND_API_KEY!);
+
+// export async function POST(req: Request) {
+//   try {
+//     const body = await req.json();
+//     const { name, email, password } = signUpSchema.parse(body);
+
+//     const passwordErrors = validatePassword(password);
+//     if (passwordErrors.length > 0) {
+//       return NextResponse.json(
+//         {
+//           message: "Password does not meet the required criteria.",
+//           errors: { password: passwordErrors },
+//         },
+//         { status: 400 }
+//       );
+//     }
+
+//     const existingUser = await prisma.user.findUnique({ where: { email } });
+//     if (existingUser) {
+//       return NextResponse.json(
+//         { message: "Email is already in use" },
+//         { status: 400 }
+//       );
+//     }
+
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     await prisma.user.create({
+//       data: {
+//         name,
+//         email,
+//         password: hashedPassword,
+//         emailVerified: null,
+//       },
+//     });
+
+//     const token = randomBytes(32).toString("hex");
+//     const expires = addMinutes(new Date(), 15);
+
+//     await prisma.verificationToken.create({
+//       data: {
+//         identifier: email,
+//         token,
+//         expires,
+//       },
+//     });
+
+//     const verifyUrl = `https://surfphotosjapan.com/verify-email?token=${token}`;
+
+//     await resend.emails.send({
+//       from: "verify@surfphotosjapan.com",
+//       to: email,
+//       subject: "Verify Your Email",
+//       html: `<p>Click to verify your account: <a href="${verifyUrl}">${verifyUrl}</a></p>`,
+//     });
+
+//     return NextResponse.json(
+//       { message: "User created successfully. Verification email sent." },
+//       { status: 201 }
+//     );
+//   } catch (error: unknown) {
+//     if (error instanceof Error) {
+//       console.error("SIGN-UP ERROR:", JSON.stringify(error, null, 2));
+//       return NextResponse.json(
+//         {
+//           message: "Something went wrong during sign-up",
+//           error: error.message,
+//         },
+//         { status: 500 }
+//       );
+//     }
+
+//     return NextResponse.json(
+//       { message: "Unexpected error during sign-up" },
+//       { status: 500 }
+//     );
+//   }
+// }
+
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
+import { addMinutes } from "date-fns";
+import { randomBytes } from "crypto";
+import bcrypt from "bcryptjs";
+import { Resend } from "resend";
 import { signUpSchema } from "@/lib/validations/validation";
 import { validatePassword } from "@/lib/validations/auth/sign-up";
-import bcrypt from "bcryptjs";
-import { prisma } from "@/lib/db";
-import { randomBytes } from "crypto";
-import { addMinutes } from "date-fns";
-import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
+const TOKEN_TTL_MIN = 15;
+const RESEND_COOLDOWN_SEC = 60;
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
   try {
@@ -17,74 +120,80 @@ export async function POST(req: Request) {
     const { name, email, password } = signUpSchema.parse(body);
 
     const passwordErrors = validatePassword(password);
-    if (passwordErrors.length > 0) {
+    if (passwordErrors.length) {
       return NextResponse.json(
-        {
-          message: "Password does not meet the required criteria.",
-          errors: { password: passwordErrors },
-        },
+        { error: "Weak password", details: passwordErrors },
         { status: 400 }
       );
     }
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
-    if (existingUser) {
+    if (existingUser?.emailVerified) {
       return NextResponse.json(
-        { message: "Email is already in use" },
-        { status: 400 }
+        { error: "Email already in use" },
+        { status: 409 }
       );
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        emailVerified: null,
-      },
-    });
-
     const token = randomBytes(32).toString("hex");
-    const expires = addMinutes(new Date(), 15);
+    const expires = addMinutes(new Date(), TOKEN_TTL_MIN);
 
-    await prisma.verificationToken.create({
-      data: {
-        identifier: email,
-        token,
-        expires,
-      },
-    });
+    const pending = await prisma.pendingUser.findUnique({ where: { email } });
 
-    const verifyUrl = `https://surfphotosjapan.com/verify-email?token=${token}`;
+    if (pending) {
+      const now = new Date();
+      if (
+        pending.lastSentAt &&
+        now.getTime() - pending.lastSentAt.getTime() <
+          RESEND_COOLDOWN_SEC * 1000
+      ) {
+        return NextResponse.json(
+          {
+            message:
+              "Verification email recently sent. Please check your inbox or try again shortly.",
+          },
+          { status: 202 }
+        );
+      }
+
+      await prisma.pendingUser.update({
+        where: { email },
+        data: {
+          name,
+          hashedPassword,
+          token,
+          expires,
+          lastSentAt: now,
+        },
+      });
+    } else {
+      await prisma.pendingUser.create({
+        data: {
+          email,
+          name,
+          hashedPassword,
+          token,
+          expires,
+          lastSentAt: new Date(),
+        },
+      });
+    }
+
+    const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${token}`;
 
     await resend.emails.send({
       from: "verify@surfphotosjapan.com",
       to: email,
-      subject: "Verify Your Email",
+      subject: "Verify your email",
       html: `<p>Click to verify your account: <a href="${verifyUrl}">${verifyUrl}</a></p>`,
     });
 
     return NextResponse.json(
-      { message: "User created successfully. Verification email sent." },
-      { status: 201 }
+      { message: "Check your email to verify your account." },
+      { status: 200 }
     );
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error("SIGN-UP ERROR:", JSON.stringify(error, null, 2));
-      return NextResponse.json(
-        {
-          message: "Something went wrong during sign-up",
-          error: error.message,
-        },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json(
-      { message: "Unexpected error during sign-up" },
-      { status: 500 }
-    );
+  } catch {
+    return NextResponse.json({ error: "Sign-up failed" }, { status: 500 });
   }
 }
