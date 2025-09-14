@@ -29,9 +29,10 @@ export async function POST(req: Request) {
     if (!pending) {
       return NextResponse.json(
         {
-          message: "If an account exists, a verification email has been sent.",
+          message:
+            "A verification email was just sent. Please check your inbox.",
         },
-        { status: 200 }
+        { status: 202 }
       );
     }
 
@@ -59,7 +60,6 @@ export async function POST(req: Request) {
 
     // const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${token}`;
     const verifyUrl = `${BASE_URL}/verify-email?token=${token}`;
-
 
     await resend.emails.send({
       from: "verify@surfphotosjapan.com",

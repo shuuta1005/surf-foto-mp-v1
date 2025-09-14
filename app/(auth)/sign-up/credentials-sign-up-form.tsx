@@ -29,144 +29,79 @@ const CredentialsSignUpForm = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setErrors({});
-  setIsSubmitting(true);
+    e.preventDefault();
+    setErrors({});
+    setIsSubmitting(true);
 
-  try {
-    const validated = signUpSchema.parse(formData);
+    try {
+      const validated = signUpSchema.parse(formData);
 
-    const res = await fetch("/api/auth/sign-up", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(validated),
-    });
+      const res = await fetch("/api/auth/sign-up", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(validated),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      const fieldErrors: Partial<Record<keyof SignUpData, string>> = {};
+      if (!res.ok) {
+        const fieldErrors: Partial<Record<keyof SignUpData, string>> = {};
 
-      // Handle password validation errors
-      if (data.details && Array.isArray(data.details)) {
-        fieldErrors.password = data.details.join(" ");
+        // Handle password validation errors
+        if (data.details && Array.isArray(data.details)) {
+          fieldErrors.password = data.details.join(" ");
+        }
+
+        // Handle known backend error messages
+        if (data.error === "Email already in use") {
+          fieldErrors.email = "This email is already registered.";
+        }
+
+        if (data.error === "Weak password") {
+          fieldErrors.password = "Your password is too weak.";
+        }
+
+        // Fallback for unknown errors
+        if (!fieldErrors.password && !fieldErrors.email) {
+          fieldErrors.password = data.error || "Something went wrong.";
+        }
+
+        setErrors(fieldErrors);
+
+        toast({
+          title: "Sign Up Failed",
+          description: Object.values(fieldErrors).join(" "),
+          variant: "destructive",
+        });
+
+        return;
       }
-
-      // Handle known backend error messages
-      if (data.error === "Email already in use") {
-        fieldErrors.email = "This email is already registered.";
-      }
-
-      if (data.error === "Weak password") {
-        fieldErrors.password = "Your password is too weak.";
-      }
-
-      // Fallback for unknown errors
-      if (!fieldErrors.password && !fieldErrors.email) {
-        fieldErrors.password = data.error || "Something went wrong.";
-      }
-
-      setErrors(fieldErrors);
 
       toast({
-        title: "Sign Up Failed",
-        description: Object.values(fieldErrors).join(" "),
-        variant: "destructive",
+        title: "One last step…",
+        description:
+          "Your account is almost ready. Check your email to complete sign-up.",
       });
 
-      return;
+      router.push(`/check-email?email=${validated.email}`);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const fieldErrors: typeof errors = {};
+        err.issues.forEach((issue) => {
+          const key = issue.path[0] as keyof SignUpData;
+          fieldErrors[key] = issue.message;
+        });
+        setErrors(fieldErrors);
+      } else {
+        toast({
+          title: "Unexpected Error",
+          description: "Something went wrong.",
+        });
+      }
+    } finally {
+      setIsSubmitting(false);
     }
-
-    // Store email for resend flow
-    localStorage.setItem("pendingEmail", validated.email);
-
-    toast({
-      title: "One last step…",
-      description:
-        "Your account is almost ready. Check your email to complete sign-up.",
-    });
-
-    router.push("/check-email");
-  } catch (err) {
-    if (err instanceof z.ZodError) {
-      const fieldErrors: typeof errors = {};
-      err.issues.forEach((issue) => {
-        const key = issue.path[0] as keyof SignUpData;
-        fieldErrors[key] = issue.message;
-      });
-      setErrors(fieldErrors);
-    } else {
-      toast({
-        title: "Unexpected Error",
-        description: "Something went wrong.",
-      });
-    }
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
-
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   setErrors({});
-  //   setIsSubmitting(true);
-
-  //   try {
-  //     const validated = signUpSchema.parse(formData);
-
-  //     const res = await fetch("/api/auth/sign-up", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify(validated),
-  //     });
-
-  //     const data = await res.json();
-
-  //     if (!res.ok) {
-  //       const passwordErrors =
-  //         data.errors?.password?.join(" ") ||
-  //         data.message ||
-  //         "Something went wrong.";
-
-  //       setErrors((prev) => ({
-  //         ...prev,
-  //         password: passwordErrors,
-  //       }));
-
-  //       toast({
-  //         title: "Sign Up Failed",
-  //         description: passwordErrors,
-  //         variant: "destructive",
-  //       });
-
-  //       return;
-  //     }
-
-  //     toast({
-  //       title: "One last step…",
-  //       description:
-  //         "Your account is almost ready. Check your email to complete sign-up.",
-  //     });
-  //     router.push("/check-email");
-  //   } catch (err) {
-  //     if (err instanceof z.ZodError) {
-  //       const fieldErrors: typeof errors = {};
-  //       err.issues.forEach((issue) => {
-  //         const key = issue.path[0] as keyof SignUpData;
-  //         fieldErrors[key] = issue.message;
-  //       });
-  //       setErrors(fieldErrors);
-  //     } else {
-  //       toast({
-  //         title: "Unexpected Error",
-  //         description: "Something went wrong.",
-  //       });
-  //     }
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

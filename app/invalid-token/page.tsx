@@ -2,20 +2,27 @@
 
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export default function InvalidTokenPage() {
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email");
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
   const handleResend = async () => {
+    if (!email) return;
+
     setLoading(true);
     setMessage("");
+
     try {
       const res = await fetch("/api/auth/resend-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: localStorage.getItem("pendingEmail") }),
+        body: JSON.stringify({ email }),
       });
 
       const data = await res.json();
@@ -40,7 +47,7 @@ export default function InvalidTokenPage() {
 
         <button
           onClick={handleResend}
-          disabled={loading}
+          disabled={loading || !email}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-sm"
         >
           {loading ? "Resending..." : "Resend Verification Email"}
