@@ -1,4 +1,4 @@
-// // // app/(auth)/check-email/page.tsx
+//app/(auth)/check-email/page.tsx
 
 "use client";
 
@@ -14,6 +14,12 @@ export default function CheckEmailPage() {
   const [message, setMessage] = useState("");
   const [cooldown, setCooldown] = useState(0);
 
+  // Start cooldown immediately on page load
+  useEffect(() => {
+    setCooldown(60);
+  }, []);
+
+  // Countdown logic
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (cooldown > 0) {
@@ -38,10 +44,8 @@ export default function CheckEmailPage() {
       const data = await res.json();
       setMessage(data.message || "Verification email resent.");
 
-      // If cooldown triggered by backend, start countdown
-      if (res.status === 202) {
-        setCooldown(60);
-      }
+      // Always restart cooldown after resend
+      setCooldown(60);
     } catch {
       setMessage("Something went wrong. Please try again.");
     } finally {
