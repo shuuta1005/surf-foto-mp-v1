@@ -100,7 +100,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       { message: "Check your email to verify your account." },
-      { status: 200 }
+      { status: 202 }
     );
   } catch {
     return NextResponse.json({ error: "Sign-up failed" }, { status: 500 });
