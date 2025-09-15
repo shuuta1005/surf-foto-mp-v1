@@ -71,7 +71,7 @@ The BrahFotos Team`,
       html: `
         <div style="max-width:600px; margin:0 auto; padding:20px; font-family: Arial, sans-serif; color: #333;">
           <div style="text-align: center; margin-bottom: 20px;">
-            <img src="https://surfphotosjapan.com/brafotos-logo-1.png" alt="BrahFotos Logo" style="width: 240px; height: auto;" />
+            <img src="https://surfphotosjapan.com/brafotos-logo-1.png" alt="BrahFotos Logo" style="width: 120px; height: auto;" />
           </div>
           <h2>G'day ${user.name || "there"},</h2>
           <p>You recently requested to reset your password for your BrahFotos account.</p>
