@@ -144,3 +144,11 @@ model Purchase {
   photo Photo @relation(fields: [photoId], references: [id])
   user  User  @relation(fields: [userId], references: [id])
 }
+
+model PasswordResetToken {
+  email   String   @id
+  token   String
+  expires DateTime
+
+  @@map("password_reset_tokens") // optional: custom table name
+}

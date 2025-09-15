@@ -55,7 +55,7 @@ export const UserDropdown = ({ user }: Props) => {
         {/* ✅ My Account Link */}
         <DropdownMenuItem asChild>
           <Link href="/profile" className="w-full">
-            👤 My Account
+            👤 Profile
           </Link>
         </DropdownMenuItem>
 

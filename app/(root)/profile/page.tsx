@@ -10,7 +10,7 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-xl mx-auto py-10 px-4">
-      <h1 className="text-2xl font-semibold mb-6">My Account</h1>
+      <h1 className="text-2xl font-semibold mb-6">My Account Information</h1>
 
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-1">

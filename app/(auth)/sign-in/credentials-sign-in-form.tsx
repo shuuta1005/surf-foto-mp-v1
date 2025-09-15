@@ -100,6 +100,10 @@ const CredentialsSignInForm = () => {
         disabled={isLoading}
       />
 
+      <p className="text-sm text-right text-blue-500 hover:underline">
+        <Link href="/forgot-password">Forgot your password?</Link>
+      </p>
+
       <Button className="w-full" disabled={isLoading}>
         {isLoading ? "Signing in..." : "Sign In"}
       </Button>
