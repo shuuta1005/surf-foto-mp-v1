@@ -64,7 +64,9 @@ export default function CheckEmailPage() {
           your account.
         </p>
         <p className="text-sm text-gray-500 mb-4">
-          Didn’t receive it? Check your spam folder or click below to resend.
+          {cooldown > 0
+            ? `You can resend a verification email in ${cooldown}s.`
+            : "Didn’t receive it? Check your spam folder or click below to resend."}
         </p>
 
         <button
