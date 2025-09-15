@@ -70,7 +70,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       { message: "Verification email sent." },
-      { status: 200 }
+      { status: 202 }
     );
   } catch {
     return NextResponse.json(
