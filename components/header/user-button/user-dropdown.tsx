@@ -1,5 +1,7 @@
 // components/shared/header/user-dropdown.tsx
 
+// components/shared/header/user-dropdown.tsx
+
 "use client";
 
 import { signOut } from "next-auth/react";
@@ -12,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import { ADMIN_EMAILS } from "@/lib/constants"; // ✅ import your admin list
+import { ADMIN_EMAILS } from "@/lib/constants";
 
 interface Props {
   user: {
@@ -49,6 +51,13 @@ export const UserDropdown = ({ user }: Props) => {
             </p>
           </div>
         </DropdownMenuLabel>
+
+        {/* ✅ My Account Link */}
+        <DropdownMenuItem asChild>
+          <Link href="/profile" className="w-full">
+            👤 My Account
+          </Link>
+        </DropdownMenuItem>
 
         {/* ✅ Admin Link (only for admins) */}
         {isAdmin && (
