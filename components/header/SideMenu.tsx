@@ -32,7 +32,7 @@ const SideMenu = () => {
       ? {
           title: "My Account",
           icon: <UserIcon />,
-          href: "/account", // You can implement this page later
+          href: "/profile", // You can implement this page later
         }
       : {
           title: "Sign In",
