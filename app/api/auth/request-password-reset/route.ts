@@ -37,10 +37,27 @@ export async function POST(req: Request) {
 
   try {
     await resend.emails.send({
-      from: "reset@surfphotosjapan.com",
+      from: "BrahFoto Support <reset@surfphotosjapan.com>",
       to: email,
-      subject: "Reset your password",
-      html: `<p>Click to reset your password: <a href="${resetUrl}">${resetUrl}</a></p>`,
+      subject: "Reset your BrahFotos account password",
+      html: `
+    <div style="font-family: Arial, sans-serif; color: #333;">
+      <h2>G'day ${user.name || "there"},</h2>
+      <p>You recently requested to reset your password for your BrahFotos account.</p>
+      <p>Click the button below to set a new password. This link will expire in 15 minutes.</p>
+      <p style="margin: 20px 0;">
+        <a href="${resetUrl}" style="background-color: #007BFF; color: white; padding: 12px 20px; border-radius: 6px; text-decoration: none;">
+          Reset My Password
+        </a>
+      </p>
+      <p>If you didn’t request this, you can safely ignore this email.</p>
+      <hr style="margin: 30px 0;" />
+      <p style="font-size: 12px; color: #888;">
+        Sent by BrahFotos • Chiba, Japan<br/>
+        Need help? Contact us at support@surfphotosjapan.com
+      </p>
+    </div>
+  `,
     });
 
     return NextResponse.json(

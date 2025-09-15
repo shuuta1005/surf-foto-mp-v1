@@ -94,7 +94,7 @@ const Footer = () => {
                     <Link href="/faq">FAQ</Link>
                   </li>
                   <li>
-                    <Link href="/contact">Contact</Link>
+                    <a href="mailto:support@surfphotosjapan.com">Contact</a>
                   </li>
                 </ul>
               )}
@@ -110,7 +110,7 @@ const Footer = () => {
                   <Link href="/faq">FAQ</Link>
                 </li>
                 <li>
-                  <Link href="/contact">Contact</Link>
+                  <a href="mailto:support@surfphotosjapan.com">Contact</a>
                 </li>
               </ul>
             </div>
