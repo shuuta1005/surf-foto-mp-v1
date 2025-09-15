@@ -3,7 +3,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function InvalidTokenPage() {
   const searchParams = useSearchParams();
@@ -11,9 +11,24 @@ export default function InvalidTokenPage() {
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [cooldown, setCooldown] = useState(0);
+
+  // Start cooldown immediately on page load
+  useEffect(() => {
+    setCooldown(60);
+  }, []);
+
+  // Countdown logic
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (cooldown > 0) {
+      timer = setTimeout(() => setCooldown((prev) => prev - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   const handleResend = async () => {
-    if (!email) return;
+    if (!email || cooldown > 0) return;
 
     setLoading(true);
     setMessage("");
@@ -27,6 +42,9 @@ export default function InvalidTokenPage() {
 
       const data = await res.json();
       setMessage(data.message || "Verification email resent.");
+
+      // Always restart cooldown after resend
+      setCooldown(60);
     } catch {
       setMessage("Something went wrong. Please try again.");
     } finally {
@@ -41,16 +59,25 @@ export default function InvalidTokenPage() {
           Invalid or Expired Link
         </h1>
         <p className="text-gray-600 mb-6">
-          The verification link is no longer valid. You can request a new one
-          below or contact support.
+          {cooldown > 0
+            ? `You can resend a verification email in ${cooldown}s.`
+            : "The verification link is no longer valid. You can request a new one below or contact support."}
         </p>
 
         <button
           onClick={handleResend}
-          disabled={loading || !email}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-sm"
+          disabled={loading || cooldown > 0 || !email}
+          className={`px-4 py-2 rounded text-sm ${
+            loading || cooldown > 0 || !email
+              ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+              : "bg-blue-500 text-white hover:bg-blue-600"
+          }`}
         >
-          {loading ? "Resending..." : "Resend Verification Email"}
+          {loading
+            ? "Resending..."
+            : cooldown > 0
+            ? `Resend available in ${cooldown}s`
+            : "Resend Verification Email"}
         </button>
 
         {message && <p className="mt-4 text-sm text-green-600">{message}</p>}
