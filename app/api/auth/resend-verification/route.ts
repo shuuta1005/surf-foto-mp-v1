@@ -46,7 +46,7 @@ export async function POST(req: Request) {
           message:
             "A verification email was just sent. Please check your inbox.",
         },
-        { status: 200 }
+        { status: 202 }
       );
     }
 
