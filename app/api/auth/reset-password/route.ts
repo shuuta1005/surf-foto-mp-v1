@@ -3,43 +3,60 @@ import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
-  const { token, newPassword } = await req.json();
+  const { resetToken, newPassword, email } = await req.json();
 
-  if (!token || !newPassword) {
+  if (!resetToken || !newPassword || !email) {
     return NextResponse.json(
-      { error: "Missing token or password." },
+      { error: "Missing required fields." },
       { status: 400 }
     );
   }
 
-  const resetRecord = await prisma.passwordResetToken.findFirst({
-    where: { token },
+  if (newPassword.length < 8) {
+    return NextResponse.json(
+      { error: "Password must be at least 8 characters long." },
+      { status: 400 }
+    );
+  }
+
+  const resetRecord = await prisma.passwordResetCode.findFirst({
+    where: {
+      email: email.toLowerCase(),
+      resetToken,
+      verified: true,
+    },
   });
 
   if (!resetRecord) {
     return NextResponse.json(
-      { error: "Invalid or expired token." },
+      { error: "Invalid or expired reset token." },
       { status: 400 }
     );
   }
 
-  if (resetRecord.expires < new Date()) {
+  if (!resetRecord.tokenExpires || resetRecord.tokenExpires < new Date()) {
+    await prisma.passwordResetCode.delete({
+      where: { email: email.toLowerCase() },
+    });
     return NextResponse.json(
-      { error: "Token has expired. Please request a new reset link." },
+      { error: "Reset token has expired. Please start the process again." },
       { status: 400 }
     );
   }
 
-  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  const hashedPassword = await bcrypt.hash(newPassword, 12);
 
   await prisma.user.update({
-    where: { email: resetRecord.email },
+    where: { email: email.toLowerCase() },
     data: { password: hashedPassword },
   });
 
-  await prisma.passwordResetToken.delete({
-    where: { email: resetRecord.email },
+  // Clean up the reset record
+  await prisma.passwordResetCode.delete({
+    where: { email: email.toLowerCase() },
   });
 
-  return NextResponse.json({ message: "Password has been reset." });
+  return NextResponse.json({
+    message: "Password has been reset successfully.",
+  });
 }

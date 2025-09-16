@@ -145,10 +145,17 @@ model Purchase {
   user  User  @relation(fields: [userId], references: [id])
 }
 
-model PasswordResetToken {
-  email   String   @id
-  token   String
-  expires DateTime
+model PasswordResetCode {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  code         String
+  expires      DateTime
+  attempts     Int       @default(0)
+  verified     Boolean   @default(false)
+  resetToken   String? // Temporary token after verification
+  tokenExpires DateTime? // Expiry for reset token
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
-  @@map("password_reset_tokens") // optional: custom table name
+  @@map("password_reset_codes")
 }
