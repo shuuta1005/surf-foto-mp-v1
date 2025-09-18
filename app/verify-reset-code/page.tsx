@@ -1,4 +1,5 @@
 // app/verify-reset-code/page.tsx
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -10,22 +11,46 @@ export default function VerifyResetCodePage() {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
   const [remainingAttempts, setRemainingAttempts] = useState(3);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   useEffect(() => {
     const emailParam = searchParams.get("email");
+    const canResendAt = searchParams.get("canResendAt");
+
     if (emailParam) {
       setEmail(emailParam);
     } else {
       router.push("/forgot-password");
     }
+
+    // Set initial cooldown if coming from successful send
+    if (canResendAt) {
+      const timeLeft = Math.max(
+        0,
+        Math.ceil((new Date(canResendAt).getTime() - Date.now()) / 1000)
+      );
+      setResendCooldown(timeLeft);
+    }
   }, [searchParams, router]);
+
+  // Countdown timer for resend button
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (resendCooldown > 0) {
+      timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [resendCooldown]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    setMessage("");
 
     try {
       const response = await fetch("/api/auth/verify-reset-code", {
@@ -37,7 +62,6 @@ export default function VerifyResetCodePage() {
       const data = await response.json();
 
       if (response.ok) {
-        // Redirect to password reset page with token
         router.push(
           `/reset-password?token=${data.resetToken}&email=${encodeURIComponent(
             email
@@ -56,10 +80,48 @@ export default function VerifyResetCodePage() {
     }
   };
 
-  const handleResendCode = () => {
-    router.push(
-      `/forgot-password${email ? `?email=${encodeURIComponent(email)}` : ""}`
-    );
+  const handleResendCode = async () => {
+    if (resendCooldown > 0) return;
+
+    setIsResending(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/auth/send-reset-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage("New verification code sent. Please check your inbox.");
+        setCode(""); // Clear the current code input
+        setRemainingAttempts(3); // Reset attempts for new code
+
+        // Set cooldown from server response
+        if (data.canResendAt) {
+          const timeLeft = Math.max(
+            0,
+            Math.ceil(
+              (new Date(data.canResendAt).getTime() - Date.now()) / 1000
+            )
+          );
+          setResendCooldown(timeLeft);
+        }
+      } else {
+        setError(data.error);
+        if (data.timeLeft) {
+          setResendCooldown(data.timeLeft);
+        }
+      }
+    } catch {
+      setError("Failed to resend code. Please try again.");
+    } finally {
+      setIsResending(false);
+    }
   };
 
   return (
@@ -110,6 +172,12 @@ export default function VerifyResetCodePage() {
             </div>
           )}
 
+          {message && (
+            <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-md text-sm">
+              {message}
+            </div>
+          )}
+
           <div>
             <button
               type="submit"
@@ -124,9 +192,14 @@ export default function VerifyResetCodePage() {
             <button
               type="button"
               onClick={handleResendCode}
-              className="font-medium text-blue-600 hover:text-blue-500"
+              disabled={resendCooldown > 0 || isResending}
+              className="font-medium text-blue-600 hover:text-blue-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:text-gray-400"
             >
-              Didn&apos;t receive the code? Send a new one
+              {isResending
+                ? "Sending..."
+                : resendCooldown > 0
+                ? `Resend code in ${resendCooldown}s`
+                : "Didn't receive the code? Send a new one"}
             </button>
             <br />
             <a

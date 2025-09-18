@@ -1,104 +1,28 @@
-// // app/forgot-password/page.tsx
-
-// "use client";
-
-// import { useState } from "react";
-// import { Button } from "@/components/ui/button";
-// import { toast } from "@/components/ui/use-toast";
-// import FormField from "@/components/shared/formField";
-
-// export default function ForgotPasswordPage() {
-//   const [email, setEmail] = useState("");
-//   const [isLoading, setIsLoading] = useState(false);
-
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     setIsLoading(true);
-
-//     try {
-//       const res = await fetch("/api/auth/request-password-reset", {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({ email }),
-//       });
-
-//       const data = await res.json();
-
-//       if (res.ok) {
-//         toast({
-//           title: "Reset Link Sent",
-//           description: data.message || "Check your inbox for the reset link.",
-//         });
-//       } else {
-//         toast({
-//           title: "Error",
-//           description: data.error || "Could not send reset link.",
-//           variant: "destructive",
-//         });
-//       }
-//     } catch {
-//       toast({
-//         title: "Unexpected Error",
-//         description: "Something went wrong.",
-//         variant: "destructive",
-//       });
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-
-//   return (
-//     <div className="max-w-md mx-auto py-10 px-4">
-//       <h1 className="text-2xl font-semibold mb-6">Forgot Password</h1>
-//       <form onSubmit={handleSubmit} className="space-y-6">
-//         <FormField
-//           label="Email"
-//           name="email"
-//           type="email"
-//           value={email}
-//           onChange={(e) => setEmail(e.target.value)}
-//           disabled={isLoading}
-//         />
-
-//         <Button type="submit" className="w-full" disabled={isLoading}>
-//           {isLoading ? "Sending..." : "Send Reset Link"}
-//         </Button>
-//       </form>
-//     </div>
-//   );
-// }
-
 // app/forgot-password/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 
 export default function ForgotPasswordPage() {
   const { data: session } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [cooldown, setCooldown] = useState(0);
 
-  // Pre-fill email if user is logged in
+  // Pre-fill email if user is logged in OR from URL parameter
   useEffect(() => {
-    if (session?.user?.email) {
+    const emailParam = searchParams.get("email");
+    if (emailParam) {
+      setEmail(emailParam);
+    } else if (session?.user?.email) {
       setEmail(session.user.email);
     }
-  }, [session]);
-
-  // Cooldown timer
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (cooldown > 0) {
-      timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
-    }
-    return () => clearTimeout(timer);
-  }, [cooldown]);
+  }, [session, searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,9 +41,13 @@ export default function ForgotPasswordPage() {
 
       if (response.ok) {
         setMessage(data.message);
-        setCooldown(60); // 1 minute cooldown
-        // Redirect to verification page with email
-        router.push(`/verify-reset-code?email=${encodeURIComponent(email)}`);
+        // Redirect to verification page with timing info
+        const canResendAt = data.canResendAt
+          ? `&canResendAt=${encodeURIComponent(data.canResendAt)}`
+          : "";
+        router.push(
+          `/verify-reset-code?email=${encodeURIComponent(email)}${canResendAt}`
+        );
       } else {
         setError(data.error);
       }
@@ -159,7 +87,7 @@ export default function ForgotPasswordPage() {
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              disabled={isLoading || cooldown > 0}
+              disabled={isLoading}
             />
           </div>
 
@@ -178,14 +106,10 @@ export default function ForgotPasswordPage() {
           <div>
             <button
               type="submit"
-              disabled={isLoading || cooldown > 0}
+              disabled={isLoading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading
-                ? "Sending..."
-                : cooldown > 0
-                ? `Wait ${cooldown}s`
-                : "Send Verification Code"}
+              {isLoading ? "Sending..." : "Send Verification Code"}
             </button>
           </div>
 

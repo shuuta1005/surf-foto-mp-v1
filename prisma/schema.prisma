@@ -154,6 +154,7 @@ model PasswordResetCode {
   verified     Boolean   @default(false)
   resetToken   String? // Temporary token after verification
   tokenExpires DateTime? // Expiry for reset token
+  lastSentAt   DateTime? // NEW: Track when code was last sent
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
