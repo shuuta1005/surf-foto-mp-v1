@@ -1,3 +1,5 @@
+//app/api/auth/reset-password/route.ts
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
@@ -12,6 +14,7 @@ export async function POST(req: Request) {
     );
   }
 
+  //TODO We have to apply the zod validations here.
   if (newPassword.length < 8) {
     return NextResponse.json(
       { error: "Password must be at least 8 characters long." },

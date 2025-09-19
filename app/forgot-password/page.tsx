@@ -15,6 +15,7 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState("");
 
   // Pre-fill email if user is logged in OR from URL parameter
+  //I do not quite think we need this.
   useEffect(() => {
     const emailParam = searchParams.get("email");
     if (emailParam) {
@@ -115,8 +116,8 @@ export default function ForgotPasswordPage() {
 
           <div className="text-center">
             <a
-              href="/auth/signin"
-              className="font-medium text-blue-600 hover:text-blue-500"
+              href="/sign-in"
+              className="font-medium text-gray-500 hover:text-gray-600"
             >
               Back to sign in
             </a>
