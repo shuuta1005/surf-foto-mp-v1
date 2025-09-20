@@ -110,7 +110,7 @@ const Footer = () => {
                   <Link href="/faq">FAQ</Link>
                 </li>
                 <li>
-                  <a href="mailto:support@surfphotosjapan.com">Contact</a>
+                  <Link href="/contact">Contact</Link>
                 </li>
               </ul>
             </div>
