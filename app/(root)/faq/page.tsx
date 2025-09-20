@@ -132,12 +132,12 @@ export default function FAQPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-blue-600 text-white py-16">
+      <div className="bg-gray-600 text-white py-16">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h1 className="text-4xl font-bold mb-4">
             Frequently Asked Questions
           </h1>
-          <p className="text-xl text-blue-100">
+          <p className="text-xl text-gray-100">
             Find answers to common questions about BrahFotos
           </p>
         </div>
@@ -146,7 +146,7 @@ export default function FAQPage() {
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 py-16">
         {/* Quick Contact */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-12">
+        <div className="bg-blue-50 border border-gray-200 rounded-lg p-6 mb-12">
           <div className="flex items-start">
             <svg
               className="w-6 h-6 text-blue-600 mt-1 mr-3 flex-shrink-0"
@@ -258,13 +258,13 @@ export default function FAQPage() {
           <div className="space-x-4">
             <a
               href="/galleries"
-              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 transition-colors"
             >
               Browse Photos
             </a>
             <a
               href="/contact"
-              className="inline-flex items-center px-6 py-3 border border-blue-600 text-base font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 transition-colors"
+              className="inline-flex items-center px-6 py-3 border border-gray-600 text-base font-medium rounded-md text-gray-600 bg-white hover:bg-blue-50 transition-colors"
             >
               Contact Us
             </a>

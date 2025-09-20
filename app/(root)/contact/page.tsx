@@ -81,7 +81,7 @@ export default function ContactPage() {
           </p>
           <button
             onClick={() => setSubmitted(false)}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+            className="w-full bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 transition-colors"
           >
             Send Another Message
           </button>
@@ -93,10 +93,10 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-blue-600 text-white py-16">
+      <div className="bg-gray-600 text-white py-16">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
-          <p className="text-xl text-blue-100">
+          <p className="text-xl text-gray-100">
             Get in touch with the BrahFotos team
           </p>
         </div>
@@ -125,7 +125,7 @@ export default function ContactPage() {
                   required
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500"
                   placeholder="Your name"
                 />
               </div>
@@ -144,7 +144,7 @@ export default function ContactPage() {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500"
                   placeholder="your.email@example.com"
                 />
               </div>
@@ -162,7 +162,7 @@ export default function ContactPage() {
                   required
                   value={formData.subject}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500"
                 >
                   {subjects.map((subject) => (
                     <option key={subject.value} value={subject.value}>
@@ -186,7 +186,7 @@ export default function ContactPage() {
                   rows={6}
                   value={formData.message}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 resize-vertical"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500 resize-vertical"
                   placeholder="Tell us how we can help you..."
                 />
               </div>
@@ -200,7 +200,7 @@ export default function ContactPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {isSubmitting ? "Sending..." : "Send Message"}
               </button>
@@ -218,7 +218,7 @@ export default function ContactPage() {
               <div className="space-y-4">
                 <div className="flex items-start">
                   <svg
-                    className="w-6 h-6 text-blue-600 mt-1 mr-3 flex-shrink-0"
+                    className="w-6 h-6 text-gray-600 mt-1 mr-3 flex-shrink-0"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -241,7 +241,7 @@ export default function ContactPage() {
 
                 <div className="flex items-start">
                   <svg
-                    className="w-6 h-6 text-blue-600 mt-1 mr-3 flex-shrink-0"
+                    className="w-6 h-6 text-gray-600 mt-1 mr-3 flex-shrink-0"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -270,7 +270,7 @@ export default function ContactPage() {
 
                 <div className="flex items-start">
                   <svg
-                    className="w-6 h-6 text-blue-600 mt-1 mr-3 flex-shrink-0"
+                    className="w-6 h-6 text-gray-600 mt-1 mr-3 flex-shrink-0"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -349,7 +349,7 @@ export default function ContactPage() {
               <div className="flex space-x-4">
                 <a
                   href="#"
-                  className="bg-blue-600 text-white p-3 rounded-full hover:bg-blue-700 transition-colors"
+                  className="bg-gray-600 text-white p-3 rounded-full hover:bg-gray-700 transition-colors"
                   aria-label="Instagram"
                 >
                   <svg
@@ -363,7 +363,7 @@ export default function ContactPage() {
 
                 <a
                   href="#"
-                  className="bg-blue-400 text-white p-3 rounded-full hover:bg-blue-500 transition-colors"
+                  className="bg-gray-400 text-white p-3 rounded-full hover:bg-gray-500 transition-colors"
                   aria-label="Twitter"
                 >
                   <svg
@@ -377,7 +377,7 @@ export default function ContactPage() {
 
                 <a
                   href="#"
-                  className="bg-blue-700 text-white p-3 rounded-full hover:bg-blue-800 transition-colors"
+                  className="bg-gray-700 text-white p-3 rounded-full hover:bg-gray-800 transition-colors"
                   aria-label="Facebook"
                 >
                   <svg
