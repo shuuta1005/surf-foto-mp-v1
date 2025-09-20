@@ -1,3 +1,5 @@
+//app/(auth)/verify-signup/page.tsx
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -52,7 +54,8 @@ export default function VerifySignUpPage() {
     setMessage("");
 
     try {
-      const response = await fetch("/api/auth/verify-signup-code", {
+      const response = await fetch("/api/auth/verify-email", {
+        //"/api/auth/verify-signup-code"
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, code }),
@@ -88,7 +91,8 @@ export default function VerifySignUpPage() {
     setMessage("");
 
     try {
-      const response = await fetch("/api/auth/resend-signup-code", {
+      const response = await fetch("/api/auth/resend-verification", {
+        //"/api/auth/resend-signup-code"
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
