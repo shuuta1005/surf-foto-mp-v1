@@ -4,7 +4,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import equaliser1Gif from "@/assets/equaliser-1.gif";
+import equaliser2Gif from "@/assets/equaliser-2.gif";
 
 const LoadingPage = () => {
   const [showEnglish, setShowEnglish] = useState(true);
@@ -20,7 +20,7 @@ const LoadingPage = () => {
   return (
     <div className="flex flex-col items-center justify-center h-screen w-screen bg-white text-center px-4">
       <Image
-        src={equaliser1Gif}
+        src={equaliser2Gif}
         height={320}
         width={320}
         alt="Loading..."
