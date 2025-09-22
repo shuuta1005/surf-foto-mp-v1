@@ -1,13 +1,13 @@
 //app/loading.tsx
 
 import Image from "next/image";
-import waveLoader from "@/assets/wave-loader.gif";
+import equaliser1Gif from "@/assets/equaliser-1.gif";
 
 const LoadingPage = () => {
   return (
     <div className="flex flex-col items-center justify-center h-screen w-screen bg-white text-center px-4">
       <Image
-        src={waveLoader}
+        src={equaliser1Gif}
         height={320}
         width={320}
         alt="Loading..."
