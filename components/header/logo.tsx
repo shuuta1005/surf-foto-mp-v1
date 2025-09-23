@@ -45,10 +45,10 @@ const Logo = () => {
       ) : (
         <>
           <Image
-            src="/logo.svg"
+            src="/brahfotos-logo-3.png"
             alt="BraFotos Logo"
-            height={45}
-            width={45}
+            height={60}
+            width={60}
             priority
           />
           <span className="hidden lg:block font-gothic text-2xl sm:text-3xl md:text-4xl text-gray-800 font-semibold">

@@ -18,7 +18,7 @@ export default function SignInPage() {
             <div className="text-center space-y-2">
               <Link href="/" className="flex justify-center">
                 <Image
-                  src="/logo.svg"
+                  src="/brahfotos-logo-3.png"
                   alt="App Logo"
                   width={120}
                   height={120}
@@ -41,10 +41,10 @@ export default function SignInPage() {
             <CardHeader className="text-center space-y-2">
               <Link href="/" className="flex justify-center">
                 <Image
-                  src="/logo.svg"
+                  src="/brahfotos-logo-3.png"
                   alt="App Logo"
-                  width={120}
-                  height={120}
+                  width={150}
+                  height={150}
                   priority
                 />
               </Link>

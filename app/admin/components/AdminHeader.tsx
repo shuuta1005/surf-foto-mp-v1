@@ -10,10 +10,10 @@ const AdminHeader = () => {
       <div className="flex items-center gap-3">
         <Link href="/" className="flex items-center space-x-3">
           <Image
-            src="/logo.svg"
+            src="/brahfotos-logo-3.png"
             alt="BraFotos Logo"
-            height={60}
-            width={60}
+            height={80}
+            width={80}
             priority={true}
             // className="w-110 h-10 sm:w-12 sm:h-12"
           />
