@@ -1,4 +1,4 @@
-//app/api/auth/verify-email/route.ts
+//app/api/auth/verify-signup-code/route.ts
 
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
