@@ -16,10 +16,10 @@ export default function SignUpPage() {
             <div className="text-center space-y-2">
               <Link href="/" className="flex justify-center">
                 <Image
-                  src="/brafotos-logo-1.svg"
+                  src="/brahfotos-logo-3.png"
                   alt="App Logo"
-                  width={180}
-                  height={180}
+                  width={150}
+                  height={150}
                   priority
                 />
               </Link>
@@ -36,10 +36,10 @@ export default function SignUpPage() {
             <CardHeader className="text-center space-y-2">
               <Link href="/" className="flex justify-center">
                 <Image
-                  src="/brafotos-logo-1.svg"
+                  src="/brahfotos-logo-3.png"
                   alt="App Logo"
-                  width={180}
-                  height={180}
+                  width={150}
+                  height={150}
                   priority
                 />
               </Link>

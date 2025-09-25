@@ -20,7 +20,7 @@ export default function AboutPage() {
         {/* Overlay content - Positioned absolutely like in HighlightedPhotos */}
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
-            About BraFotos
+            About BrahFotos
           </h1>
           <div className="h-1 w-16 bg-stone-700 mx-auto mt-4 mb-6" />
           <p className="text-xl md:text-2xl font-semibold text-gray-700">
