@@ -40,7 +40,7 @@ export default function HighlightedGalleriesClient({
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg sm:text-xl md:text-2xl font-bold">
-            Recent Scores🔥最近の1173
+            Recent Scores🔥最近のいい波
           </h2>
 
           {!isMobile && (
