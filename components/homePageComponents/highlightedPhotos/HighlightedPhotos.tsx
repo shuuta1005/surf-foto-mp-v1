@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 const HighlightedPhotos: React.FC = () => {
   const originalPhotos: string[] = [
     "/takeoff1.jpg",
-    "/takeoff2.jpg",
-    "/float1.jpg",
+    "/higlighted-photo-3.jpg",
+    "/fake-gallery-1/photo-1.jpg",
   ];
 
   const highlightedPhotos: string[] = [...originalPhotos, originalPhotos[0]];
