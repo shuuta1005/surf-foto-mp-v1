@@ -68,4 +68,11 @@ export const uploadGallerySchema = z.object({
   surfSpot: z.string().min(1, "Surf spot is required"),
   date: z.string().min(1, "Date is required"),
   sessionTime: z.string().min(1, "Session time is required"),
+  price: z
+    .union([z.string(), z.number()])
+    .transform((v) => Number(v))
+    .refine((n) => Number.isFinite(n) && n >= 100, {
+      message: "Price must be a number >= 100",
+    }),
+  tiers: z.string().optional(), // JSON string, parsed later
 });

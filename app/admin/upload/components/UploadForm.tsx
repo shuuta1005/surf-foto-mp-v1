@@ -6,7 +6,19 @@ import UploadPhotoSelector from "./UploadPhotoSelector";
 import UploadingOverlay from "./UploadingOverlay";
 import UploadSessionDetails from "./UploadSessionDetails";
 
-export default function UploadForm() {
+// 👇 Define the type for bundle tiers
+interface PricingTier {
+  quantity: number;
+  price: number;
+}
+
+// 👇 Define props for UploadForm
+interface UploadFormProps {
+  price: number;
+  tiers: PricingTier[];
+}
+
+export default function UploadForm({ price, tiers }: UploadFormProps) {
   const [files, setFiles] = useState<FileList | null>(null);
   const [coverPhoto, setCoverPhoto] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -40,10 +52,10 @@ export default function UploadForm() {
     if (files) {
       Array.from(files).forEach((file) => formData.append("photos", file));
     }
-    
+
     if (coverPhoto) {
-  formData.append("coverPhoto", coverPhoto);
-}
+      formData.append("coverPhoto", coverPhoto);
+    }
 
     formData.append("prefecture", prefecture);
     formData.append("area", area);
@@ -51,9 +63,13 @@ export default function UploadForm() {
     formData.append("date", date);
     formData.append("sessionTime", sessionTime);
 
+    // 👇 Add pricing info
+    formData.append("price", price.toString());
+    formData.append("tiers", JSON.stringify(tiers));
+
     setIsUploading(true);
     setUploadProgress(0);
-    setFormErrors({}); // Clear errors on submit
+    setFormErrors({});
 
     try {
       await axios.post("/api/admin/upload-gallery", formData, {

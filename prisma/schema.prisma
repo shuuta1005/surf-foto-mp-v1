@@ -1,3 +1,15 @@
+enum Role {
+  ADMIN
+  PHOTOGRAPHER
+  USER
+}
+
+enum GalleryStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
@@ -9,21 +21,25 @@ datasource db {
 }
 
 model User {
-  id            String     @id @default(uuid())
-  name          String     @default("NO_NAME")
-  email         String     @unique(map: "user_email_idx")
-  emailVerified DateTime?
-  image         String?
-  password      String?
-  role          String     @default("user")
-  local_break   Json?      @db.Json
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  accounts      Account?
-  carts         Cart[]
-  galleries     Gallery[]  @relation("PhotographerGalleries")
-  Purchase      Purchase[]
-  sessions      Session[]
+  id              String     @id @default(uuid())
+  name            String     @default("NO_NAME")
+  email           String     @unique(map: "user_email_idx")
+  emailVerified   DateTime?
+  image           String?
+  password        String?
+  role            Role       @default(USER) // changed from String to Enum
+  verified        Boolean    @default(false) // optional: for upload gating
+  stripeAccountId String? // for payouts
+  bio             String? // optional: for photographer profile
+  avatarUrl       String? // optional: profile image
+  local_break     Json?      @db.Json
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  accounts        Account?
+  carts           Cart[]
+  galleries       Gallery[]  @relation("PhotographerGalleries")
+  Purchase        Purchase[]
+  sessions        Session[]
 }
 
 model PendingUser {
@@ -108,28 +124,29 @@ model CartItem {
 }
 
 model Gallery {
-  id             String   @id @default(uuid())
-  createdAt      DateTime @default(now())
+  id             String        @id @default(uuid())
+  createdAt      DateTime      @default(now())
   area           String
   date           DateTime
-  isPublic       Boolean  @default(false)
+  isPublic       Boolean       @default(false)
   photographerId String
   prefecture     String
   surfSpot       String
   coverPhoto     String?
   sessionTime    String?
-  photographer   User     @relation("PhotographerGalleries", fields: [photographerId], references: [id])
+  photographer   User          @relation("PhotographerGalleries", fields: [photographerId], references: [id])
   photos         Photo[]
+  pricingTiers   PricingTier[]
 }
 
 model Photo {
   id          String     @id @default(uuid())
   galleryId   String
-  photoUrl    String
-  uploadedAt  DateTime   @default(now())
-  //isCover     Boolean    @default(false)
-  originalUrl String?
   gallery     Gallery    @relation(fields: [galleryId], references: [id])
+  photoUrl    String
+  originalUrl String
+  price       Int
+  createdAt   DateTime   @default(now())
   Purchase    Purchase[]
 }
 
@@ -159,4 +176,14 @@ model PasswordResetCode {
   updatedAt    DateTime  @updatedAt
 
   @@map("password_reset_codes")
+}
+
+model PricingTier {
+  id        String   @id @default(uuid())
+  quantity  Int // e.g. 3 photos
+  price     Int // e.g. ¥2000
+  createdAt DateTime @default(now())
+
+  Gallery   Gallery? @relation(fields: [galleryId], references: [id])
+  galleryId String?
 }
