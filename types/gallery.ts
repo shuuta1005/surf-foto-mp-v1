@@ -1,10 +1,12 @@
-//app/types/gallery.ts
+// app/types/gallery.ts
 
 export type Photo = {
   id: string;
   galleryId: string;
   photoUrl: string;
-  uploadedAt: Date;
+  originalUrl: string; // ✅ required in schema
+  price: number;
+  createdAt: Date;
 };
 
 export type Gallery = {
@@ -18,9 +20,17 @@ export type Gallery = {
   photos: Photo[];
   createdAt: Date;
 
-  // ✅ New optional fields
-  sessionTime?: string;
-  coverPhoto?: string;
+  // ✅ match schema (nullable, not optional)
+  sessionTime: string | null;
+  coverPhoto: string | null;
+
+  pricingTiers: {
+    id: string;
+    quantity: number;
+    price: number;
+    createdAt: Date;
+    galleryId?: string | null;
+  }[];
 };
 
 export type GalleryCardProps = {
@@ -29,7 +39,7 @@ export type GalleryCardProps = {
   title: string;
   location: string;
   sessionTime?: string | null;
-  date?: string | Date | null; // ✅ Add this
+  date?: string | Date | null;
 };
 
 export type GalleryViewProps = {

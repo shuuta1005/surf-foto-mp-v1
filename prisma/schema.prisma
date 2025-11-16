@@ -11,8 +11,7 @@ enum GalleryStatus {
 }
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -32,7 +31,8 @@ model User {
   stripeAccountId String? // for payouts
   bio             String? // optional: for photographer profile
   avatarUrl       String? // optional: profile image
-  local_break     Json?      @db.Json
+  local_break     String?
+  local_area      String?
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
   accounts        Account?
@@ -134,6 +134,7 @@ model Gallery {
   surfSpot       String
   coverPhoto     String?
   sessionTime    String?
+  status         GalleryStatus @default(PENDING)
   photographer   User          @relation("PhotographerGalleries", fields: [photographerId], references: [id])
   photos         Photo[]
   pricingTiers   PricingTier[]
