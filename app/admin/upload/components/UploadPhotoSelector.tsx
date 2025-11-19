@@ -1,11 +1,11 @@
 // app/admin/upload/components/UploadPhotoSelector.tsx
 
+//Could decompose
 import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-label";
 import { UploadCloud, XCircle } from "lucide-react";
 import { useEffect } from "react";
 import Image from "next/image";
-
 
 type Props = {
   files: FileList | null;
@@ -63,7 +63,7 @@ export default function UploadPhotoSelector({
           <p className="text-sm text-gray-400 mb-4">or</p>
           <label
             htmlFor="photos"
-            className={`inline-block px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded hover:bg-blue-600 transition cursor-pointer ${
+            className={`inline-block px-4 py-2 text-sm font-bold text-white bg-gray-500 rounded hover:bg-gray-600 transition cursor-pointer ${
               disabled ? "pointer-events-none opacity-60" : ""
             }`}
           >
@@ -136,7 +136,7 @@ export default function UploadPhotoSelector({
           <p className="text-sm text-gray-400 mb-4">or</p>
           <label
             htmlFor="coverPhoto"
-            className={`inline-block px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded hover:bg-blue-600 transition cursor-pointer ${
+            className={`inline-block px-4 py-2 text-sm font-bold text-white bg-gray-500 rounded hover:bg-gray-600 transition cursor-pointer ${
               disabled ? "pointer-events-none opacity-60" : ""
             }`}
           >

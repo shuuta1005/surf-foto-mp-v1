@@ -62,9 +62,9 @@ export default function BundlePricingSetup({
       ))}
       <button
         onClick={addTier}
-        className="mt-2 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+        className="mt-2 px-3 py-1 bg-zinc-500 text-white rounded hover:bg-zinc-600"
       >
-        ➕ Add Tier
+        Add Tier
       </button>
     </div>
   );

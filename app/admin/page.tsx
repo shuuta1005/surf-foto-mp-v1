@@ -14,7 +14,7 @@ export default function AdminPage() {
       <h2 className="text-3xl font-extrabold">G&apos;day, {userName}! </h2>
       <h3 className="font-medium">Proud to have ya in BrahFotots team 🌅</h3>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
         <AdminActionCard
           emoji="📤"
           title="Upload New Gallery"
@@ -26,6 +26,12 @@ export default function AdminPage() {
           title="View Your Sales Report"
           description="Track your sales record."
           href="/admin/sales"
+        />
+        <AdminActionCard
+          emoji="🎥"
+          title="Your Galleries"
+          description="Manage your galleries"
+          href="/admin/manage-gallery"
         />
       </div>
     </div>

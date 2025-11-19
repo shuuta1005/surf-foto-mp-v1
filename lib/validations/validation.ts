@@ -1,5 +1,3 @@
-//WILL NOT USE ANYMORE, better to decompose for easier control
-
 //Zod is a runtime validator —
 //meaning it actually checks the data while the app is running, not just during development.
 //TypeScript only checks types while you're coding — it disappears when the app runs in the browser.

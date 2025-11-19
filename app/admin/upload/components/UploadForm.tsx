@@ -1,24 +1,14 @@
 // app/admin/upload/components/UploadForm.tsx
-
 import { useState } from "react";
 import axios from "axios";
 import UploadPhotoSelector from "./UploadPhotoSelector";
 import UploadingOverlay from "./UploadingOverlay";
 import UploadSessionDetails from "./UploadSessionDetails";
+import PricingSetup from "./PricingSetup";
+import BundlePricingSetup from "./BundlePricingSetup";
+import { PricingTier } from "@/types/pricing";
 
-// 👇 Define the type for bundle tiers
-interface PricingTier {
-  quantity: number;
-  price: number;
-}
-
-// 👇 Define props for UploadForm
-interface UploadFormProps {
-  price: number;
-  tiers: PricingTier[];
-}
-
-export default function UploadForm({ price, tiers }: UploadFormProps) {
+export default function UploadForm() {
   const [files, setFiles] = useState<FileList | null>(null);
   const [coverPhoto, setCoverPhoto] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -31,10 +21,11 @@ export default function UploadForm({ price, tiers }: UploadFormProps) {
   const [date, setDate] = useState("");
   const [sessionTime, setSessionTime] = useState("");
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [price, setPrice] = useState<number>(1000);
+  const [tiers, setTiers] = useState<PricingTier[]>([]);
 
   const handleUpload = async () => {
     const errors: Record<string, string> = {};
-
     if (!prefecture) errors.prefecture = "都道府県を入力してください";
     if (!area) errors.area = "エリアを入力してください";
     if (!surfSpot) errors.surfSpot = "スポット名を入力してください";
@@ -49,21 +40,15 @@ export default function UploadForm({ price, tiers }: UploadFormProps) {
     }
 
     const formData = new FormData();
-    if (files) {
+    if (files)
       Array.from(files).forEach((file) => formData.append("photos", file));
-    }
-
-    if (coverPhoto) {
-      formData.append("coverPhoto", coverPhoto);
-    }
+    if (coverPhoto) formData.append("coverPhoto", coverPhoto);
 
     formData.append("prefecture", prefecture);
     formData.append("area", area);
     formData.append("surfSpot", surfSpot);
     formData.append("date", date);
     formData.append("sessionTime", sessionTime);
-
-    // 👇 Add pricing info
     formData.append("price", price.toString());
     formData.append("tiers", JSON.stringify(tiers));
 
@@ -80,8 +65,7 @@ export default function UploadForm({ price, tiers }: UploadFormProps) {
           setUploadProgress(percent);
         },
       });
-
-      // Success handling
+      // Reset
       setFiles(null);
       setCoverPhoto(null);
       setPrefecture("");
@@ -100,47 +84,69 @@ export default function UploadForm({ price, tiers }: UploadFormProps) {
   };
 
   return (
-    <div className="relative space-y-8">
-      <UploadSessionDetails
-        prefecture={prefecture}
-        setPrefecture={setPrefecture}
-        area={area}
-        setArea={setArea}
-        surfSpot={surfSpot}
-        setSurfSpot={setSurfSpot}
-        date={date}
-        setDate={setDate}
-        sessionTime={sessionTime}
-        setSessionTime={setSessionTime}
-        disabled={isUploading}
-        formErrors={formErrors}
-      />
+    <div className="w-full px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 py-10 space-y-10">
+      {/* 📝 Metadata + Pricing row */}
+      <div className="flex flex-col md:flex-row gap-10">
+        {/* Left: Metadata (70%) */}
+        <div className="w-full md:w-7/10 space-y-6">
+          <UploadSessionDetails
+            prefecture={prefecture}
+            setPrefecture={setPrefecture}
+            area={area}
+            setArea={setArea}
+            surfSpot={surfSpot}
+            setSurfSpot={setSurfSpot}
+            date={date}
+            setDate={setDate}
+            sessionTime={sessionTime}
+            setSessionTime={setSessionTime}
+            disabled={isUploading}
+            formErrors={formErrors}
+          />
+        </div>
 
-      <UploadPhotoSelector
-        files={files}
-        setFiles={setFiles}
-        coverPhoto={coverPhoto}
-        setCoverPhoto={setCoverPhoto}
-        disabled={isUploading}
-        onDrop={(e) => setFiles(e.dataTransfer.files)}
-        onCoverDrop={(e) => setCoverPhoto(e.dataTransfer.files?.[0] || null)}
-      />
+        {/* Right: Pricing (30%) */}
+        <div className="w-full md:w-3/10 space-y-6">
+          <PricingSetup price={price} setPrice={setPrice} />
+          <BundlePricingSetup tiers={tiers} setTiers={setTiers} />
+        </div>
+      </div>
 
-      {formErrors.files && (
-        <p className="text-sm text-red-500 mt-1">{formErrors.files}</p>
-      )}
-      {formErrors.coverPhoto && (
-        <p className="text-sm text-red-500 mt-1">{formErrors.coverPhoto}</p>
-      )}
+      {/* 📸 Photo Upload (full width) */}
+      <div className="w-full space-y-4">
+        <UploadPhotoSelector
+          files={files}
+          setFiles={setFiles}
+          coverPhoto={coverPhoto}
+          setCoverPhoto={setCoverPhoto}
+          disabled={isUploading}
+          onDrop={(e) => setFiles(e.dataTransfer.files)}
+          onCoverDrop={(e) => setCoverPhoto(e.dataTransfer.files?.[0] || null)}
+        />
+        {formErrors.files && (
+          <p className="text-sm text-red-500 mt-1">{formErrors.files}</p>
+        )}
+      </div>
 
-      <button
-        onClick={handleUpload}
-        disabled={isUploading}
-        className="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-      >
-        Upload Gallery
-      </button>
+      {/* 🖼 Cover Photo Upload (full width, separate section) */}
+      <div className="w-full space-y-4">
+        {formErrors.coverPhoto && (
+          <p className="text-sm text-red-500 mt-1">{formErrors.coverPhoto}</p>
+        )}
+      </div>
 
+      {/* 🚀 Submit Button */}
+      <div className="w-full">
+        <button
+          onClick={handleUpload}
+          disabled={isUploading}
+          className="w-full md:w-auto mt-6 px-6 py-3 bg-gray-500 text-white rounded hover:bg-gray-600 disabled:opacity-50 font-extrabold"
+        >
+          Upload Gallery
+        </button>
+      </div>
+
+      {/* ⏳ Upload Overlay */}
       {isUploading && (
         <UploadingOverlay
           fileCount={files?.length || 0}
