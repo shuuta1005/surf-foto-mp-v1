@@ -2,6 +2,7 @@
 import { useState } from "react";
 import axios from "axios";
 import UploadPhotoSelector from "./UploadPhotoSelector";
+import UploadCoverPhoto from "./UploadCoverPhoto";
 import UploadingOverlay from "./UploadingOverlay";
 import UploadSessionDetails from "./UploadSessionDetails";
 import PricingSetup from "./PricingSetup";
@@ -9,20 +10,40 @@ import BundlePricingSetup from "./BundlePricingSetup";
 import { PricingTier } from "@/types/pricing";
 
 export default function UploadForm() {
-  const [files, setFiles] = useState<FileList | null>(null);
+  // 📸 File state (now File[] instead of FileList)
+  const [files, setFiles] = useState<File[] | null>(null);
   const [coverPhoto, setCoverPhoto] = useState<File | null>(null);
+
+  // ⚙️ Upload state
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  // Metadata fields
+  // 📝 Metadata fields
   const [prefecture, setPrefecture] = useState("");
   const [area, setArea] = useState("");
   const [surfSpot, setSurfSpot] = useState("");
   const [date, setDate] = useState("");
   const [sessionTime, setSessionTime] = useState("");
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  // 💴 Pricing
   const [price, setPrice] = useState<number>(1000);
   const [tiers, setTiers] = useState<PricingTier[]>([]);
+
+  // 🔄 Reset helper
+  const resetForm = () => {
+    setFiles(null);
+    setCoverPhoto(null);
+    setPrefecture("");
+    setArea("");
+    setSurfSpot("");
+    setDate("");
+    setSessionTime("");
+    setPrice(1000);
+    setTiers([]);
+    setUploadProgress(0);
+    setFormErrors({});
+  };
 
   const handleUpload = async () => {
     const errors: Record<string, string> = {};
@@ -40,8 +61,7 @@ export default function UploadForm() {
     }
 
     const formData = new FormData();
-    if (files)
-      Array.from(files).forEach((file) => formData.append("photos", file));
+    if (files) files.forEach((file) => formData.append("photos", file));
     if (coverPhoto) formData.append("coverPhoto", coverPhoto);
 
     formData.append("prefecture", prefecture);
@@ -65,30 +85,21 @@ export default function UploadForm() {
           setUploadProgress(percent);
         },
       });
-      // Reset
-      setFiles(null);
-      setCoverPhoto(null);
-      setPrefecture("");
-      setArea("");
-      setSurfSpot("");
-      setDate("");
-      setSessionTime("");
-      setUploadProgress(0);
-      alert("Upload complete!");
+      resetForm();
     } catch (error) {
       console.error("Upload failed:", error);
-      alert("Upload failed. Please try again.");
+      setFormErrors({ general: "Upload failed. Please try again." });
     } finally {
       setIsUploading(false);
     }
   };
 
   return (
-    <div className="w-full px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 py-10 space-y-10">
+    <div className="w-full px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 py-10">
       {/* 📝 Metadata + Pricing row */}
       <div className="flex flex-col md:flex-row gap-10">
-        {/* Left: Metadata (70%) */}
-        <div className="w-full md:w-7/10 space-y-6">
+        {/* Left: Metadata (≈58%) */}
+        <div className="w-full md:w-7/12 space-y-6">
           <UploadSessionDetails
             prefecture={prefecture}
             setPrefecture={setPrefecture}
@@ -105,8 +116,8 @@ export default function UploadForm() {
           />
         </div>
 
-        {/* Right: Pricing (30%) */}
-        <div className="w-full md:w-3/10 space-y-6">
+        {/* Right: Pricing (≈42%) */}
+        <div className="w-full md:w-5/12 space-y-6">
           <PricingSetup price={price} setPrice={setPrice} />
           <BundlePricingSetup tiers={tiers} setTiers={setTiers} />
         </div>
@@ -117,11 +128,12 @@ export default function UploadForm() {
         <UploadPhotoSelector
           files={files}
           setFiles={setFiles}
-          coverPhoto={coverPhoto}
-          setCoverPhoto={setCoverPhoto}
           disabled={isUploading}
-          onDrop={(e) => setFiles(e.dataTransfer.files)}
-          onCoverDrop={(e) => setCoverPhoto(e.dataTransfer.files?.[0] || null)}
+          onDrop={(e) =>
+            setFiles(
+              e.dataTransfer.files ? Array.from(e.dataTransfer.files) : null
+            )
+          }
         />
         {formErrors.files && (
           <p className="text-sm text-red-500 mt-1">{formErrors.files}</p>
@@ -130,6 +142,12 @@ export default function UploadForm() {
 
       {/* 🖼 Cover Photo Upload (full width, separate section) */}
       <div className="w-full space-y-4">
+        <UploadCoverPhoto
+          coverPhoto={coverPhoto}
+          setCoverPhoto={setCoverPhoto}
+          disabled={isUploading}
+          onDrop={(e) => setCoverPhoto(e.dataTransfer.files?.[0] || null)}
+        />
         {formErrors.coverPhoto && (
           <p className="text-sm text-red-500 mt-1">{formErrors.coverPhoto}</p>
         )}
@@ -144,6 +162,9 @@ export default function UploadForm() {
         >
           Upload Gallery
         </button>
+        {formErrors.general && (
+          <p className="text-sm text-red-500 mt-2">{formErrors.general}</p>
+        )}
       </div>
 
       {/* ⏳ Upload Overlay */}

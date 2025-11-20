@@ -1,4 +1,5 @@
-// components/admin/UploadingOverlay.tsx
+import Image from "next/image";
+import SurfboardKunn from "@/assets/surfboard.gif";
 
 type Props = {
   fileCount: number;
@@ -12,8 +13,16 @@ export default function UploadingOverlay({
   progress,
 }: Props) {
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/90 px-4 text-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-solid" />
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center h-screen bg-white/90 px-4 text-center">
+      {/* Replace spinner with surfboard GIF */}
+      <Image
+        src={SurfboardKunn}
+        alt="Uploading Surfboard"
+        width={180}
+        height={180}
+        className="rounded-full"
+      />
+
       <p className="mt-4 text-gray-700 text-lg font-semibold">
         Uploading {fileCount} photo{fileCount !== 1 ? "s" : ""}…
       </p>

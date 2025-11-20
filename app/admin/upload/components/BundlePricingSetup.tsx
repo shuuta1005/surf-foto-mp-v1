@@ -1,10 +1,6 @@
 "use client";
 import React from "react";
-
-interface PricingTier {
-  quantity: number;
-  price: number;
-}
+import { PricingTier } from "@/types/pricing";
 
 interface BundlePricingSetupProps {
   tiers: PricingTier[];
