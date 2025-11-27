@@ -9,7 +9,7 @@ type Props = {
 
 export default function UploadingOverlay({
   fileCount,
-  coverName,
+  //coverName,
   progress,
 }: Props) {
   return (
@@ -26,11 +26,11 @@ export default function UploadingOverlay({
       <p className="mt-4 text-gray-700 text-lg font-semibold">
         Uploading {fileCount} photo{fileCount !== 1 ? "s" : ""}…
       </p>
-      {coverName && (
+      {/* {coverName && (
         <p className="text-sm text-gray-500 mt-1">
           Cover Photo: <span className="font-medium">{coverName}</span>
         </p>
-      )}
+      )} */}
       <div className="w-full max-w-sm bg-gray-200 rounded-full h-2 mt-4">
         <div
           className="bg-blue-500 h-2 rounded-full transition-all"

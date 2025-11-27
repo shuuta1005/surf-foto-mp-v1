@@ -99,7 +99,7 @@ export default function UploadForm() {
       {/* 📝 Metadata + Pricing row */}
       <div className="flex flex-col md:flex-row gap-10">
         {/* Left: Metadata (≈58%) */}
-        <div className="w-full md:w-7/12 space-y-6">
+        <div className="w-full md:w-6/12 space-y-6">
           <UploadSessionDetails
             prefecture={prefecture}
             setPrefecture={setPrefecture}
@@ -117,9 +117,13 @@ export default function UploadForm() {
         </div>
 
         {/* Right: Pricing (≈42%) */}
-        <div className="w-full md:w-5/12 space-y-6">
+        <div className="w-full md:w-6/12 space-y-6">
           <PricingSetup price={price} setPrice={setPrice} />
-          <BundlePricingSetup tiers={tiers} setTiers={setTiers} />
+          <BundlePricingSetup
+            tiers={tiers}
+            setTiers={setTiers}
+            basePrice={price}
+          />
         </div>
       </div>
 

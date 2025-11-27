@@ -33,6 +33,12 @@ export default function AdminPage() {
           description="Manage your galleries"
           href="/admin/manage-gallery"
         />
+        <AdminActionCard
+          emoji="🏄‍♂️"
+          title="Galleries for Review"
+          description="Manage your galleries"
+          href="/admin/manage-gallery"
+        />
       </div>
     </div>
   );
