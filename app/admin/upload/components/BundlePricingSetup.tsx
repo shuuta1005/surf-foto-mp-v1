@@ -1,3 +1,4 @@
+//app/admin/upload/components/BundlePricingSetup.tsx
 "use client";
 import React, { useState, useEffect } from "react";
 import { PricingTier } from "@/types/pricing";

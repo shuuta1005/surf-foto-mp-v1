@@ -24,6 +24,9 @@ export type Gallery = {
   sessionTime: string | null;
   coverPhoto: string | null;
 
+  // ✅ Added base price for the gallery
+  price: number;
+
   pricingTiers: {
     id: string;
     quantity: number;

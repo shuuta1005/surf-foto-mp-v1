@@ -4,6 +4,11 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { CartItem } from "@/types/cart";
+import {
+  calculateCartPricing,
+  PricingResult,
+  GalleryPricingData,
+} from "@/lib/pricing-calculator";
 
 type CartContextType = {
   items: CartItem[];
@@ -14,6 +19,8 @@ type CartContextType = {
   getTotal: () => number;
   getOriginalPrice: () => number;
   getDiscount: () => number;
+  getGalleryPricing: () => Map<string, PricingResult>;
+  getItemsByGallery: () => Map<string, CartItem[]>;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -21,8 +28,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
 
-  //Load cart from browser storage
-  //When the page loads, it checks if the user already had items saved in the cart. If yes, it loads them.
+  // Load cart from browser storage
   useEffect(() => {
     const loadCart = () => {
       const stored = localStorage.getItem("brafotos-cart");
@@ -47,15 +53,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("cart-updated", handleCartUpdate);
   }, []);
 
-  //Save cart when it changes
-  //Every time the cart changes, it saves the new version to the browser so it doesn’t get lost.
+  // Save cart when it changes
   useEffect(() => {
     localStorage.setItem("brafotos-cart", JSON.stringify(items));
   }, [items]);
 
-  //Add and remove items
-
-  //These functions let us add or remove photos from the cart. They check for duplicates and update the list.
+  // Add and remove items
   const addToCart = (item: CartItem) => {
     if (!items.some((i) => i.photoId === item.photoId)) {
       setItems((prev) => [...prev, item]);
@@ -70,29 +73,74 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return items.some((item) => item.photoId === photoId);
   };
 
-  //Clear the cart
-  //This wipes the cart clean and deletes it from the browser.
-
+  // Clear the cart
   const clearCart = () => {
     setItems([]);
     localStorage.removeItem("brafotos-cart");
-    window.dispatchEvent(new Event("cart-updated")); // 👈 trigger sync across tabs or listeners
+    window.dispatchEvent(new Event("cart-updated"));
   };
 
-  // 🧮 Pricing logic
-  const getOriginalPrice = () => items.length * 1000;
+  // Group items by gallery
+  const getItemsByGallery = () => {
+    const grouped = new Map<string, CartItem[]>();
 
+    items.forEach((item) => {
+      const galleryId = item.galleryId;
+      if (!grouped.has(galleryId)) {
+        grouped.set(galleryId, []);
+      }
+      grouped.get(galleryId)!.push(item);
+    });
+
+    return grouped;
+  };
+
+  // Get pricing breakdown by gallery
+  const getGalleryPricing = () => {
+    const itemsByGallery = getItemsByGallery();
+    const galleryData = new Map<string, GalleryPricingData>();
+
+    for (const [galleryId, galleryItems] of itemsByGallery) {
+      // All items from the same gallery should have the same pricing info
+      const firstItem = galleryItems[0];
+      galleryData.set(galleryId, {
+        items: galleryItems,
+        basePrice: firstItem.galleryBasePrice,
+        tiers: firstItem.galleryTiers || [],
+      });
+    }
+
+    const { galleryPricing } = calculateCartPricing(galleryData);
+    return galleryPricing;
+  };
+
+  // Calculate total price across all galleries
   const getTotal = () => {
-    const n = items.length;
-    if (n === 1) return 1000;
-    if (n === 2) return 1600;
-    if (n === 3) return 2100;
-    if (n === 4) return 2400;
-    if (n === 5) return 2500;
-    return n * 500;
+    const itemsByGallery = getItemsByGallery();
+    const galleryData = new Map<string, GalleryPricingData>();
+
+    for (const [galleryId, galleryItems] of itemsByGallery) {
+      const firstItem = galleryItems[0];
+      galleryData.set(galleryId, {
+        items: galleryItems,
+        basePrice: firstItem.galleryBasePrice,
+        tiers: firstItem.galleryTiers || [],
+      });
+    }
+
+    const { grandTotal } = calculateCartPricing(galleryData);
+    return grandTotal;
   };
 
-  const getDiscount = () => getOriginalPrice() - getTotal();
+  // Calculate original price (without bundles)
+  const getOriginalPrice = () => {
+    return items.reduce((sum, item) => sum + item.price, 0);
+  };
+
+  // Calculate total discount
+  const getDiscount = () => {
+    return getOriginalPrice() - getTotal();
+  };
 
   return (
     <CartContext.Provider
@@ -105,6 +153,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         getTotal,
         getOriginalPrice,
         getDiscount,
+        getGalleryPricing,
+        getItemsByGallery,
       }}
     >
       {children}

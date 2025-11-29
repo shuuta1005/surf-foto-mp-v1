@@ -25,25 +25,76 @@ const CartSummaryCard = ({
   isLoading,
   onCheckout,
 }: Props) => {
-  const { getOriginalPrice, getDiscount, getTotal } = useCart();
+  const {
+    getOriginalPrice,
+    getDiscount,
+    getTotal,
+    getGalleryPricing,
+    getItemsByGallery,
+  } = useCart();
 
   const basePrice = getOriginalPrice();
   const discount = getDiscount();
   const finalPrice = getTotal();
+  const galleryPricing = getGalleryPricing();
+  const itemsByGallery = getItemsByGallery();
 
   return (
     <Card className="bg-stone-100 border w-full md:w-80 shadow-lg">
       <CardContent className="p-4 flex flex-col gap-4 text-sm">
+        {/* Gallery-by-Gallery Breakdown */}
+        {itemsByGallery.size > 1 && (
+          <div className="space-y-2 pb-3 border-b border-gray-300">
+            <p className="font-semibold text-gray-700">Pricing by Gallery:</p>
+            {Array.from(itemsByGallery.entries()).map(
+              ([galleryId, galleryItems]) => {
+                const pricing = galleryPricing.get(galleryId);
+                const galleryName =
+                  galleryItems[0]?.galleryName || "Unknown Gallery";
+
+                return (
+                  <div key={galleryId} className="text-xs space-y-1">
+                    <p className="font-medium text-gray-800">{galleryName}</p>
+                    <p className="text-gray-600 pl-2">
+                      {galleryItems.length} photo
+                      {galleryItems.length !== 1 ? "s" : ""} →{" "}
+                      {formatYen(pricing?.totalPrice || 0)}
+                    </p>
+                    {pricing && pricing.savings > 0 && (
+                      <p className="text-green-600 text-xs pl-2">
+                        Saved {formatYen(pricing.savings)}
+                      </p>
+                    )}
+                    {pricing && pricing.breakdown.length > 0 && (
+                      <div className="pl-2 text-xs text-gray-500">
+                        {pricing.breakdown.map((item, idx) => (
+                          <p key={idx}>
+                            {item.quantity > 1 ? `${item.quantity} × ` : ""}
+                            {item.type}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+            )}
+          </div>
+        )}
+
+        {/* Total Summary */}
         <div className="space-y-1">
           <div className="flex justify-between">
             <span>Base Total</span>
             <span>{formatYen(basePrice)}</span>
           </div>
-          <div className="flex justify-between text-green-600">
-            <span>Discount</span>
-            <span>-{formatYen(discount)}</span>
-          </div>
-          <div className="flex justify-between font-bold text-lg mt-2">
+          {discount > 0 && (
+            <div className="flex justify-between text-green-600">
+              <span>Bundle Discount</span>
+              <span>-{formatYen(discount)}</span>
+            </div>
+          )}
+          <div className="flex justify-between font-bold text-lg mt-2 pt-2 border-t border-gray-300">
             <span>Total</span>
             <span>{formatYen(finalPrice)}</span>
           </div>
@@ -93,9 +144,11 @@ const CartSummaryCard = ({
           {isLoading ? "Processing..." : "Go To Checkout"}
         </Button>
 
-        <div className="mt-4 text-xs text-gray-600 border-t pt-3 leading-relaxed">
-          <p className="font-semibold">Chuck our pricing logic here</p>
-        </div>
+        {discount > 0 && (
+          <div className="mt-4 text-xs text-green-700 bg-green-50 border border-green-200 rounded p-2 text-center">
+            🎉 You&apos;re saving {formatYen(discount)} with bundle pricing!
+          </div>
+        )}
       </CardContent>
     </Card>
   );

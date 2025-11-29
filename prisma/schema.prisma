@@ -140,6 +140,7 @@ model Gallery {
   coverPhoto     String?
   sessionTime    String?
   status         GalleryStatus @default(PENDING)
+  price          Int           @default(1000) // ✅ Add this - base price per photo
   photographer   User          @relation("PhotographerGalleries", fields: [photographerId], references: [id])
   photos         Photo[]
   pricingTiers   PricingTier[]
