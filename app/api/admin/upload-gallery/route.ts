@@ -139,7 +139,6 @@ export async function POST(req: Request) {
         sessionTime,
         coverPhoto: coverPhotoUrl,
         photographerId: session.user.id,
-        isPublic: true,
         price: Number(price), // 🔥 THIS WAS MISSING! Add base price to gallery
         photos: { create: uploaded },
         pricingTiers: {

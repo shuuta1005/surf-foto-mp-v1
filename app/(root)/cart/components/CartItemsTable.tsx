@@ -1,4 +1,4 @@
-// app/(root)/cart/components/CartItemTable.tsx
+// app/(root)/cart/components/CartItemsTable.tsx
 
 "use client";
 
@@ -26,6 +26,7 @@ const CartItemsTable = () => {
         <TableHeader>
           <TableRow>
             <TableHead className="text-black">Photo</TableHead>
+            <TableHead className="text-black">Gallery</TableHead>
             <TableHead className="text-black">Price</TableHead>
             <TableHead></TableHead>
           </TableRow>
@@ -41,8 +42,11 @@ const CartItemsTable = () => {
                   className="object-cover rounded-md shadow-sm"
                 />
               </TableCell>
+              <TableCell className="text-sm">
+                {item.galleryName || "Gallery"}
+              </TableCell>
               <TableCell className="font-semibold text-sm">
-                {formatYen(item.price)}
+                {formatYen(item.galleryBasePrice)}
               </TableCell>
               <TableCell>
                 <Button

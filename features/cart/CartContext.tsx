@@ -4,11 +4,8 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { CartItem } from "@/types/cart";
-import {
-  calculateCartPricing,
-  PricingResult,
-  GalleryPricingData,
-} from "@/lib/pricing-calculator";
+import { PricingResult, GalleryPricingData } from "@/types/pricing";
+import { calculateCartPricing } from "@/lib/pricing-calculator";
 
 type CartContextType = {
   items: CartItem[];
@@ -134,7 +131,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Calculate original price (without bundles)
   const getOriginalPrice = () => {
-    return items.reduce((sum, item) => sum + item.price, 0);
+    return items.reduce((sum, item) => sum + item.galleryBasePrice, 0);
   };
 
   // Calculate total discount

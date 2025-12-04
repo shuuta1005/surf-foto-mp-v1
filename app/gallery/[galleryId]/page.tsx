@@ -1,3 +1,5 @@
+//app/gallery/[galleryId]/page.tsx
+
 import { notFound } from "next/navigation";
 import { getGalleryById } from "@/lib/queries/gallery";
 import { Gallery } from "@/types/gallery";

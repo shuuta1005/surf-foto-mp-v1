@@ -1,50 +1,76 @@
-// app/types/gallery.ts
+// types/gallery.ts
 
+/**
+ * Photo represents an individual surf photo
+ * Belongs to a Gallery
+ */
 export type Photo = {
   id: string;
   galleryId: string;
-  photoUrl: string;
-  originalUrl: string; // ✅ required in schema
-  price: number;
+  photoUrl: string; // Watermarked version (public display)
+  originalUrl: string; // High-res original (after purchase)
   createdAt: Date;
 };
 
+/**
+ * Gallery represents a surf session photo collection
+ * Created by photographers, approved by admins
+ */
 export type Gallery = {
+  // Identification
   id: string;
-  prefecture: string;
-  area: string;
-  surfSpot: string;
-  date: Date;
-  isPublic: boolean;
   photographerId: string;
-  photos: Photo[];
   createdAt: Date;
 
-  // ✅ match schema (nullable, not optional)
-  sessionTime: string | null;
+  // Location & Session
+  prefecture: string; // e.g., "千葉県"
+  area: string; // e.g., "千葉北"
+  surfSpot: string; // e.g., "志田下"
+  date: Date; // Session date
+  sessionTime: string; // e.g., "08:00 - 11:00" (required)
+
+  // Media
   coverPhoto: string | null;
 
-  // ✅ Added base price for the gallery
-  price: number;
-
+  // Pricing
+  price: number; // Base price per single photo (JPY)
   pricingTiers: {
     id: string;
-    quantity: number;
-    price: number;
+    galleryId: string;
+    quantity: number; // Bundle size (2, 3, 5 photos)
+    price: number; // Total bundle price (JPY)
     createdAt: Date;
-    galleryId?: string | null;
   }[];
+
+  // Status & Moderation
+  status: "PENDING" | "APPROVED" | "REJECTED";
+
+  // Relations
+  photos: Photo[];
+  photographer?: {
+    // Optional - included when needed
+    id: string;
+    name: string;
+    email: string;
+  };
 };
 
+/**
+ * Props for gallery card component
+ * Used in gallery list/grid displays
+ */
 export type GalleryCardProps = {
   id: string;
   image: string;
   title: string;
   location: string;
-  sessionTime?: string | null;
-  date?: string | Date | null;
+  sessionTime?: string;
+  date?: string | Date;
 };
 
+/**
+ * Props for gallery view page
+ */
 export type GalleryViewProps = {
   gallery: Gallery;
 };

@@ -1,30 +1,11 @@
 // lib/pricing-calculator.ts
 
-export type PricingTier = {
-  id?: string;
-  quantity: number;
-  price: number;
-};
-
-export type PricingBreakdown = {
-  type: string;
-  quantity: number;
-  unitPrice: number;
-  totalPrice: number;
-};
-
-export type PricingResult = {
-  totalPrice: number;
-  originalPrice: number;
-  savings: number;
-  breakdown: PricingBreakdown[];
-};
-
-export type GalleryPricingData = {
-  items: { photoId: string }[];
-  basePrice: number;
-  tiers: PricingTier[];
-};
+import {
+  PricingTier,
+  PricingBreakdown,
+  PricingResult,
+  GalleryPricingData,
+} from "@/types/pricing";
 
 /**
  * Calculate the best price for a given quantity using gallery-specific bundles

@@ -37,7 +37,7 @@ export default function AdminPage() {
           emoji="🏄‍♂️"
           title="Galleries for Review"
           description="Manage your galleries"
-          href="/admin/manage-gallery"
+          href="/admin/galleries/pending"
         />
       </div>
     </div>

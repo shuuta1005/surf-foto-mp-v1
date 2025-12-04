@@ -1,15 +1,10 @@
-//Enums
-enum Role {
-  ADMIN
-  PHOTOGRAPHER
-  USER
-}
+// ═══════════════════════════════════════════════════════════════
+// PRISMA SCHEMA - BrahFotos Surf Photo Marketplace
+// ═══════════════════════════════════════════════════════════════
 
-enum GalleryStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
+// ───────────────────────────────────────────────────────────────
+// CONFIGURATION
+// ───────────────────────────────────────────────────────────────
 
 generator client {
   provider = "prisma-client-js"
@@ -20,28 +15,51 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-//User Models
+// ───────────────────────────────────────────────────────────────
+// ENUMS
+// ───────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  PHOTOGRAPHER
+  USER
+}
+
+enum GalleryStatus {
+  PENDING // Awaiting admin approval
+  APPROVED // Live and public
+  REJECTED // Not approved by admin
+}
+
+// ═══════════════════════════════════════════════════════════════
+// USER & AUTHENTICATION MODELS
+// ═══════════════════════════════════════════════════════════════
+
 model User {
-  id              String     @id @default(uuid())
-  name            String     @default("NO_NAME")
-  email           String     @unique(map: "user_email_idx")
-  emailVerified   DateTime?
-  image           String?
-  password        String?
-  role            Role       @default(USER) // changed from String to Enum
-  verified        Boolean    @default(false) // optional: for upload gating
-  stripeAccountId String? // for payouts
-  bio             String? // optional: for photographer profile
-  avatarUrl       String? // optional: profile image
-  local_break     String?
-  local_area      String?
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-  accounts        Account?
-  carts           Cart[]
-  galleries       Gallery[]  @relation("PhotographerGalleries")
-  Purchase        Purchase[]
-  sessions        Session[]
+  id            String    @id @default(uuid())
+  name          String    @default("NO_NAME")
+  email         String    @unique(map: "user_email_idx")
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          Role      @default(USER)
+  verified      Boolean   @default(false)
+
+  // Photographer-specific fields
+  stripeAccountId String? // For payouts to photographers
+  bio             String? // Photographer profile bio
+  avatarUrl       String? // Profile picture
+  local_break     String? // Home surf spot
+  local_area      String? // Home area
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  accounts  Account?
+  sessions  Session[]
+  galleries Gallery[]  @relation("PhotographerGalleries")
+  purchases Purchase[]
 }
 
 model PendingUser {
@@ -49,11 +67,9 @@ model PendingUser {
   email          String    @unique
   name           String
   hashedPassword String
-  // Store a one-time verification token and expiry
-  token          String    @unique
-  expires        DateTime
-  // Throttling + observability
-  lastSentAt     DateTime?
+  token          String    @unique // Verification code
+  expires        DateTime // Code expiry
+  lastSentAt     DateTime? // Rate limiting
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
@@ -62,7 +78,6 @@ model PendingUser {
   @@index([expires])
 }
 
-//Auth & Session Models
 model Account {
   id                String   @id @default(uuid())
   userId            String   @unique
@@ -78,7 +93,8 @@ model Account {
   session_state     String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -89,7 +105,8 @@ model Session {
   expires      DateTime
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
@@ -100,75 +117,6 @@ model VerificationToken {
   @@id([identifier, token])
 }
 
-//Cart & Purchase Models
-model Cart {
-  id            String     @id @default(uuid())
-  sessionCartId String     @unique
-  userId        String?
-  totalPrice    Int
-  taxPrice      Int?
-  afterTaxPrice Int?
-  createdAt     DateTime   @default(now())
-  user          User?      @relation(fields: [userId], references: [id])
-  items         CartItem[]
-}
-
-model CartItem {
-  id               String    @id @default(uuid())
-  cartId           String
-  photoId          String
-  photoUrl         String
-  price            Int
-  location         String?
-  takenAt          DateTime?
-  photographerId   String?
-  photographerName String?
-  slug             String?
-  cart             Cart      @relation(fields: [cartId], references: [id])
-}
-
-//Gallery & Photo Models
-model Gallery {
-  id             String        @id @default(uuid())
-  createdAt      DateTime      @default(now())
-  area           String
-  date           DateTime
-  isPublic       Boolean       @default(false)
-  photographerId String
-  prefecture     String
-  surfSpot       String
-  coverPhoto     String?
-  sessionTime    String?
-  status         GalleryStatus @default(PENDING)
-  price          Int           @default(1000) // ✅ Add this - base price per photo
-  photographer   User          @relation("PhotographerGalleries", fields: [photographerId], references: [id])
-  photos         Photo[]
-  pricingTiers   PricingTier[]
-}
-
-model Photo {
-  id          String     @id @default(uuid())
-  galleryId   String
-  gallery     Gallery    @relation(fields: [galleryId], references: [id])
-  photoUrl    String
-  originalUrl String
-  price       Int
-  createdAt   DateTime   @default(now())
-  Purchase    Purchase[]
-}
-
-model Purchase {
-  id              String   @id @default(uuid())
-  userId          String
-  photoId         String
-  createdAt       DateTime @default(now())
-  paymentIntentId String? // 🛠 Rename if needed to match webhook (was previously stripePaymentIntentId)
-  refunded        Boolean  @default(false) // ✅ Add this
-
-  photo Photo @relation(fields: [photoId], references: [id])
-  user  User  @relation(fields: [userId], references: [id])
-}
-
 model PasswordResetCode {
   id           String    @id @default(cuid())
   email        String    @unique
@@ -176,21 +124,94 @@ model PasswordResetCode {
   expires      DateTime
   attempts     Int       @default(0)
   verified     Boolean   @default(false)
-  resetToken   String? // Temporary token after verification
-  tokenExpires DateTime? // Expiry for reset token
-  lastSentAt   DateTime? // NEW: Track when code was last sent
+  resetToken   String?
+  tokenExpires DateTime?
+  lastSentAt   DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
   @@map("password_reset_codes")
 }
 
-model PricingTier {
-  id        String   @id @default(uuid())
-  quantity  Int // e.g. 3 photos
-  price     Int // e.g. ¥2000
+// ═══════════════════════════════════════════════════════════════
+// GALLERY & PHOTO MODELS
+// ═══════════════════════════════════════════════════════════════
+
+model Gallery {
+  id String @id @default(uuid())
+
+  // Location & Session Info
+  prefecture  String // e.g., "千葉県"
+  area        String // e.g., "千葉北"
+  surfSpot    String // e.g., "志田下"
+  date        DateTime // Session date
+  sessionTime String // e.g., "08:00 - 11:00" (required)
+
+  // Media
+  coverPhoto String? // Cover image URL
+
+  // Pricing (NEW)
+  price Int @default(1000) // Base price per photo (JPY)
+
+  // Ownership & Status
+  photographerId String
+  status         GalleryStatus @default(PENDING)
+
+  // Metadata
   createdAt DateTime @default(now())
 
-  Gallery   Gallery? @relation(fields: [galleryId], references: [id])
-  galleryId String?
+  // Relations
+  photographer User          @relation("PhotographerGalleries", fields: [photographerId], references: [id])
+  photos       Photo[]
+  pricingTiers PricingTier[]
+}
+
+model Photo {
+  id        String @id @default(uuid())
+  galleryId String
+
+  // URLs
+  photoUrl    String // Watermarked version (public display)
+  originalUrl String // High-res original (after purchase)
+
+  // Metadata
+  createdAt DateTime @default(now())
+
+  // Relations
+  gallery   Gallery    @relation(fields: [galleryId], references: [id])
+  purchases Purchase[]
+}
+
+model PricingTier {
+  id        String @id @default(uuid())
+  galleryId String // Required - every tier belongs to a gallery
+
+  // Bundle Definition
+  quantity Int // Number of photos in bundle (e.g., 2, 3, 5)
+  price    Int // Total price for bundle (JPY)
+
+  // Metadata
+  createdAt DateTime @default(now())
+
+  // Relations
+  // onDelete: Cascade = if gallery is deleted, automatically delete all its pricing tiers
+  // This prevents orphaned pricing tiers in the database
+  gallery Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PURCHASE MODEL
+// ═══════════════════════════════════════════════════════════════
+
+model Purchase {
+  id              String   @id @default(uuid())
+  userId          String
+  photoId         String
+  paymentIntentId String? // Stripe payment intent ID
+  refunded        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  // Relations
+  photo Photo @relation(fields: [photoId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
 }

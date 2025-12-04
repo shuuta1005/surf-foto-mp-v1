@@ -1,98 +1,43 @@
-// // db/gallery.ts
-
-// import { prisma } from "@/lib/db";
-// import { Gallery } from "@/types/gallery"; // ✅ your custom Gallery type
-
-// // ✅ Fetch all galleries with photos and photographer info
-// export async function getAllGalleries(): Promise<Gallery[]> {
-//   const galleries = await prisma.gallery.findMany({
-//     orderBy: { date: "desc" },
-//     select: {
-//       id: true,
-//       prefecture: true,
-//       area: true,
-//       surfSpot: true,
-//       date: true,
-//       sessionTime: true, // ✅ include this
-//       coverPhoto: true, // ✅ include this
-//       isPublic: true,
-//       photographerId: true,
-//       createdAt: true,
-//       photographer: {
-//         select: {
-//           name: true,
-//           email: true,
-//         },
-//       },
-//       photos: {
-//         select: {
-//           id: true,
-//           galleryId: true,
-//           photoUrl: true,
-//           createdAt: true,
-//         },
-//       },
-//     },
-//   });
-
-//   return galleries as Gallery[];
-// }
-
-// // ✅ Fetch a single gallery by ID (with all photos)
-// export async function getGalleryById(
-//   galleryId: string
-// ): Promise<Gallery | null> {
-//   const gallery = await prisma.gallery.findUnique({
-//     where: { id: galleryId },
-//     include: {
-//       photos: true, // includes isCover, uploadedAt, etc.
-//       photographer: {
-//         select: {
-//           name: true,
-//           email: true,
-//         },
-//       },
-//     },
-//   });
-
-//   return gallery as Gallery | null; // ✅ Same here
-// }
-
-// db/gallery.ts
+// lib/queries/gallery.ts
 
 import { prisma } from "@/lib/db";
-import { Gallery } from "@/types/gallery"; // ✅ your custom Gallery type
+import { Gallery } from "@/types/gallery";
 
-// ✅ Fetch all galleries with photos, pricing tiers, and photographer info
+// ✅ Fetch all APPROVED galleries with photos, pricing tiers, and photographer info
 export async function getAllGalleries(): Promise<Gallery[]> {
   const galleries = await prisma.gallery.findMany({
+    where: {
+      status: "APPROVED", // ✅ Only show approved galleries
+    },
     orderBy: { date: "desc" },
     include: {
       photographer: {
         select: {
+          id: true, // ✅ Added id
           name: true,
           email: true,
         },
       },
-      photos: true, // full Photo objects
-      pricingTiers: true, // full PricingTier objects
+      photos: true,
+      pricingTiers: true,
     },
   });
 
-  return galleries; // ✅ typed as Gallery[] automatically
+  return galleries;
 }
 
-// ✅ Fetch a single gallery by ID (with all photos + pricing tiers)
+// ✅ Fetch a single gallery by ID (only if APPROVED)
 export async function getGalleryById(
   galleryId: string
 ): Promise<Gallery | null> {
   const gallery = await prisma.gallery.findUnique({
     where: { id: galleryId },
     include: {
-      photos: true, // full Photo objects
-      pricingTiers: true, // full PricingTier objects
+      photos: true,
+      pricingTiers: true,
       photographer: {
         select: {
+          id: true, // ✅ Added id
           name: true,
           email: true,
         },
@@ -100,5 +45,10 @@ export async function getGalleryById(
     },
   });
 
-  return gallery; // ✅ typed as Gallery | null automatically
+  // ✅ Return null if gallery is not approved (privacy protection)
+  if (gallery && gallery.status !== "APPROVED") {
+    return null;
+  }
+
+  return gallery;
 }

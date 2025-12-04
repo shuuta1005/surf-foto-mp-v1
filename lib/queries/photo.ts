@@ -12,15 +12,13 @@ export async function getPhotosByGalleryId(galleryId: string) {
 export async function createPhoto(
   galleryId: string,
   photoUrl: string,
-  originalUrl: string,
-  price: number
+  originalUrl: string
 ) {
   return await prisma.photo.create({
     data: {
       galleryId,
       photoUrl,
       originalUrl, // ✅ required
-      price, // ✅ required
     },
   });
 }
