@@ -30,6 +30,17 @@ export default function UploadForm() {
   const [price, setPrice] = useState<number>(1000);
   const [tiers, setTiers] = useState<PricingTier[]>([]);
 
+  // ✅ Check if all required fields are filled
+  const isFormValid =
+    prefecture.trim() !== "" &&
+    area.trim() !== "" &&
+    surfSpot.trim() !== "" &&
+    date !== "" &&
+    sessionTime !== "" &&
+    files !== null &&
+    files.length > 0 &&
+    coverPhoto !== null;
+
   // 🔄 Reset helper
   const resetForm = () => {
     setFiles(null);
@@ -161,8 +172,8 @@ export default function UploadForm() {
       <div className="w-full">
         <button
           onClick={handleUpload}
-          disabled={isUploading}
-          className="w-full md:w-auto mt-6 px-6 py-3 bg-gray-500 text-white rounded hover:bg-gray-600 disabled:opacity-50 font-extrabold"
+          disabled={isUploading || !isFormValid}
+          className="w-full md:w-auto mt-6 px-6 py-3 bg-gray-500 text-white rounded hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed font-extrabold transition-opacity"
         >
           Upload Gallery
         </button>

@@ -124,7 +124,7 @@ export async function POST(req: Request) {
         return {
           photoUrl: watermarkedUrl,
           originalUrl,
-          price: Number(price), // Individual photo price (same as base)
+          // ✅ Photos don't have individual prices - Gallery has the base price
         };
       })
     );
@@ -139,7 +139,7 @@ export async function POST(req: Request) {
         sessionTime,
         coverPhoto: coverPhotoUrl,
         photographerId: session.user.id,
-        price: Number(price), // 🔥 THIS WAS MISSING! Add base price to gallery
+        price: Number(price), // ✅ Base price per photo (e.g., ¥1,000 for 1 photo)
         photos: { create: uploaded },
         pricingTiers: {
           create: parsedTiers.map((t) => ({

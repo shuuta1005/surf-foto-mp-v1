@@ -1,3 +1,4 @@
+//components/header/HeaderWrapper.tsx
 import { getFilterOptions } from "@/lib/actions/gallery";
 import Header from "./index"; // Your main Header
 import { Session } from "next-auth";

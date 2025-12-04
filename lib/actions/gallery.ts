@@ -5,6 +5,9 @@ import { prisma } from "@/lib/db";
 // 🏄‍♂️ Fetch unique Prefectures, Areas, Surf Spots from galleries
 export async function getFilterOptions() {
   const galleries = await prisma.gallery.findMany({
+    where: {
+      status: "APPROVED", // ← Add this line!
+    },
     select: {
       prefecture: true,
       area: true,

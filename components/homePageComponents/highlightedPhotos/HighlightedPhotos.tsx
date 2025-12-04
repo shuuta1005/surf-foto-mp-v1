@@ -1,3 +1,4 @@
+//Highlighted Photos
 "use client";
 
 import { useState, useEffect } from "react";
