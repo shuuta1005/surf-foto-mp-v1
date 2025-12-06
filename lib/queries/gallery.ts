@@ -40,13 +40,14 @@ export async function getGalleriesForGrid() {
   });
 }
 
-// ✅ NEW: Data for highlighted galleries section
+// ✅ UPDATED: Get epic galleries ONLY (no fallback)
 export async function getHighlightedGalleries() {
-  return await prisma.gallery.findMany({
+  const galleries = await prisma.gallery.findMany({
     where: {
       status: "APPROVED",
+      isEpic: true, // ✅ Only epic galleries
     },
-    take: 6, // Only get 6 most recent
+    take: 6,
     orderBy: { date: "desc" },
     select: {
       id: true,
@@ -56,6 +57,56 @@ export async function getHighlightedGalleries() {
       area: true,
       sessionTime: true,
       date: true,
+    },
+  });
+
+  // ❌ REMOVED: Fallback logic
+  // If you want to add it back later, uncomment below:
+  /*
+  if (galleries.length === 0) {
+    galleries = await prisma.gallery.findMany({
+      where: { status: "APPROVED" },
+      take: 6,
+      orderBy: { date: "desc" },
+      select: {
+        id: true,
+        coverPhoto: true,
+        surfSpot: true,
+        prefecture: true,
+        area: true,
+        sessionTime: true,
+        date: true,
+      },
+    });
+  }
+  */
+
+  return galleries;
+}
+
+// ✅ NEW: Get all approved galleries for admin (to manage epic status)
+export async function getAllApprovedGalleriesForAdmin() {
+  return await prisma.gallery.findMany({
+    where: {
+      status: "APPROVED",
+    },
+    orderBy: [
+      { isEpic: "desc" }, // Epic ones first
+      { date: "desc" },
+    ],
+    select: {
+      id: true,
+      coverPhoto: true,
+      surfSpot: true,
+      prefecture: true,
+      area: true,
+      date: true,
+      isEpic: true,
+      photographer: {
+        select: {
+          name: true,
+        },
+      },
     },
   });
 }

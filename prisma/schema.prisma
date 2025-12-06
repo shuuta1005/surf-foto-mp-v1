@@ -150,7 +150,7 @@ model Gallery {
   // Media
   coverPhoto String? // Cover image URL
 
-  // Pricing (NEW)
+  // Pricing
   price Int @default(1000) // Base price per photo (JPY)
 
   // Ownership & Status
@@ -159,6 +159,9 @@ model Gallery {
 
   // Metadata
   createdAt DateTime @default(now())
+
+  //isEpic
+  isEpic Boolean @default(false)
 
   // Relations
   photographer User          @relation("PhotographerGalleries", fields: [photographerId], references: [id])

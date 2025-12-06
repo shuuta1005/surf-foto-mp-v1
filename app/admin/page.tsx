@@ -7,12 +7,12 @@ import AdminActionCard from "./components/AdminActionCard";
 export default function AdminPage() {
   const { data: session } = useSession();
 
-  const userName = session?.user?.name || "Admin"; // fallback if no name
+  const userName = session?.user?.name || "Admin";
 
   return (
     <div className="space-y-6">
       <h2 className="text-3xl font-extrabold">G&apos;day, {userName}! </h2>
-      <h3 className="font-medium">Proud to have ya in BrahFotots team 🌅</h3>
+      <h3 className="font-medium">Cheers for your support🌅</h3>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
         <AdminActionCard
@@ -38,6 +38,13 @@ export default function AdminPage() {
           title="Galleries for Review"
           description="Manage your galleries"
           href="/admin/galleries/pending"
+        />
+        {/* ✅ NEW: Epic Galleries Card */}
+        <AdminActionCard
+          emoji="⭐"
+          title="Epic Galleries"
+          description="Manage featured galleries on homepage"
+          href="/admin/galleries/epic"
         />
       </div>
     </div>
