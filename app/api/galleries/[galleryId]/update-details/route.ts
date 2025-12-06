@@ -6,7 +6,7 @@ import { prisma } from "@/lib/db";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { galleryId: string } }
+  { params }: { params: Promise<{ galleryId: string }> } // ✅ Changed to Promise
 ) {
   try {
     const session = await auth();
@@ -15,8 +15,11 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // ✅ Await params
+    const { galleryId } = await params;
+
     const gallery = await prisma.gallery.findUnique({
-      where: { id: params.galleryId },
+      where: { id: galleryId }, // ✅ Now use the awaited value
       select: { photographerId: true },
     });
 
@@ -45,7 +48,7 @@ export async function PATCH(
 
     // Update gallery
     await prisma.gallery.update({
-      where: { id: params.galleryId },
+      where: { id: galleryId }, // ✅ Use the awaited value
       data: {
         prefecture,
         area,

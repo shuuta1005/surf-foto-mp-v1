@@ -1,12 +1,12 @@
-// app/api/galleries/[galleryId]/route.ts
+// app/api/galleries/[galleryId]/pricing-tiers/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 
-export async function DELETE(
+export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ galleryId: string }> } // ✅ Changed to Promise
+  { params }: { params: Promise<{ galleryId: string }> }
 ) {
   try {
     const session = await auth();
@@ -15,11 +15,10 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // ✅ Await params
     const { galleryId } = await params;
 
     const gallery = await prisma.gallery.findUnique({
-      where: { id: galleryId }, // ✅ Use awaited value
+      where: { id: galleryId },
       select: { photographerId: true },
     });
 
@@ -27,7 +26,6 @@ export async function DELETE(
       return NextResponse.json({ error: "Gallery not found" }, { status: 404 });
     }
 
-    // Check permissions: must be owner or admin
     if (
       session.user.role !== "ADMIN" &&
       gallery.photographerId !== session.user.id
@@ -35,16 +33,28 @@ export async function DELETE(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Delete gallery (cascade will delete photos and pricing tiers)
-    await prisma.gallery.delete({
-      where: { id: galleryId }, // ✅ Use awaited value
+    const { quantity, price } = await req.json();
+
+    if (!quantity || !price || quantity < 1 || price < 1) {
+      return NextResponse.json(
+        { error: "Invalid quantity or price" },
+        { status: 400 }
+      );
+    }
+
+    const tier = await prisma.pricingTier.create({
+      data: {
+        galleryId,
+        quantity,
+        price,
+      },
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, tier });
   } catch (error) {
-    console.error("Error deleting gallery:", error);
+    console.error("Error creating pricing tier:", error);
     return NextResponse.json(
-      { error: "Failed to delete gallery" },
+      { error: "Failed to create pricing tier" },
       { status: 500 }
     );
   }
