@@ -13,14 +13,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Loader2, Trash2, Star, Upload } from "lucide-react";
-
-type Photo = {
-  id: string;
-  photoUrl: string;
-  originalUrl: string;
-  createdAt: Date;
-};
+import { Loader2, Trash2, Star } from "lucide-react";
+import { Photo } from "@/types/gallery";
 
 interface Props {
   galleryId: string;
@@ -36,7 +30,6 @@ export default function PhotoGrid({
   const router = useRouter();
   const [deletePhoto, setDeletePhoto] = useState<Photo | null>(null);
   const [loading, setLoading] = useState(false);
-  const [uploadLoading, setUploadLoading] = useState(false);
 
   // Delete photo
   const handleDelete = async () => {
@@ -68,7 +61,7 @@ export default function PhotoGrid({
   const handleSetCover = async (photoUrl: string) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/galleries/${galleryId}/update-details`, {
+      const res = await fetch(`/api/galleries/${galleryId}/set-cover`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ coverPhoto: photoUrl }),
@@ -78,7 +71,8 @@ export default function PhotoGrid({
         alert("Cover photo updated! ✅");
         router.refresh();
       } else {
-        alert("Failed to update cover photo");
+        const data = await res.json();
+        alert(data.error || "Failed to update cover photo");
       }
     } catch (error) {
       console.error("Error updating cover:", error);
@@ -88,90 +82,15 @@ export default function PhotoGrid({
     }
   };
 
-  // Upload new photos
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    setUploadLoading(true);
-
-    try {
-      const formData = new FormData();
-      Array.from(files).forEach((file) => {
-        formData.append("photos", file);
-      });
-
-      const res = await fetch(`/api/galleries/${galleryId}/upload-photos`, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (res.ok) {
-        alert(`${files.length} photo(s) uploaded successfully! ✅`);
-        router.refresh();
-      } else {
-        const data = await res.json();
-        alert(data.error || "Failed to upload photos");
-      }
-    } catch (error) {
-      console.error("Error uploading photos:", error);
-      alert("Failed to upload photos");
-    } finally {
-      setUploadLoading(false);
-    }
-  };
-
   return (
     <div>
-      {/* Upload Button */}
-      <Card className="mb-6">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold text-lg mb-1">Upload New Photos</h3>
-              <p className="text-sm text-gray-600">
-                Add more photos to this gallery
-              </p>
-            </div>
-            <div>
-              <input
-                type="file"
-                id="photo-upload"
-                multiple
-                accept="image/*"
-                onChange={handleUpload}
-                className="hidden"
-                disabled={uploadLoading}
-              />
-              <label htmlFor="photo-upload">
-                <Button disabled={uploadLoading} asChild>
-                  <span className="cursor-pointer">
-                    {uploadLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                        Uploading...
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="w-4 h-4 mr-2" />
-                        Upload Photos
-                      </>
-                    )}
-                  </span>
-                </Button>
-              </label>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Photo Grid */}
       {photos.length === 0 ? (
         <Card>
           <CardContent className="p-12 text-center">
-            <p className="text-gray-500">No photos in this gallery yet</p>
+            <p className="text-gray-500">No photos in this gallery</p>
             <p className="text-sm text-gray-400 mt-2">
-              Upload some photos to get started
+              To add photos, create a new gallery
             </p>
           </CardContent>
         </Card>

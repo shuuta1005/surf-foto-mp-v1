@@ -1,7 +1,5 @@
 // components/shared/header/user-dropdown.tsx
 
-// components/shared/header/user-dropdown.tsx
-
 "use client";
 
 import { signOut } from "next-auth/react";
@@ -11,21 +9,28 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import { ADMIN_EMAILS } from "@/lib/constants";
 
 interface Props {
   user: {
     name?: string | null;
     email?: string | null;
+    role?: string;
+    photographerStatus?: string;
   };
 }
 
 export const UserDropdown = ({ user }: Props) => {
   const firstInitial = user.name?.charAt(0).toUpperCase() ?? "U";
-  const isAdmin = user.email && ADMIN_EMAILS.includes(user.email);
+  const isAdmin = user.role === "ADMIN";
+  const isPhotographer = user.role === "PHOTOGRAPHER";
+  const isRegularUser = user.role === "USER";
+  const canApplyPhotographer =
+    isRegularUser && user.photographerStatus === "NONE";
+  const applicationPending = user.photographerStatus === "PENDING";
 
   return (
     <DropdownMenu>
@@ -41,38 +46,68 @@ export const UserDropdown = ({ user }: Props) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
+        {/* User Info */}
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">
               G&apos;day, {user.name}🤙🏽
             </p>
-            <p className="text-sm text-muted-foreground leading-none">
+            <p className="text-xs text-muted-foreground leading-none">
               {user.email}
             </p>
+            {/* Role Badge */}
+            {user.role && (
+              <span className="text-xs font-medium text-blue-600 mt-1">
+                {user.role === "ADMIN" && "👑 Admin"}
+                {user.role === "PHOTOGRAPHER" && "📸 Photographer"}
+                {user.role === "USER" && "🏄 User"}
+              </span>
+            )}
           </div>
         </DropdownMenuLabel>
 
-        {/* ✅ My Account Link */}
-        <DropdownMenuItem asChild>
-          <Link href="/profile" className="w-full">
-            👤 Profile
-          </Link>
-        </DropdownMenuItem>
+        <DropdownMenuSeparator />
 
-        {/* ✅ Admin Link (only for admins) */}
-        {isAdmin && (
+        {/* Dashboard - Admin & Photographers */}
+        {(isAdmin || isPhotographer) && (
           <DropdownMenuItem asChild>
-            <Link href="/admin" className="w-full">
-              🛠 Admin Dashboard
+            <Link href="/admin" className="w-full cursor-pointer">
+              🛠️ Dashboard
             </Link>
           </DropdownMenuItem>
         )}
 
+        {/* Become a Photographer - Regular Users */}
+        {canApplyPhotographer && (
+          <DropdownMenuItem asChild>
+            <Link href="/apply-photographer" className="w-full cursor-pointer">
+              <span className="flex items-center gap-2">
+                📸 Become a Photographer
+                <span className="ml-auto text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
+                  New
+                </span>
+              </span>
+            </Link>
+          </DropdownMenuItem>
+        )}
+
+        {/* Application Pending - Regular Users */}
+        {applicationPending && (
+          <DropdownMenuItem disabled>
+            <span className="flex items-center gap-2 text-amber-600">
+              ⏳ Application Pending
+            </span>
+          </DropdownMenuItem>
+        )}
+
+        <DropdownMenuSeparator />
+
+        {/* Sign Out - Everyone */}
         <DropdownMenuItem
-          className="cursor-pointer text-red-500"
+          className="cursor-pointer text-red-600 focus:text-red-600"
           onClick={() => signOut({ callbackUrl: "/" })}
         >
-          Sign Out
+          🚪 Sign Out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

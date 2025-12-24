@@ -1,20 +1,19 @@
 // components/shared/header/index.tsx
 
-import UserButton from "./user-button/user-button-client";
-import { Session } from "next-auth";
+import UserButton from "./user-button/user-button"; // ✅ Changed from user-button-client
 import SideMenu from "./SideMenu";
 import Logo from "./logo";
 import Searchbar from "./searchBar";
 import AreaFilterBar from "@/components/filters/AreaFilterBar";
 import CartButton from "./CartButton";
-import AnnouncementBar from "../homePageComponents/announcementBar/AnnouncementBar"; // ✅ already imported
+import AnnouncementBar from "../homePageComponents/announcementBar/AnnouncementBar";
 
 interface HeaderProps {
-  session: Session | null;
   areas: string[];
+  // ✅ Removed session - UserButton handles it internally
 }
 
-const Header = ({ session, areas }: HeaderProps) => {
+const Header = ({ areas }: HeaderProps) => {
   return (
     <>
       {/* ✅ Dynamic scrolling announcement bar */}
@@ -36,7 +35,7 @@ const Header = ({ session, areas }: HeaderProps) => {
           {/* Right: Search + User */}
           <div className="flex items-center gap-4">
             <Searchbar />
-            <UserButton session={session} />
+            <UserButton /> {/* ✅ No props needed - fetches auth internally */}
             <CartButton />
           </div>
         </div>

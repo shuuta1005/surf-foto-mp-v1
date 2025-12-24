@@ -10,13 +10,14 @@ import EditDetailsForm from "./EditDetailsForm";
 async function getGallery(galleryId: string, userId: string, userRole: string) {
   const gallery = await prisma.gallery.findUnique({
     where: { id: galleryId },
-    include: {
-      photos: {
-        select: {
-          id: true,
-          photoUrl: true,
-        },
-      },
+    select: {
+      id: true,
+      prefecture: true,
+      area: true,
+      surfSpot: true,
+      date: true,
+      sessionTime: true,
+      photographerId: true,
     },
   });
 
@@ -33,7 +34,7 @@ async function getGallery(galleryId: string, userId: string, userRole: string) {
 export default async function EditGalleryDetailsPage({
   params,
 }: {
-  params: Promise<{ galleryId: string }>; // ✅ Changed to Promise
+  params: Promise<{ galleryId: string }>;
 }) {
   const session = await auth();
 
@@ -41,11 +42,10 @@ export default async function EditGalleryDetailsPage({
     redirect("/sign-in");
   }
 
-  // ✅ Await params
   const { galleryId } = await params;
 
   const gallery = await getGallery(
-    galleryId, // ✅ Now use the awaited value
+    galleryId,
     session.user.id!,
     session.user.role!
   );

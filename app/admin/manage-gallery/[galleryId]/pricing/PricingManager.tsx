@@ -6,13 +6,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Plus } from "lucide-react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
+  validatePricingTier,
+  ALLOWED_BUNDLE_SIZES,
+  AllowedBundleSize,
+} from "@/lib/pricing-rules";
+import BasePriceEditor from "./components/BasePriceEditor";
+import TiersList from "./components/TiersList";
+import TierDialog from "./components/TierDialog";
+import DeleteTierDialog from "./components/DeleteTierDialog";
+import BasePriceWarningDialog from "./components/BasePriceWarningDialog";
 
 type PricingTier = {
   id: string;
@@ -36,33 +40,69 @@ export default function PricingManager({
 
   // Base price state
   const [newBasePrice, setNewBasePrice] = useState(basePrice);
-  const [editingBasePrice, setEditingBasePrice] = useState(false);
 
   // Tier dialog state
   const [showTierDialog, setShowTierDialog] = useState(false);
   const [editingTier, setEditingTier] = useState<PricingTier | null>(null);
-  const [tierQuantity, setTierQuantity] = useState("");
-  const [tierPrice, setTierPrice] = useState("");
 
   // Delete confirmation
   const [deleteTier, setDeleteTier] = useState<PricingTier | null>(null);
 
+  // Base price change warning
+  const [showBasePriceWarning, setShowBasePriceWarning] = useState(false);
+  const [invalidTiers, setInvalidTiers] = useState<PricingTier[]>([]);
+
+  // Check which tiers would become invalid with new base price
+  const checkInvalidTiers = (newBase: number): PricingTier[] => {
+    return pricingTiers.filter((tier) => {
+      const otherTiers = pricingTiers
+        .filter((t) => t.id !== tier.id)
+        .map((t) => ({ quantity: t.quantity, price: t.price }));
+
+      const error = validatePricingTier({
+        quantity: tier.quantity,
+        price: tier.price,
+        basePrice: newBase,
+        existingTiers: otherTiers,
+      });
+
+      return error !== null;
+    });
+  };
+
   // Update base price
-  const handleUpdateBasePrice = async () => {
+  const handleUpdateBasePrice = async (newPrice: number) => {
+    setNewBasePrice(newPrice);
+
+    // Check if any tiers would become invalid
+    if (pricingTiers.length > 0) {
+      const invalid = checkInvalidTiers(newPrice);
+      if (invalid.length > 0) {
+        setInvalidTiers(invalid);
+        setShowBasePriceWarning(true);
+        return;
+      }
+    }
+
+    await performBasePriceUpdate(newPrice);
+  };
+
+  // Perform base price update
+  const performBasePriceUpdate = async (price: number) => {
     setLoading(true);
     try {
       const res = await fetch(`/api/galleries/${galleryId}/update-pricing`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ basePrice: newBasePrice }),
+        body: JSON.stringify({ basePrice: price }),
       });
 
       if (res.ok) {
         alert("Base price updated! ✅");
-        setEditingBasePrice(false);
         router.refresh();
       } else {
-        alert("Failed to update base price");
+        const data = await res.json();
+        alert(data.error || "Failed to update base price");
       }
     } catch (error) {
       console.error("Error updating base price:", error);
@@ -72,16 +112,30 @@ export default function PricingManager({
     }
   };
 
-  // Add or edit tier
-  const handleSaveTier = async () => {
-    const quantity = parseInt(tierQuantity);
-    const price = parseInt(tierPrice);
+  // Confirm base price update and delete invalid tiers
+  const confirmBasePriceUpdate = async () => {
+    setLoading(true);
+    try {
+      // Delete invalid tiers first
+      for (const tier of invalidTiers) {
+        await fetch(`/api/pricing-tiers/${tier.id}`, { method: "DELETE" });
+      }
 
-    if (!quantity || !price || quantity < 1 || price < 1) {
-      alert("Please enter valid quantity and price");
-      return;
+      // Then update base price
+      await performBasePriceUpdate(newBasePrice);
+
+      setShowBasePriceWarning(false);
+      setInvalidTiers([]);
+    } catch (error) {
+      console.error("Error updating base price:", error);
+      alert("Failed to update base price");
+    } finally {
+      setLoading(false);
     }
+  };
 
+  // Save tier (add or edit)
+  const handleSaveTier = async (quantity: AllowedBundleSize, price: number) => {
     setLoading(true);
     try {
       if (editingTier) {
@@ -95,7 +149,10 @@ export default function PricingManager({
         if (res.ok) {
           alert("Pricing tier updated! ✅");
         } else {
-          alert("Failed to update tier");
+          const data = await res.json();
+          alert(data.error || "Failed to update tier");
+          setLoading(false);
+          return;
         }
       } else {
         // Create new tier
@@ -108,14 +165,15 @@ export default function PricingManager({
         if (res.ok) {
           alert("Pricing tier added! ✅");
         } else {
-          alert("Failed to add tier");
+          const data = await res.json();
+          alert(data.error || "Failed to add tier");
+          setLoading(false);
+          return;
         }
       }
 
       setShowTierDialog(false);
       setEditingTier(null);
-      setTierQuantity("");
-      setTierPrice("");
       router.refresh();
     } catch (error) {
       console.error("Error saving tier:", error);
@@ -140,7 +198,8 @@ export default function PricingManager({
         setDeleteTier(null);
         router.refresh();
       } else {
-        alert("Failed to delete tier");
+        const data = await res.json();
+        alert(data.error || "Failed to delete tier");
       }
     } catch (error) {
       console.error("Error deleting tier:", error);
@@ -150,269 +209,99 @@ export default function PricingManager({
     }
   };
 
-  // Open dialog for new tier
-  const openAddTierDialog = () => {
-    setEditingTier(null);
-    setTierQuantity("");
-    setTierPrice("");
-    setShowTierDialog(true);
-  };
-
-  // Open dialog for editing tier
-  const openEditTierDialog = (tier: PricingTier) => {
-    setEditingTier(tier);
-    setTierQuantity(tier.quantity.toString());
-    setTierPrice(tier.price.toString());
-    setShowTierDialog(true);
-  };
+  // Get available bundle sizes
+  const availableBundleSizes = ALLOWED_BUNDLE_SIZES.filter(
+    (size) =>
+      editingTier?.quantity === size ||
+      !pricingTiers.some((t) => t.quantity === size)
+  );
 
   return (
     <div className="space-y-6">
-      {/* Base Price Card */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="font-semibold text-lg">Base Price</h3>
-              <p className="text-sm text-gray-600">
-                Price per single photo (JPY)
-              </p>
-            </div>
-            {!editingBasePrice && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setEditingBasePrice(true)}
-              >
-                <Pencil className="w-4 h-4 mr-2" />
-                Edit
-              </Button>
-            )}
-          </div>
+      {/* Base Price */}
+      <BasePriceEditor
+        basePrice={basePrice}
+        onUpdate={handleUpdateBasePrice}
+        loading={loading}
+      />
 
-          {editingBasePrice ? (
-            <div className="flex gap-3 items-end">
-              <div className="flex-1">
-                <label className="block text-sm font-medium mb-2">
-                  Price (¥)
-                </label>
-                <input
-                  type="number"
-                  value={newBasePrice}
-                  onChange={(e) => setNewBasePrice(parseInt(e.target.value))}
-                  min="1"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                />
-              </div>
-              <Button
-                onClick={handleUpdateBasePrice}
-                disabled={loading}
-                className="flex-shrink-0"
-              >
-                {loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  "Save"
-                )}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setEditingBasePrice(false);
-                  setNewBasePrice(basePrice);
-                }}
-                disabled={loading}
-              >
-                Cancel
-              </Button>
-            </div>
-          ) : (
-            <p className="text-3xl font-bold text-blue-600">¥{basePrice}</p>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Pricing Tiers Card */}
+      {/* Pricing Tiers */}
       <Card>
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="font-semibold text-lg">Bulk Pricing Tiers</h3>
               <p className="text-sm text-gray-600">
-                Offer discounts for multiple photos
+                Offer discounts for multiple photos (2, 3, 4, or 5 photos)
               </p>
             </div>
-            <Button onClick={openAddTierDialog}>
+            <Button
+              onClick={() => setShowTierDialog(true)}
+              disabled={availableBundleSizes.length === 0}
+            >
               <Plus className="w-4 h-4 mr-2" />
               Add Tier
             </Button>
           </div>
 
-          {pricingTiers.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <p>No pricing tiers yet</p>
-              <p className="text-sm mt-1">
-                Add tiers to offer bulk discounts (e.g., 5 photos for ¥4,500)
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {pricingTiers.map((tier) => (
-                <div
-                  key={tier.id}
-                  className="flex items-center justify-between p-4 border rounded-lg"
-                >
-                  <div>
-                    <p className="font-semibold">
-                      {tier.quantity} {tier.quantity === 1 ? "photo" : "photos"}
-                    </p>
-                    <p className="text-2xl font-bold text-blue-600">
-                      ¥{tier.price}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      ¥{Math.round(tier.price / tier.quantity)} per photo
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => openEditTierDialog(tier)}
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => setDeleteTier(tier)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+          <TiersList
+            tiers={pricingTiers}
+            basePrice={basePrice}
+            onEdit={(tier) => {
+              setEditingTier(tier);
+              setShowTierDialog(true);
+            }}
+            onDelete={setDeleteTier}
+          />
+
+          {availableBundleSizes.length === 0 && pricingTiers.length > 0 && (
+            <div className="mt-4 text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded px-3 py-2">
+              All available bundle sizes (2, 3, 4, 5 photos) have been
+              configured.
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Add/Edit Tier Dialog */}
-      <Dialog open={showTierDialog} onOpenChange={setShowTierDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {editingTier ? "Edit Pricing Tier" : "Add Pricing Tier"}
-            </DialogTitle>
-          </DialogHeader>
+      {/* Tier Dialog */}
+      <TierDialog
+        open={showTierDialog}
+        onClose={() => {
+          setShowTierDialog(false);
+          setEditingTier(null);
+        }}
+        onSave={handleSaveTier}
+        editingTier={editingTier}
+        basePrice={newBasePrice}
+        existingTiers={pricingTiers}
+        availableSizes={availableBundleSizes}
+        loading={loading}
+      />
 
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Number of Photos *
-              </label>
-              <input
-                type="number"
-                value={tierQuantity}
-                onChange={(e) => setTierQuantity(e.target.value)}
-                min="1"
-                placeholder="e.g., 5"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              />
-            </div>
+      {/* Delete Confirmation */}
+      <DeleteTierDialog
+        tier={deleteTier}
+        basePrice={basePrice}
+        onClose={() => setDeleteTier(null)}
+        onConfirm={handleDeleteTier}
+        loading={loading}
+      />
 
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Total Price (¥) *
-              </label>
-              <input
-                type="number"
-                value={tierPrice}
-                onChange={(e) => setTierPrice(e.target.value)}
-                min="1"
-                placeholder="e.g., 4500"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              />
-              {tierQuantity && tierPrice && (
-                <p className="text-xs text-gray-500 mt-1">
-                  ¥{Math.round(parseInt(tierPrice) / parseInt(tierQuantity))}{" "}
-                  per photo
-                </p>
-              )}
-            </div>
-
-            <div className="flex gap-2 pt-4">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => setShowTierDialog(false)}
-                disabled={loading}
-              >
-                Cancel
-              </Button>
-              <Button
-                className="flex-1"
-                onClick={handleSaveTier}
-                disabled={loading}
-              >
-                {loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : editingTier ? (
-                  "Update Tier"
-                ) : (
-                  "Add Tier"
-                )}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Tier Confirmation */}
-      <Dialog open={!!deleteTier} onOpenChange={() => setDeleteTier(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Pricing Tier?</DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <p className="text-sm text-gray-600">
-              Are you sure you want to delete this pricing tier?
-            </p>
-
-            {deleteTier && (
-              <div className="bg-gray-50 p-4 rounded">
-                <p className="font-semibold">
-                  {deleteTier.quantity}{" "}
-                  {deleteTier.quantity === 1 ? "photo" : "photos"} for ¥
-                  {deleteTier.price}
-                </p>
-              </div>
-            )}
-
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => setDeleteTier(null)}
-                disabled={loading}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                className="flex-1"
-                onClick={handleDeleteTier}
-                disabled={loading}
-              >
-                {loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                ) : null}
-                Delete Tier
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Base Price Warning */}
+      <BasePriceWarningDialog
+        open={showBasePriceWarning}
+        onClose={() => {
+          setShowBasePriceWarning(false);
+          setInvalidTiers([]);
+          setNewBasePrice(basePrice);
+        }}
+        onConfirm={confirmBasePriceUpdate}
+        oldBasePrice={basePrice}
+        newBasePrice={newBasePrice}
+        invalidTiers={invalidTiers}
+        allTiers={pricingTiers}
+        loading={loading}
+      />
     </div>
   );
 }

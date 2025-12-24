@@ -8,7 +8,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="flex-center min-h-screen w-full">
+    <div className="min-h-screen w-full">
       {children}
       <Toaster position="top-center" richColors closeButton />
     </div>

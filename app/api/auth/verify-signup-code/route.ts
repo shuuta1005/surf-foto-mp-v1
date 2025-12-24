@@ -1,4 +1,5 @@
-//app/api/auth/verify-signup-code/route.ts
+// app/api/auth/verify-signup-code/route.ts
+// UPDATED VERSION - Handles photographer applications
 
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
@@ -46,6 +47,9 @@ export async function POST(req: Request) {
       );
     }
 
+    // ✨ Check if this is a photographer signup (has bio)
+    const isPhotographer = !!pendingUser.bio;
+
     // Code is valid - create the user account
     const result = await prisma.$transaction(async (tx) => {
       // Check if user already exists (edge case)
@@ -60,6 +64,13 @@ export async function POST(req: Request) {
               name: pendingUser.name,
               password: pendingUser.hashedPassword,
               emailVerified: new Date(),
+              // ✨ Add photographer fields if applicable
+              ...(isPhotographer && {
+                photographerStatus: "PENDING",
+                bio: pendingUser.bio,
+                portfolioLink: pendingUser.portfolioLink,
+                applicationSubmittedAt: new Date(),
+              }),
             },
           })
         : await tx.user.create({
@@ -68,6 +79,13 @@ export async function POST(req: Request) {
               name: pendingUser.name,
               password: pendingUser.hashedPassword,
               emailVerified: new Date(),
+              // ✨ Add photographer fields if applicable
+              ...(isPhotographer && {
+                photographerStatus: "PENDING",
+                bio: pendingUser.bio,
+                portfolioLink: pendingUser.portfolioLink,
+                applicationSubmittedAt: new Date(),
+              }),
             },
           });
 
@@ -79,6 +97,25 @@ export async function POST(req: Request) {
       return user;
     });
 
+    // ✨ Send photographer application confirmation email
+    if (isPhotographer) {
+      try {
+        const { sendApplicationSubmittedEmail } = await import(
+          "@/lib/email/photographer-emails"
+        );
+        await sendApplicationSubmittedEmail(
+          result.email,
+          result.name || "there"
+        );
+      } catch (emailError) {
+        console.error(
+          "Failed to send photographer confirmation email:",
+          emailError
+        );
+        // Don't fail the request if email fails
+      }
+    }
+
     return NextResponse.json({
       message: "Email verified successfully. Your account has been created.",
       user: {
@@ -86,6 +123,7 @@ export async function POST(req: Request) {
         email: result.email,
         name: result.name,
       },
+      isPhotographer, // ✨ Let frontend know if photographer
     });
   } catch (error) {
     console.error("Email verification failed:", error);

@@ -1,4 +1,5 @@
 // app/admin/page.tsx
+
 "use client";
 
 import { useSession } from "next-auth/react";
@@ -8,6 +9,7 @@ export default function AdminPage() {
   const { data: session } = useSession();
 
   const userName = session?.user?.name || "Admin";
+  const isAdmin = session?.user?.role === "ADMIN";
 
   return (
     <div className="space-y-6">
@@ -15,6 +17,7 @@ export default function AdminPage() {
       <h3 className="font-medium">Cheers for your support🌅</h3>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
+        {/* Photographer Actions */}
         <AdminActionCard
           emoji="📤"
           title="Upload New Gallery"
@@ -33,19 +36,31 @@ export default function AdminPage() {
           description="Manage your galleries"
           href="/admin/manage-gallery"
         />
-        <AdminActionCard
-          emoji="🏄‍♂️"
-          title="Galleries for Review"
-          description="Manage your galleries"
-          href="/admin/galleries/pending"
-        />
-        {/* ✅ NEW: Epic Galleries Card */}
-        <AdminActionCard
-          emoji="⭐"
-          title="Epic Galleries"
-          description="Manage featured galleries on homepage"
-          href="/admin/galleries/epic"
-        />
+
+        {/* Admin-Only Actions */}
+        {isAdmin && (
+          <>
+            <AdminActionCard
+              emoji="🏄‍♂️"
+              title="Galleries for Review"
+              description="Review and approve pending galleries"
+              href="/admin/galleries/pending"
+            />
+            <AdminActionCard
+              emoji="⭐"
+              title="Epic Galleries"
+              description="Manage featured galleries on homepage"
+              href="/admin/galleries/epic"
+            />
+            {/* ✨ NEW: Photographer Applications */}
+            <AdminActionCard
+              emoji="📸"
+              title="Photographer Applications"
+              description="Review pending photographer applications"
+              href="/admin/photographer-applications"
+            />
+          </>
+        )}
       </div>
     </div>
   );

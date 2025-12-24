@@ -31,6 +31,14 @@ enum GalleryStatus {
   REJECTED // Not approved by admin
 }
 
+// ✨ NEW: Photographer application status
+enum PhotographerStatus {
+  NONE // Regular user, hasn't applied
+  PENDING // Applied, waiting for admin approval
+  APPROVED // Approved and became photographer
+  REJECTED // Application was rejected
+}
+
 // ═══════════════════════════════════════════════════════════════
 // USER & AUTHENTICATION MODELS
 // ═══════════════════════════════════════════════════════════════
@@ -52,6 +60,11 @@ model User {
   local_break     String? // Home surf spot
   local_area      String? // Home area
 
+  // ✨ NEW: Photographer application fields
+  photographerStatus     PhotographerStatus @default(NONE)
+  applicationSubmittedAt DateTime?
+  portfolioLink          String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -70,8 +83,13 @@ model PendingUser {
   token          String    @unique // Verification code
   expires        DateTime // Code expiry
   lastSentAt     DateTime? // Rate limiting
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+
+  // ✨ ADD THESE TWO FIELDS for photographer signup
+  bio           String? // Photographer bio (only if signing up as photographer)
+  portfolioLink String? // Portfolio URL (optional)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([email])
   @@index([token])

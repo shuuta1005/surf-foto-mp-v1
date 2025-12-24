@@ -8,10 +8,10 @@
 
 // You're not there yet, but we’ll handle it when the time comes 🔧
 
+// lib/db.ts
 import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as {
-  //globalThis is the global object (like a universal variable shared across modules in dev)
   prisma: PrismaClient | undefined;
 };
 
@@ -20,7 +20,6 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient();
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
 }
-
 // 🧠 In short: What is this file doing?
 // It gives you a safe, shared, and singleton Prisma instance that:
 

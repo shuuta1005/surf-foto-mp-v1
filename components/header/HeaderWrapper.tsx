@@ -10,5 +10,5 @@ interface HeaderWrapperProps {
 export default async function HeaderWrapper({ session }: HeaderWrapperProps) {
   const { areas } = await getFilterOptions(); // ✅ Fetch areas here (server-side)
 
-  return <Header session={session} areas={areas} />; // ✅ Pass it to client Header
+  return <Header areas={areas} />; // ✅ Pass it to client Header
 }

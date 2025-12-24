@@ -1,14 +1,13 @@
 // components/shared/header/header-container.tsx
 
-import { auth } from "@/auth";
 import Header from "./index";
 import { getFilterOptions } from "@/lib/actions/gallery";
 
 const HeaderContainer = async () => {
-  const session = await auth();
+  // ✅ Removed auth() call - Header/UserButton will handle it internally
   const { areas } = await getFilterOptions();
 
-  return <Header session={session} areas={areas} />;
+  return <Header areas={areas} />; // ✅ No session prop
 };
 
 export default HeaderContainer;

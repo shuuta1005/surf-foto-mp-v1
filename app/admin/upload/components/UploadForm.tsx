@@ -1,8 +1,8 @@
 // app/admin/upload/components/UploadForm.tsx
+
 import { useState } from "react";
 import axios from "axios";
 import UploadPhotoSelector from "./UploadPhotoSelector";
-import UploadCoverPhoto from "./UploadCoverPhoto";
 import UploadingOverlay from "./UploadingOverlay";
 import UploadSessionDetails from "./UploadSessionDetails";
 import PricingSetup from "./PricingSetup";
@@ -10,9 +10,9 @@ import BundlePricingSetup from "./BundlePricingSetup";
 import { PricingTier } from "@/types/pricing";
 
 export default function UploadForm() {
-  // 📸 File state (now File[] instead of FileList)
+  // 📸 File state
   const [files, setFiles] = useState<File[] | null>(null);
-  const [coverPhoto, setCoverPhoto] = useState<File | null>(null);
+  const [coverIndex, setCoverIndex] = useState<number>(0); // ✅ Track cover by index
 
   // ⚙️ Upload state
   const [isUploading, setIsUploading] = useState(false);
@@ -38,13 +38,12 @@ export default function UploadForm() {
     date !== "" &&
     sessionTime !== "" &&
     files !== null &&
-    files.length > 0 &&
-    coverPhoto !== null;
+    files.length > 0; // ✅ No more coverPhoto check!
 
   // 🔄 Reset helper
   const resetForm = () => {
     setFiles(null);
-    setCoverPhoto(null);
+    setCoverIndex(0);
     setPrefecture("");
     setArea("");
     setSurfSpot("");
@@ -64,7 +63,6 @@ export default function UploadForm() {
     if (!date) errors.date = "日にちを選択してください";
     if (!sessionTime) errors.sessionTime = "セッション時間を設定してください";
     if (!files || files.length === 0) errors.files = "写真を選択してください";
-    if (!coverPhoto) errors.coverPhoto = "カバー写真を選択してください";
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -72,8 +70,16 @@ export default function UploadForm() {
     }
 
     const formData = new FormData();
-    if (files) files.forEach((file) => formData.append("photos", file));
-    if (coverPhoto) formData.append("coverPhoto", coverPhoto);
+
+    // ✅ Add all photos
+    if (files) {
+      files.forEach((file) => formData.append("photos", file));
+    }
+
+    // ✅ Add cover photo separately (it's one of the uploaded photos)
+    if (files && files[coverIndex]) {
+      formData.append("coverPhoto", files[coverIndex]);
+    }
 
     formData.append("prefecture", prefecture);
     formData.append("area", area);
@@ -96,6 +102,7 @@ export default function UploadForm() {
           setUploadProgress(percent);
         },
       });
+      alert("Gallery uploaded successfully! ✅");
       resetForm();
     } catch (error) {
       console.error("Upload failed:", error);
@@ -109,7 +116,7 @@ export default function UploadForm() {
     <div className="w-full px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 py-10">
       {/* 📝 Metadata + Pricing row */}
       <div className="flex flex-col md:flex-row gap-10">
-        {/* Left: Metadata (≈58%) */}
+        {/* Left: Metadata */}
         <div className="w-full md:w-6/12 space-y-6">
           <UploadSessionDetails
             prefecture={prefecture}
@@ -127,7 +134,7 @@ export default function UploadForm() {
           />
         </div>
 
-        {/* Right: Pricing (≈42%) */}
+        {/* Right: Pricing */}
         <div className="w-full md:w-6/12 space-y-6">
           <PricingSetup price={price} setPrice={setPrice} />
           <BundlePricingSetup
@@ -139,32 +146,16 @@ export default function UploadForm() {
       </div>
 
       {/* 📸 Photo Upload (full width) */}
-      <div className="w-full space-y-4">
+      <div className="w-full space-y-4 mt-10">
         <UploadPhotoSelector
           files={files}
           setFiles={setFiles}
+          coverIndex={coverIndex}
+          setCoverIndex={setCoverIndex}
           disabled={isUploading}
-          onDrop={(e) =>
-            setFiles(
-              e.dataTransfer.files ? Array.from(e.dataTransfer.files) : null
-            )
-          }
         />
         {formErrors.files && (
           <p className="text-sm text-red-500 mt-1">{formErrors.files}</p>
-        )}
-      </div>
-
-      {/* 🖼 Cover Photo Upload (full width, separate section) */}
-      <div className="w-full space-y-4">
-        <UploadCoverPhoto
-          coverPhoto={coverPhoto}
-          setCoverPhoto={setCoverPhoto}
-          disabled={isUploading}
-          onDrop={(e) => setCoverPhoto(e.dataTransfer.files?.[0] || null)}
-        />
-        {formErrors.coverPhoto && (
-          <p className="text-sm text-red-500 mt-1">{formErrors.coverPhoto}</p>
         )}
       </div>
 
@@ -183,10 +174,10 @@ export default function UploadForm() {
       </div>
 
       {/* ⏳ Upload Overlay */}
-      {isUploading && (
+      {isUploading && files && (
         <UploadingOverlay
-          fileCount={files?.length || 0}
-          coverName={coverPhoto?.name || ""}
+          fileCount={files.length}
+          coverName={files[coverIndex]?.name || ""}
           progress={uploadProgress}
         />
       )}

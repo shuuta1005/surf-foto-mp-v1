@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import Image from "next/image";
 
 type Gallery = {
   id: string;
@@ -16,8 +15,6 @@ type Gallery = {
   surfSpot: string;
   date: Date;
   sessionTime: string | null;
-  coverPhoto: string | null;
-  photos: { id: string; photoUrl: string }[];
 };
 
 interface Props {
@@ -36,7 +33,6 @@ export default function EditDetailsForm({ gallery }: Props) {
     new Date(gallery.date).toISOString().split("T")[0]
   );
   const [sessionTime, setSessionTime] = useState(gallery.sessionTime || "");
-  const [coverPhoto, setCoverPhoto] = useState(gallery.coverPhoto || "");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +48,6 @@ export default function EditDetailsForm({ gallery }: Props) {
           surfSpot,
           date: new Date(date).toISOString(),
           sessionTime,
-          coverPhoto,
         }),
       });
 
@@ -149,48 +144,6 @@ export default function EditDetailsForm({ gallery }: Props) {
               Optional - e.g., &quot;08:00 - 11:00&quot; or &quot;Morning
               session&quot;
             </p>
-          </div>
-
-          {/* Cover Photo Selection */}
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Cover Photo
-            </label>
-            <p className="text-xs text-gray-500 mb-3">
-              Select a photo to use as the gallery cover
-            </p>
-
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-              {gallery.photos.map((photo) => (
-                <div
-                  key={photo.id}
-                  onClick={() => setCoverPhoto(photo.photoUrl)}
-                  className={`relative aspect-square cursor-pointer rounded-lg overflow-hidden border-2 transition ${
-                    coverPhoto === photo.photoUrl
-                      ? "border-blue-500 ring-2 ring-blue-200"
-                      : "border-gray-200 hover:border-gray-400"
-                  }`}
-                >
-                  <Image
-                    src={photo.photoUrl}
-                    alt="Gallery photo"
-                    fill
-                    className="object-cover"
-                  />
-                  {coverPhoto === photo.photoUrl && (
-                    <div className="absolute inset-0 bg-blue-500 bg-opacity-20 flex items-center justify-center">
-                      <span className="text-white text-2xl">✓</span>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {gallery.photos.length === 0 && (
-              <p className="text-sm text-gray-500">
-                No photos in this gallery yet
-              </p>
-            )}
           </div>
 
           {/* Buttons */}

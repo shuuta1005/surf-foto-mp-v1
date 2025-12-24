@@ -6,7 +6,7 @@ import { prisma } from "@/lib/db";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: Promise<{ galleryId: string }> } // ✅ Changed to Promise
+  { params }: { params: Promise<{ galleryId: string }> }
 ) {
   try {
     const session = await auth();
@@ -15,11 +15,10 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // ✅ Await params
     const { galleryId } = await params;
 
     const gallery = await prisma.gallery.findUnique({
-      where: { id: galleryId }, // ✅ Now use the awaited value
+      where: { id: galleryId },
       select: { photographerId: true },
     });
 
@@ -36,7 +35,7 @@ export async function PATCH(
     }
 
     const body = await req.json();
-    const { prefecture, area, surfSpot, date, sessionTime, coverPhoto } = body;
+    const { prefecture, area, surfSpot, date, sessionTime } = body;
 
     // Validate required fields
     if (!prefecture || !area || !surfSpot || !date) {
@@ -46,16 +45,15 @@ export async function PATCH(
       );
     }
 
-    // Update gallery
+    // ✅ Update gallery (no coverPhoto field)
     await prisma.gallery.update({
-      where: { id: galleryId }, // ✅ Use the awaited value
+      where: { id: galleryId },
       data: {
         prefecture,
         area,
         surfSpot,
         date: new Date(date),
         sessionTime: sessionTime || null,
-        coverPhoto: coverPhoto || null,
       },
     });
 

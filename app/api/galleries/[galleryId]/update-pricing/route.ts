@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { validateBasePrice } from "@/lib/pricing-rules";
 
 export async function PATCH(
   req: NextRequest,
@@ -35,11 +36,10 @@ export async function PATCH(
 
     const { basePrice } = await req.json();
 
-    if (!basePrice || basePrice < 1) {
-      return NextResponse.json(
-        { error: "Invalid base price" },
-        { status: 400 }
-      );
+    // Validate base price using shared validation logic
+    const validationError = validateBasePrice(basePrice);
+    if (validationError) {
+      return NextResponse.json({ error: validationError }, { status: 400 });
     }
 
     await prisma.gallery.update({
