@@ -1,8 +1,9 @@
-// page.tsx - OPTIMIZED
+// page.tsx
 
 import DestinationsGrid from "@/components/homePageComponents/destinationGrid/DestinationsGrid";
 import HighlightedGalleries from "@/components/homePageComponents/highlightedGallery/HighlightedGalleries";
 import HighlightedPhotos from "@/components/homePageComponents/highlightedPhotos/HighlightedPhotos";
+import PhotographerCTA from "@/components/homePageComponents/photographerCTA/PhotographerCTA";
 import {
   getGalleriesForGrid,
   getHighlightedGalleries,
@@ -19,6 +20,10 @@ const Homepage = async () => {
     <>
       <HighlightedPhotos />
       <HighlightedGalleries galleries={highlightedGalleries} />
+
+      {/* 📸 Photographer CTA - Positioned strategically between sections */}
+      <PhotographerCTA />
+
       <DestinationsGrid galleries={gridGalleries} />
     </>
   );
