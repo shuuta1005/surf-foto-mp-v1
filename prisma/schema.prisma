@@ -175,6 +175,8 @@ model Gallery {
   photographerId String
   status         GalleryStatus @default(PENDING)
 
+  hasVideo Boolean @default(false) // Quick filter for galleries with video
+
   // Metadata
   createdAt DateTime @default(now())
 
@@ -194,6 +196,8 @@ model Photo {
   // URLs
   photoUrl    String // Watermarked version (public display)
   originalUrl String // High-res original (after purchase)
+
+  mediaType String @default("image") // "image" or "video"
 
   // Metadata
   createdAt DateTime @default(now())
