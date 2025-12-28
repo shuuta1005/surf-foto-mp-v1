@@ -1,7 +1,7 @@
 // app/admin/upload/components/UploadForm.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { upload } from "@vercel/blob/client";
 import UploadPhotoSelector from "./UploadPhotoSelector";
 import UploadingOverlay from "./UploadingOverlay";
@@ -20,6 +20,10 @@ export default function UploadForm() {
   const [currentFile, setCurrentFile] = useState(0);
   const [currentFileName, setCurrentFileName] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [failedFiles, setFailedFiles] = useState<string[]>([]);
+
+  // Use ref for cancellation (immediate check, not state-dependent)
+  const cancelledRef = useRef(false);
 
   // 📝 Metadata fields
   const [prefecture, setPrefecture] = useState("");
@@ -58,6 +62,8 @@ export default function UploadForm() {
     setCurrentFile(0);
     setCurrentFileName("");
     setFormErrors({});
+    setFailedFiles([]);
+    cancelledRef.current = false;
   };
 
   const handleUpload = async () => {
@@ -81,6 +87,8 @@ export default function UploadForm() {
 
     setIsUploading(true);
     setFormErrors({});
+    setFailedFiles([]);
+    cancelledRef.current = false;
 
     try {
       // ─────────────────────────────────────────────────────────
@@ -91,7 +99,21 @@ export default function UploadForm() {
       const uploadedFiles: { url: string; mediaType: string }[] = [];
 
       for (let i = 0; i < files.length; i++) {
+        // Check if upload was cancelled
+        if (cancelledRef.current) {
+          console.log("🛑 Upload cancelled by user");
+          throw new Error("Upload cancelled by user");
+        }
+
         const file = files[i];
+
+        // File size warning (10MB threshold)
+        const fileSizeMB = file.size / 1024 / 1024;
+        if (fileSizeMB > 10) {
+          console.warn(
+            `⚠️ Large file: ${file.name} (${fileSizeMB.toFixed(1)}MB)`
+          );
+        }
 
         // Update UI
         setCurrentFile(i + 1);
@@ -120,11 +142,28 @@ export default function UploadForm() {
           });
         } catch (error) {
           console.error(`❌ Failed to upload ${file.name}:`, error);
-          throw new Error(`Failed to upload ${file.name}`);
+
+          // Track failed file
+          setFailedFiles((prev) => [...prev, file.name]);
+
+          // Continue with other files instead of stopping completely
+          console.log(
+            `⚠️ Skipping ${file.name}, continuing with remaining files...`
+          );
+          continue;
         }
 
         // Small delay to avoid rate limiting
         await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+
+      // After loop, check if any files uploaded successfully
+      if (uploadedFiles.length === 0) {
+        throw new Error("All file uploads failed. Please try again.");
+      }
+
+      if (failedFiles.length > 0) {
+        console.warn(`⚠️ Some files failed: ${failedFiles.join(", ")}`);
       }
 
       console.log(
@@ -175,18 +214,63 @@ export default function UploadForm() {
       console.log("✅ Gallery created:", data.gallery);
 
       // ─────────────────────────────────────────────────────────
+      // STEP 3: Trigger watermarking
+      // ─────────────────────────────────────────────────────────
+      setCurrentFileName("Adding watermarks...");
+
+      try {
+        const watermarkResponse = await fetch("/api/admin/watermark", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            galleryId: data.gallery.id,
+          }),
+        });
+
+        if (watermarkResponse.ok) {
+          console.log("✅ Watermarking complete");
+        } else {
+          console.warn("⚠️ Watermarking failed, but gallery was created");
+        }
+      } catch (error) {
+        console.warn("⚠️ Watermarking failed:", error);
+        // Don't fail the whole upload if watermarking fails
+      }
+
+      // ─────────────────────────────────────────────────────────
       // SUCCESS!
       // ─────────────────────────────────────────────────────────
-      alert("Gallery uploaded successfully! ✅");
+      if (failedFiles.length > 0) {
+        alert(
+          `⚠️ Gallery created with ${uploadedFiles.length} files.\n\n` +
+            `${failedFiles.length} files failed to upload:\n` +
+            failedFiles.join("\n")
+        );
+      } else {
+        alert("Gallery uploaded successfully! ✅");
+      }
+
       resetForm();
     } catch (error) {
       console.error("❌ Upload failed:", error);
-      setFormErrors({
-        general:
-          error instanceof Error
-            ? error.message
-            : "Upload failed. Please try again.",
-      });
+
+      // Check if it was a cancellation
+      if (cancelledRef.current) {
+        alert(
+          `Upload cancelled!\n\n` +
+            `${currentFile - 1} files were uploaded before cancellation.\n` +
+            `The gallery was NOT created.\n\n` +
+            `Note: Uploaded files remain in storage.`
+        );
+        resetForm();
+      } else {
+        setFormErrors({
+          general:
+            error instanceof Error
+              ? error.message
+              : "Upload failed. Please try again.",
+        });
+      }
     } finally {
       setIsUploading(false);
     }
@@ -235,7 +319,14 @@ export default function UploadForm() {
           disabled={isUploading}
         />
         {formErrors.files && (
-          <p className="text-sm text-red-500 mt-1">{formErrors.files}</p>
+          <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-sm text-red-600 font-semibold">
+              {formErrors.files}
+            </p>
+            <p className="text-xs text-red-500 mt-1">
+              💡 Tip: Only supported file formats will appear in the file picker
+            </p>
+          </div>
         )}
       </div>
 
@@ -255,12 +346,37 @@ export default function UploadForm() {
 
       {/* ⏳ Upload Overlay */}
       {isUploading && files && (
-        <UploadingOverlay
-          fileCount={files.length}
-          currentFile={currentFile}
-          currentFileName={currentFileName}
-          progress={uploadProgress}
-        />
+        <>
+          <UploadingOverlay
+            fileCount={files.length}
+            currentFile={currentFile}
+            currentFileName={currentFileName}
+            progress={uploadProgress}
+          />
+
+          {/* Cancel Button */}
+          <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[60]">
+            <button
+              onClick={() => {
+                if (
+                  confirm(
+                    "⚠️ Cancel Upload?\n\n" +
+                      "Files already uploaded will remain in storage.\n" +
+                      "The gallery will NOT be created.\n\n" +
+                      "Continue with cancellation?"
+                  )
+                ) {
+                  cancelledRef.current = true;
+                  setCurrentFileName("Cancelling upload...");
+                }
+              }}
+              disabled={cancelledRef.current}
+              className="px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {cancelledRef.current ? "Cancelling..." : "Cancel Upload"}
+            </button>
+          </div>
+        </>
       )}
     </div>
   );

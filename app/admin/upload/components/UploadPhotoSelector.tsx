@@ -129,7 +129,7 @@ export default function UploadPhotoSelector({
             id="photos"
             type="file"
             multiple
-            accept="image/*,video/*"
+            accept=".jpg,.jpeg,.png,.webp,.heic,.heif,.mp4,.mov,.avi"
             onChange={handleFileChange}
             disabled={disabled}
             className="hidden"
@@ -229,7 +229,7 @@ export default function UploadPhotoSelector({
               id="add-more"
               type="file"
               multiple
-              accept="image/*,video/*"
+              accept=".jpg,.jpeg,.png,.webp,.heic,.heif,.mp4,.mov,.avi"
               onChange={handleAddMore}
               disabled={disabled}
               className="hidden"

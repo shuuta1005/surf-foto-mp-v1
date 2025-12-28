@@ -1,10 +1,9 @@
 // lib/blob-watermark.ts
 
-import sharp from "sharp"; //sharp is a library for editing images (resizing, adding watermarks, etc.)
+import sharp from "sharp";
 import { put } from "@vercel/blob";
-import fs from "fs/promises"; //fs is Node's file system module (promises version).
 import path from "path";
-import { File as FormidableFile } from "formidable";
+import fs from "fs/promises";
 
 const token = process.env.BLOB_READ_WRITE_TOKEN;
 
@@ -12,62 +11,104 @@ if (!token) {
   throw new Error("Missing BLOB_READ_WRITE_TOKEN in env");
 }
 
-export async function uploadWithWatermarkAndOriginal(
-  file: FormidableFile
-): Promise<{ originalUrl: string; watermarkedUrl: string }> {
-  if (!file.filepath) {
-    throw new Error("Uploaded file missing filepath");
-  }
-
-  const fileBuffer = await fs.readFile(file.filepath);
-
-  // Upload original photo
-  const original = await put(
-    //put(...) uploads the original photo using its filename or “original.jpg”
-    file.originalFilename || "original.jpg",
-    fileBuffer, //fileBuffer is the actual photo data.
-    {
-      access: "public", //access: "public" means people can view it online.
-      token, //token is needed to upload.
+/**
+ * Download a blob URL and watermark it
+ * Used AFTER files are already uploaded to Blob
+ */
+export async function watermarkBlobUrl(
+  originalUrl: string,
+  filename: string
+): Promise<string> {
+  try {
+    // ─────────────────────────────────────────────────────────
+    // STEP 1: Download original from Blob
+    // ─────────────────────────────────────────────────────────
+    const response = await fetch(originalUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch original: ${response.statusText}`);
     }
-  );
 
-  // Load watermark
-  const watermarkPath = path.join(process.cwd(), "public", "watermark.png"); //Builds the full file path to public/watermark.png.
-  const rawWatermark = await fs.readFile(watermarkPath); //Reads the watermark image file into memory.
-  const watermarkBuffer = await sharp(rawWatermark) //Resize the watermark image to 700px wide
-    .resize({ width: 700 })
-    // You want to “compose” the watermark onto another image — like putting a sticker on a photo.
-    // To do that, both images must be in memory, and in a format sharp understands — that’s a Buffer.
-    .toBuffer();
+    const arrayBuffer = await response.arrayBuffer();
+    const fileBuffer = Buffer.from(arrayBuffer);
 
-  // Apply blur and watermark
-  const blurredWithWatermark = await sharp(fileBuffer)
-    .resize(1600) // optional: resize for consistency
-    .blur(1.5) // moderate blur
-    .composite([
-      { input: watermarkBuffer, top: 300, left: 900 },
-      { input: watermarkBuffer, top: 300, left: 50 },
-    ])
-    .jpeg() //Convert the final image into JPEG format
-    .toBuffer(); //Output it as a buffer ready to upload
+    // ─────────────────────────────────────────────────────────
+    // STEP 2: Load watermark
+    // ─────────────────────────────────────────────────────────
+    const watermarkPath = path.join(process.cwd(), "public", "watermark.png");
+    const rawWatermark = await fs.readFile(watermarkPath);
+    const watermarkBuffer = await sharp(rawWatermark)
+      .resize({ width: 700 })
+      .toBuffer();
 
-  // Upload watermarked image
-  const watermarked = await put(
-    `wm_${file.originalFilename || "photo"}.jpg`,
-    blurredWithWatermark,
-    {
+    // ─────────────────────────────────────────────────────────
+    // STEP 3: Apply blur and watermark
+    // ─────────────────────────────────────────────────────────
+    const blurredWithWatermark = await sharp(fileBuffer)
+      .resize(1600) // Consistent size
+      .blur(1.5) // Moderate blur
+      .composite([
+        { input: watermarkBuffer, top: 300, left: 900 },
+        { input: watermarkBuffer, top: 300, left: 50 },
+      ])
+      .jpeg()
+      .toBuffer();
+
+    // ─────────────────────────────────────────────────────────
+    // STEP 4: Upload watermarked version
+    // ─────────────────────────────────────────────────────────
+    const watermarked = await put(`wm_${filename}`, blurredWithWatermark, {
       access: "public",
       token,
-    }
-  );
+    });
 
-  return {
-    originalUrl: original.url,
-    watermarkedUrl: watermarked.url,
-  };
+    console.log(`✅ Watermarked: ${filename}`);
+    return watermarked.url;
+  } catch (error) {
+    console.error(`❌ Watermarking failed for ${filename}:`, error);
+    throw error;
+  }
 }
 
+/**
+ * Watermark multiple images in batch
+ * Skip videos (return original URL)
+ */
+export async function watermarkPhotos(
+  photos: Array<{ url: string; mediaType: string; filename: string }>
+): Promise<Array<{ originalUrl: string; watermarkedUrl: string }>> {
+  const results = [];
+
+  for (const photo of photos) {
+    // Skip videos - return original URL for both
+    if (photo.mediaType === "video") {
+      console.log(`⏭️  Skipping video: ${photo.filename}`);
+      results.push({
+        originalUrl: photo.url,
+        watermarkedUrl: photo.url, // Videos don't get watermarked
+      });
+      continue;
+    }
+
+    try {
+      // Watermark image
+      const watermarkedUrl = await watermarkBlobUrl(photo.url, photo.filename);
+
+      results.push({
+        originalUrl: photo.url,
+        watermarkedUrl,
+      });
+    } catch (error) {
+      console.error(`Failed to watermark ${photo.filename}, using original`);
+      // Fallback: Use original if watermarking fails
+      results.push({
+        originalUrl: photo.url,
+        watermarkedUrl: photo.url,
+      });
+    }
+  }
+
+  return results;
+}
 // ✅ Future To-Do List: Photo Deletion System
 // Here’s a clean checklist you can revisit when you’re ready:
 
