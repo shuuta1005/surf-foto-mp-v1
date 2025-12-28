@@ -1,152 +1,122 @@
 // app/api/admin/upload-gallery/route.ts
+// ═══════════════════════════════════════════════════════════════
+// GALLERY CREATION ENDPOINT (NEW BLOB-BASED SYSTEM)
+// ═══════════════════════════════════════════════════════════════
 
-import { auth } from "@/auth";
-import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
-import { IncomingMessage } from "http";
-import { Readable } from "stream";
-import formidable, { File as FormidableFile } from "formidable";
-import { uploadWithWatermarkAndOriginal } from "@/lib/blob-watermark";
-import { uploadGallerySchema } from "@/lib/validations/validation";
-import type { Fields, Files } from "formidable";
+import { getServerSession } from "next-auth";
+import { config as authOptions } from "@/auth";
+import { prisma } from "@/lib/db";
 
-export const runtime = "nodejs";
+type UploadedFile = {
+  url: string;
+  mediaType: "image" | "video";
+};
 
-function parseFormData(
-  req: Request
-): Promise<{ fields: Fields; files: Files }> {
-  return new Promise(async (resolve, reject) => {
-    const reader = req.body?.getReader();
-    if (!reader) return reject("No readable stream");
+type CreateGalleryRequest = {
+  prefecture: string;
+  area: string;
+  surfSpot: string;
+  date: string;
+  sessionTime: string;
+  uploadedFiles: UploadedFile[];
+  coverPhotoUrl?: string;
+  basePrice?: number;
+  pricingTiers?: Array<{ quantity: number; price: number }>;
+  isEpic?: boolean;
+};
 
-    const chunks: Uint8Array[] = [];
-    let done = false;
-    while (!done) {
-      const { value, done: readerDone } = await reader.read();
-      if (value) chunks.push(value);
-      done = readerDone;
-    }
-
-    const buffer = Buffer.concat(chunks);
-    const stream = Readable.from(buffer);
-    Object.assign(stream, {
-      headers: {
-        "content-type": req.headers.get("content-type") || "",
-        "content-length": buffer.length.toString(),
-      },
-    });
-
-    const form = formidable({ multiples: true, keepExtensions: true });
-    form.parse(stream as IncomingMessage, (err, fields, files) => {
-      if (err) return reject(err);
-      resolve({ fields, files });
-    });
-  });
-}
-
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
-    const session = await auth();
+    // ─────────────────────────────────────────────────────────
+    // SECURITY CHECK
+    // ─────────────────────────────────────────────────────────
+    const session = await getServerSession(authOptions);
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { fields, files } = await parseFormData(req);
+    // ─────────────────────────────────────────────────────────
+    // PARSE REQUEST
+    // ─────────────────────────────────────────────────────────
+    const body = (await request.json()) as CreateGalleryRequest;
 
-    // ✅ Extract metadata + pricing
-    const rawData = {
-      prefecture: Array.isArray(fields.prefecture)
-        ? fields.prefecture[0]
-        : fields.prefecture,
-      area: Array.isArray(fields.area) ? fields.area[0] : fields.area,
-      surfSpot: Array.isArray(fields.surfSpot)
-        ? fields.surfSpot[0]
-        : fields.surfSpot,
-      date: Array.isArray(fields.date) ? fields.date[0] : fields.date,
-      sessionTime: Array.isArray(fields.sessionTime)
-        ? fields.sessionTime[0]
-        : fields.sessionTime,
-      price: Array.isArray(fields.price) ? fields.price[0] : fields.price,
-      tiers: Array.isArray(fields.tiers) ? fields.tiers[0] : fields.tiers,
-    };
+    const {
+      prefecture,
+      area,
+      surfSpot,
+      date,
+      sessionTime,
+      uploadedFiles,
+      coverPhotoUrl,
+      basePrice = 1000,
+      pricingTiers = [],
+      isEpic = false,
+    } = body;
 
-    const parsed = uploadGallerySchema.safeParse(rawData);
-    if (!parsed.success) {
+    // ─────────────────────────────────────────────────────────
+    // VALIDATION
+    // ─────────────────────────────────────────────────────────
+    if (!prefecture || !area || !surfSpot || !date || !sessionTime) {
       return NextResponse.json(
-        { error: "Invalid form data", details: parsed.error.format() },
+        { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    const { prefecture, area, surfSpot, date, sessionTime, price, tiers } =
-      parsed.data;
-
-    // ✅ Parse tiers JSON
-    let parsedTiers: { quantity: number; price: number }[] = [];
-    try {
-      parsedTiers = tiers ? JSON.parse(tiers) : [];
-    } catch {
-      parsedTiers = [];
+    if (!uploadedFiles || uploadedFiles.length === 0) {
+      return NextResponse.json({ error: "No files uploaded" }, { status: 400 });
     }
 
-    // ✅ Cover photo: only original, no watermark
-    const coverPhotoFile = Array.isArray(files.coverPhoto)
-      ? files.coverPhoto[0]
-      : files.coverPhoto;
-    if (!coverPhotoFile?.filepath) {
-      return NextResponse.json(
-        { error: "Cover photo is required" },
-        { status: 400 }
-      );
-    }
+    // ─────────────────────────────────────────────────────────
+    // DETERMINE COVER PHOTO
+    // ─────────────────────────────────────────────────────────
+    const firstImage = uploadedFiles.find((f) => f.mediaType === "image");
+    const finalCoverPhoto =
+      coverPhotoUrl || firstImage?.url || uploadedFiles[0].url;
 
-    const { originalUrl: coverPhotoUrl } = await uploadWithWatermarkAndOriginal(
-      coverPhotoFile
-    );
+    // ─────────────────────────────────────────────────────────
+    // CHECK IF HAS VIDEO
+    // ─────────────────────────────────────────────────────────
+    const hasVideo = uploadedFiles.some((f) => f.mediaType === "video");
 
-    // ✅ Gallery photos: watermark + original
-    const photoFiles = Array.isArray(files.photos)
-      ? files.photos
-      : files.photos
-      ? [files.photos]
-      : [];
-    if (photoFiles.length === 0) {
-      return NextResponse.json(
-        { error: "No photos provided" },
-        { status: 400 }
-      );
-    }
-
-    const uploaded = await Promise.all(
-      photoFiles.map(async (file: FormidableFile) => {
-        const { originalUrl, watermarkedUrl } =
-          await uploadWithWatermarkAndOriginal(file);
-        return {
-          photoUrl: watermarkedUrl,
-          originalUrl,
-          // ✅ Photos don't have individual prices - Gallery has the base price
-        };
-      })
-    );
-
-    // ✅ Save gallery with photos + pricing tiers
-    const newGallery = await prisma.gallery.create({
+    // ─────────────────────────────────────────────────────────
+    // CREATE GALLERY IN DATABASE
+    // ─────────────────────────────────────────────────────────
+    const gallery = await prisma.gallery.create({
       data: {
         prefecture,
         area,
         surfSpot,
         date: new Date(date),
         sessionTime,
-        coverPhoto: coverPhotoUrl,
+        coverPhoto: finalCoverPhoto,
+        hasVideo,
+        price: basePrice,
+        isEpic,
         photographerId: session.user.id,
-        price: Number(price), // ✅ Base price per photo (e.g., ¥1,000 for 1 photo)
-        photos: { create: uploaded },
-        pricingTiers: {
-          create: parsedTiers.map((t) => ({
-            quantity: t.quantity,
-            price: t.price,
+
+        // Create photos
+        photos: {
+          create: uploadedFiles.map((file) => ({
+            photoUrl: file.url, // For now, same as original (no watermark yet)
+            originalUrl: file.url,
+            mediaType: file.mediaType,
           })),
         },
+
+        // Create pricing tiers
+        ...(pricingTiers.length > 0
+          ? {
+              pricingTiers: {
+                create: pricingTiers.map((tier) => ({
+                  quantity: tier.quantity,
+                  price: tier.price,
+                })),
+              },
+            }
+          : {}),
       },
       include: {
         photos: true,
@@ -154,35 +124,30 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json({ gallery: newGallery }, { status: 201 });
-  } catch (error) {
-    console.error("❌ Upload failed:", error);
+    console.log(`✅ Gallery created: ${gallery.id}`);
+    console.log(`📸 Photos: ${gallery.photos.length}`);
+    console.log(`🎥 Has video: ${hasVideo}`);
+
     return NextResponse.json(
-      { error: "Internal server error" },
+      {
+        success: true,
+        gallery: {
+          id: gallery.id,
+          surfSpot: gallery.surfSpot,
+          photoCount: gallery.photos.length,
+          hasVideo: gallery.hasVideo,
+        },
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("❌ Gallery creation failed:", error);
+    return NextResponse.json(
+      {
+        error: "Failed to create gallery",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }
 }
-// 📋 Mobile (and Safari) Upload Optimization To-Do List
-// 🔧 Frontend Improvements
-// [ ] Add image size check before upload Warn users if the photo exceeds a mobile-safe threshold (e.g. 5MB).
-
-// [ ] Implement client-side image compression Use canvas or ImageBitmap to resize large images before uploading.
-
-// [ ] Add upload progress indicator Show a progress bar or spinner to reassure users during upload.
-
-// [ ] Improve error handling for mobile uploads Catch and display specific errors (e.g. timeout, file too large, unsupported format).
-
-// 📱 Mobile-Specific UX
-// [ ] Detect mobile device and adjust UI Use navigator.userAgent or similar to tailor messages and limits.
-
-// [ ] Add mobile upload tips Suggest using Wi-Fi or switching to desktop for large files.
-
-// [ ] Prevent background suspension issues Consider chunked uploads or direct-to-storage to avoid browser suspensions.
-
-// 🧪 Testing & Debugging
-// [ ] Test uploads on Safari and Chrome (iOS) Try with different image sizes and network conditions.
-
-// [ ] Log upload failures with device info Capture browser, OS, and error type for debugging.
-
-// [ ] Simulate slow network conditions Use dev tools to throttle and observe mobile behavior.

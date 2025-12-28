@@ -1,7 +1,8 @@
 // app/admin/upload/components/UploadForm.tsx
+"use client";
 
 import { useState } from "react";
-import axios from "axios";
+import { upload } from "@vercel/blob/client";
 import UploadPhotoSelector from "./UploadPhotoSelector";
 import UploadingOverlay from "./UploadingOverlay";
 import UploadSessionDetails from "./UploadSessionDetails";
@@ -12,10 +13,12 @@ import { PricingTier } from "@/types/pricing";
 export default function UploadForm() {
   // 📸 File state
   const [files, setFiles] = useState<File[] | null>(null);
-  const [coverIndex, setCoverIndex] = useState<number>(0); // ✅ Track cover by index
+  const [coverIndex, setCoverIndex] = useState<number>(0);
 
   // ⚙️ Upload state
   const [isUploading, setIsUploading] = useState(false);
+  const [currentFile, setCurrentFile] = useState(0);
+  const [currentFileName, setCurrentFileName] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
 
   // 📝 Metadata fields
@@ -38,7 +41,7 @@ export default function UploadForm() {
     date !== "" &&
     sessionTime !== "" &&
     files !== null &&
-    files.length > 0; // ✅ No more coverPhoto check!
+    files.length > 0;
 
   // 🔄 Reset helper
   const resetForm = () => {
@@ -52,10 +55,15 @@ export default function UploadForm() {
     setPrice(1000);
     setTiers([]);
     setUploadProgress(0);
+    setCurrentFile(0);
+    setCurrentFileName("");
     setFormErrors({});
   };
 
   const handleUpload = async () => {
+    // ─────────────────────────────────────────────────────────
+    // VALIDATION
+    // ─────────────────────────────────────────────────────────
     const errors: Record<string, string> = {};
     if (!prefecture) errors.prefecture = "都道府県を入力してください";
     if (!area) errors.area = "エリアを入力してください";
@@ -69,44 +77,116 @@ export default function UploadForm() {
       return;
     }
 
-    const formData = new FormData();
-
-    // ✅ Add all photos
-    if (files) {
-      files.forEach((file) => formData.append("photos", file));
-    }
-
-    // ✅ Add cover photo separately (it's one of the uploaded photos)
-    if (files && files[coverIndex]) {
-      formData.append("coverPhoto", files[coverIndex]);
-    }
-
-    formData.append("prefecture", prefecture);
-    formData.append("area", area);
-    formData.append("surfSpot", surfSpot);
-    formData.append("date", date);
-    formData.append("sessionTime", sessionTime);
-    formData.append("price", price.toString());
-    formData.append("tiers", JSON.stringify(tiers));
+    if (!files) return;
 
     setIsUploading(true);
-    setUploadProgress(0);
     setFormErrors({});
 
     try {
-      await axios.post("/api/admin/upload-gallery", formData, {
-        onUploadProgress: (event) => {
-          const percent = event.total
-            ? Math.round((event.loaded * 100) / event.total)
-            : 0;
-          setUploadProgress(percent);
-        },
+      // ─────────────────────────────────────────────────────────
+      // STEP 1: Upload all files to Blob (sequential)
+      // ─────────────────────────────────────────────────────────
+      console.log(`🚀 Starting upload of ${files.length} files...`);
+
+      const uploadedFiles: { url: string; mediaType: string }[] = [];
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+
+        // Update UI
+        setCurrentFile(i + 1);
+        setCurrentFileName(file.name);
+        setUploadProgress(Math.round(((i + 1) / files.length) * 100));
+
+        console.log(`⬆️  Uploading ${i + 1}/${files.length}: ${file.name}`);
+
+        try {
+          // Upload to Blob
+          const blob = await upload(file.name, file, {
+            access: "public",
+            handleUploadUrl: "/api/blob/upload",
+          });
+
+          // Determine media type
+          const mediaType = blob.contentType?.startsWith("video/")
+            ? "video"
+            : "image";
+
+          console.log(`✅ Success: ${blob.url}`);
+
+          uploadedFiles.push({
+            url: blob.url,
+            mediaType,
+          });
+        } catch (error) {
+          console.error(`❌ Failed to upload ${file.name}:`, error);
+          throw new Error(`Failed to upload ${file.name}`);
+        }
+
+        // Small delay to avoid rate limiting
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+
+      console.log(
+        `🏁 All files uploaded: ${uploadedFiles.length}/${files.length}`
+      );
+
+      // ─────────────────────────────────────────────────────────
+      // STEP 2: Create gallery in database
+      // ─────────────────────────────────────────────────────────
+      setCurrentFileName("Saving gallery to database...");
+      setUploadProgress(100);
+
+      const coverPhotoUrl = uploadedFiles[coverIndex]?.url;
+
+      const response = await fetch("/api/admin/upload-gallery", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          // Location & Session
+          prefecture,
+          area,
+          surfSpot,
+          date: new Date(date).toISOString(),
+          sessionTime,
+
+          // Uploaded files
+          uploadedFiles,
+          coverPhotoUrl,
+
+          // Pricing
+          basePrice: price,
+          pricingTiers: tiers.map((t) => ({
+            quantity: t.quantity,
+            price: t.price,
+          })),
+
+          // Flags
+          isEpic: false,
+        }),
       });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create gallery");
+      }
+
+      console.log("✅ Gallery created:", data.gallery);
+
+      // ─────────────────────────────────────────────────────────
+      // SUCCESS!
+      // ─────────────────────────────────────────────────────────
       alert("Gallery uploaded successfully! ✅");
       resetForm();
     } catch (error) {
-      console.error("Upload failed:", error);
-      setFormErrors({ general: "Upload failed. Please try again." });
+      console.error("❌ Upload failed:", error);
+      setFormErrors({
+        general:
+          error instanceof Error
+            ? error.message
+            : "Upload failed. Please try again.",
+      });
     } finally {
       setIsUploading(false);
     }
@@ -177,7 +257,8 @@ export default function UploadForm() {
       {isUploading && files && (
         <UploadingOverlay
           fileCount={files.length}
-          coverName={files[coverIndex]?.name || ""}
+          currentFile={currentFile}
+          currentFileName={currentFileName}
           progress={uploadProgress}
         />
       )}

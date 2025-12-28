@@ -114,7 +114,7 @@ export default function UploadPhotoSelector({
             Select photos to upload
           </p>
           <p className="text-sm text-gray-400 mb-4">
-            JPG, PNG, or WebP (multiple files)
+            Images (JPG, PNG, WebP) or Videos (MP4, MOV)
           </p>
           <label
             htmlFor="photos"
@@ -129,7 +129,7 @@ export default function UploadPhotoSelector({
             id="photos"
             type="file"
             multiple
-            accept="image/*"
+            accept="image/*,video/*"
             onChange={handleFileChange}
             disabled={disabled}
             className="hidden"
@@ -222,14 +222,14 @@ export default function UploadPhotoSelector({
               className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 bg-white border-2 border-gray-300 rounded hover:bg-gray-50 transition cursor-pointer"
             >
               <Plus className="w-4 h-4" />
-              Add More Photos
+              Add More Files
             </label>
             <Input
               ref={addMoreInputRef}
               id="add-more"
               type="file"
               multiple
-              accept="image/*"
+              accept="image/*,video/*"
               onChange={handleAddMore}
               disabled={disabled}
               className="hidden"
